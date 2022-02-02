@@ -18,3 +18,13 @@ func GetUser(id uuid.UUID) (entity.User, error) {
 
 	return user, nil
 }
+
+func GetUserByUserName(username string) (entity.User, error) {
+	for _, user := range users {
+		if user.Name == username {
+			return user, nil
+		}
+	}
+
+	return entity.User{}, errors.New("user not found")
+}

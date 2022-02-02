@@ -9,7 +9,7 @@ import (
 var todoLists = make(map[uuid.UUID]entity.TodoList)
 
 func GetTodoLists(userId uuid.UUID) ([]entity.TodoList, error) {
-	vec := make([]entity.TodoList, 0, len(todoLists))
+	vec := make([]entity.TodoList, 0)
 	for _, v := range todoLists {
 		if v.UserID == userId {
 			vec = append(vec, v)

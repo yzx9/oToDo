@@ -10,7 +10,7 @@ import (
 
 func GetTodoListsHandler(c *gin.Context) {
 	// TODO: get user by token
-	todos, err := bll.GetTodoLists("")
+	todos, err := bll.GetTodoLists("0c13da37-4593-4b2e-8163-1cbdb6e50830")
 	if err != nil {
 		c.String(http.StatusBadRequest, err.Error())
 		return
