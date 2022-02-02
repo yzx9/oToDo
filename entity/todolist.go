@@ -6,16 +6,11 @@ import (
 	"github.com/google/uuid"
 )
 
-type Todo struct {
+type TodoList struct {
 	ID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4()"`
-	Title     string
-	Content   string
-	Tags      []Tag
+	Name      string
 	CreatedAt time.Time
 
 	UserID uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4()"`
 	User   User
-
-	TodoListID uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4()"`
-	TodoList   TodoList
 }
