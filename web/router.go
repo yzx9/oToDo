@@ -1,33 +1,32 @@
 package web
 
 import (
-	"github.com/gin-gonic/gin"
+	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/web/handlers"
 	"github.com/yzx9/otodo/web/middlewares"
 )
 
-func setupRouter(r *gin.Engine) {
-	v1 := r.Group("/api/v1")
-	setupRouterV1(v1)
-}
+func setupRouter(e *gin.Engine) {
+	r := e.Group("/api")
 
-func setupRouterV1(r *gin.RouterGroup) {
 	// Public routes
 	{
-		// Auth
-		r.POST("/login", handlers.LoginHandler)
-		r.POST("/logout", handlers.LogoutHandler)
-
 		// Ping test
-		r.GET("/ping", handlers.PingHandler)
+		r.GET("/ping", func(c *gin.Context) { c.String(http.StatusOK, "pong") })
+
+		// Auth
+		r.POST("/session", handlers.PostSessionHandler)
+		r.DELETE("/session", handlers.DeleteSessionHandler)
 	}
 
 	// Authorized routes
 	r = r.Group("/", middlewares.JwtAuthMiddleware)
 	{
-		// Ping test
-		r.GET("/hello", handlers.HelloHandler)
+		// Auth
+		r.GET("/session", handlers.GetSessionHandler)
+		r.GET("/session/token", handlers.PostAccessTokenHandler)
 
 		// Todo
 		r.GET("/todo/:id", handlers.GetTodosHandler)

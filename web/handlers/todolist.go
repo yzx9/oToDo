@@ -4,13 +4,18 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-
 	"github.com/yzx9/otodo/bll"
+	"github.com/yzx9/otodo/web/utils"
 )
 
 func GetTodoListsHandler(c *gin.Context) {
-	// TODO: get user by token
-	todos, err := bll.GetTodoLists("0c13da37-4593-4b2e-8163-1cbdb6e50830")
+	userID, err := utils.GetAccessUserID(c)
+	if err != nil {
+		c.String(http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	todos, err := bll.GetTodoLists(userID)
 	if err != nil {
 		c.String(http.StatusBadRequest, err.Error())
 		return

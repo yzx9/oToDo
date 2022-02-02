@@ -3,45 +3,42 @@ package bll
 import (
 	"bytes"
 	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
 	"regexp"
 	"time"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 	"github.com/yzx9/otodo/dal"
 	"github.com/yzx9/otodo/entity"
+	"github.com/yzx9/otodo/utils"
 )
 
 // TODO configurable
 var passwordNonce = []byte("test_nonce")
-var tokenIssuer = "oToDo"
-var tokenHmacSecret = []byte("test_secret")
 var accessTokenExpiresIn = 5 * time.Minute
 var refreshTokenExpiresIn = 15 * 24 * time.Hour
 
-type LoginResult struct {
+type TokenResult struct {
 	AccessToken  string
 	TokenType    string
 	ExpiresIn    int64
 	RefreshToken string
 }
 
-func Login(userName string, password string) (LoginResult, error) {
+func Login(userName string, password string) (TokenResult, error) {
 	user, err := dal.GetUserByUserName(userName)
 	if err != nil {
-		return LoginResult{}, fmt.Errorf("user not found: %v", userName)
+		return TokenResult{}, fmt.Errorf("user not found: %v", userName)
 	}
 
 	pwd := sha256.Sum256(append([]byte(password), passwordNonce...))
-	fmt.Println(hex.EncodeToString(pwd[:]))
 	if !bytes.Equal(user.Password, pwd[:]) {
-		return LoginResult{}, fmt.Errorf("invalid credential")
+		return TokenResult{}, fmt.Errorf("invalid credential")
 	}
 
 	accessToken, exp := newAccessToken(user)
-
-	return LoginResult{
+	return TokenResult{
 		AccessToken:  accessToken,
 		TokenType:    "bearer",
 		ExpiresIn:    exp,
@@ -49,56 +46,49 @@ func Login(userName string, password string) (LoginResult, error) {
 	}, nil
 }
 
-var authorizationRegexString = "^Bearer (?P<token>\\w+.\\w+.\\w+)$"
+func Logout(refreshToken *jwt.Token) {
+	// TODO use jti for logout
+}
+
+var authorizationRegexString = "^Bearer (?P<token>[\\w-]+.[\\w-]+.[\\w-]+)$"
 var authorizationRegex = regexp.MustCompile(authorizationRegexString)
 
-func DecodeJWT(authorization string) (*jwt.Token, error) {
+func NewAccessToken(userID string) (TokenResult, error) {
+	id, err := uuid.Parse(userID)
+	if err != nil {
+		return TokenResult{}, fmt.Errorf("invalid id, %v", userID)
+	}
+
+	user, err := dal.GetUser(id)
+	if err != nil {
+		return TokenResult{}, fmt.Errorf("fails to get user, %w", err)
+	}
+
+	token, exp := newAccessToken(user)
+	return TokenResult{
+		AccessToken: token,
+		TokenType:   "bearer",
+		ExpiresIn:   exp,
+	}, nil
+}
+
+func ParseAccessToken(authorization string) (*jwt.Token, error) {
 	matches := authorizationRegex.FindStringSubmatch(authorization)
 	if len(matches) != 2 {
 		return nil, fmt.Errorf("unauthorized")
 	}
 
-	token, err := jwt.Parse(matches[1], func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return tokenHmacSecret, nil
-	})
-	if err != nil || !token.Valid {
-		return nil, fmt.Errorf("invalid token")
-	}
-
-	return token, nil
+	return utils.ParseJWT(authorization)
 }
 
 func newAccessToken(user entity.User) (string, int64) {
-	claims := newBasicClaims(user, accessTokenExpiresIn)
-	return newJwt(claims), claims["exp"].(int64)
+	claims := utils.NewTokenClaims(user.ID, accessTokenExpiresIn)
+	claims.UserName = user.Name
+	return utils.NewJwt(claims), claims.ExpiresAt
 }
 
 func newRefreshToken(user entity.User) string {
-	claims := newBasicClaims(user, refreshTokenExpiresIn)
-	// TODO: add JWT ID (jti) for logout
-	return newJwt(claims)
-}
-
-func newJwt(claims jwt.MapClaims) string {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(tokenHmacSecret)
-	if err != nil {
-		return ""
-	}
-	return tokenString
-}
-
-func newBasicClaims(user entity.User, exp time.Duration) jwt.MapClaims {
-	now := time.Now().UTC()
-	return jwt.MapClaims{
-		"iss": tokenIssuer,
-		"nbf": now.Unix(),
-		"exp": now.Add(exp).Unix(),
-
-		"user_id":   user.ID,
-		"user_name": user.Name,
-	}
+	claims := utils.NewTokenClaims(user.ID, refreshTokenExpiresIn)
+	claims.Id = uuid.NewString()
+	return utils.NewJwt(claims)
 }

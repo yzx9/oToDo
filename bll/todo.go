@@ -2,20 +2,20 @@ package bll
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
-
 	"github.com/yzx9/otodo/dal"
 	"github.com/yzx9/otodo/entity"
 )
 
 func GetTodos(todoListID string) ([]entity.Todo, error) {
-	uuid, err := uuid.Parse(todoListID)
+	id, err := uuid.Parse(todoListID)
 	if err != nil {
-		return nil, errors.New("invalid uuid")
+		return nil, fmt.Errorf("invalid id: %v", todoListID)
 	}
 
-	return dal.GetTodos(uuid), nil
+	return dal.GetTodos(id), nil
 }
 
 func GetTodo(id string) (entity.Todo, error) {
