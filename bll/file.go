@@ -41,6 +41,9 @@ func UploadFile(file *multipart.FileHeader) (string, error) {
 	record := entity.File{
 		ID:                   uuid.New(),
 		FileName:             file.Filename,
+		FilePath:             "",                          // TODO add path template
+		AccessType:           string(entity.FileTypeTodo), // TODO controlled by api
+		RelatedID:            uuid.New(),                  // TODO should be filled
 		CreatedAt:            time.Now(),
 		FileDestTemplateID:   destTemplate.ID,
 		FileServerTemplateID: serverTemplate.ID,
@@ -60,7 +63,7 @@ func UploadFile(file *multipart.FileHeader) (string, error) {
 	return path, nil
 }
 
-func GetFilePath(userID string, filename string) (string, error) {
+func GetFilePath(filename string, userID string) (string, error) {
 	// Dest template is assumed to be foo/id.ext
 	id := strings.TrimSuffix(filename, filepath.Ext(filename))
 	uuid, err := uuid.Parse(id)
@@ -73,7 +76,10 @@ func GetFilePath(userID string, filename string) (string, error) {
 		return "", utils.NewErrorWithHttpStatus(http.StatusNotFound, "file not found: %v", filename)
 	}
 
-	// TODO valid user right
+	err = hasPermission(&file, userID)
+	if err != nil {
+		return "", err
+	}
 
 	path := applyTemplate(destTemplate.Template, file)
 	return path, nil
@@ -111,4 +117,26 @@ func applyTemplate(template string, file entity.File) string {
 	template = strings.ReplaceAll(template, ":filename", file.ID.String())
 	template = strings.ReplaceAll(template, ":ext", filepath.Ext(file.FileName))
 	return template
+}
+
+func hasPermission(file *entity.File, userID string) error {
+	switch entity.FileAccessType(file.AccessType) {
+	case entity.FileTypePublic:
+		return nil
+
+	case entity.FileTypeTodo:
+		user, err := dal.GetUserByTodo(file.RelatedID)
+		if err != nil {
+			return fmt.Errorf("fails to get user, %w", err)
+		}
+
+		if userID != user.ID.String() {
+			return utils.NewErrorWithHttpStatus(http.StatusUnauthorized, "no permission")
+		}
+
+	default:
+		return fmt.Errorf("invalid file access type: %v", file.AccessType)
+	}
+
+	return nil
 }

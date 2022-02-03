@@ -47,7 +47,7 @@ func DeleteSessionHandler(c *gin.Context) {
 		bll.Logout(token)
 	}
 
-	c.String(http.StatusOK, "See you!")
+	c.String(http.StatusOK, "see you")
 }
 
 // Create New Access Token by Refresh Token

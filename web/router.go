@@ -21,6 +21,7 @@ func setupRouter(e *gin.Engine) {
 		// Auth
 		r.POST("/session", handlers.PostSessionHandler)
 		r.DELETE("/session", handlers.DeleteSessionHandler)
+		r.POST("/session/token", handlers.PostAccessTokenHandler)
 	}
 
 	// Authorized routes
@@ -28,7 +29,6 @@ func setupRouter(e *gin.Engine) {
 	{
 		// Auth
 		r.GET("/session", handlers.GetSessionHandler)
-		r.GET("/session/token", handlers.PostAccessTokenHandler)
 
 		// File
 		r.GET("/file/:id", handlers.GetFileHandler)

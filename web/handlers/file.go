@@ -37,7 +37,7 @@ func GetFileHandler(c *gin.Context) {
 	}
 
 	userID := utils.MustGetAccessUserID(c)
-	filepath, err := bll.GetFilePath(userID, params.id)
+	filepath, err := bll.GetFilePath(params.id, userID)
 	if err != nil {
 		utils.AbortWithJson(c, "invalid file")
 		return

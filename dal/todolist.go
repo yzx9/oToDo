@@ -1,8 +1,9 @@
 package dal
 
 import (
-	"github.com/google/uuid"
+	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/yzx9/otodo/entity"
 )
 
@@ -11,6 +12,16 @@ var todoLists = make(map[uuid.UUID]entity.TodoList)
 func ExistTodoList(id uuid.UUID) bool {
 	_, exist := todoLists[id]
 	return exist
+}
+
+func GetTodoList(id uuid.UUID) (entity.TodoList, error) {
+	for _, v := range todoLists {
+		if v.ID == id {
+			return v, nil
+		}
+	}
+
+	return entity.TodoList{}, fmt.Errorf("todo list not found: %v", id)
 }
 
 func GetTodoLists(userId uuid.UUID) ([]entity.TodoList, error) {
