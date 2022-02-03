@@ -10,5 +10,5 @@ type Tag struct {
 	CountDone  uint
 
 	UserId uuid.UUID
-	User   User
+	User   User `json:"-"`
 }

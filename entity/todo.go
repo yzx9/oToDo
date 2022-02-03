@@ -14,8 +14,8 @@ type Todo struct {
 	CreatedAt time.Time
 
 	UserID uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4()"`
-	User   User
+	User   User      `json:"-"`
 
 	TodoListID uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4()"`
-	TodoList   TodoList
+	TodoList   TodoList  `json:"-"`
 }

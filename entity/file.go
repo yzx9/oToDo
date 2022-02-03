@@ -22,10 +22,10 @@ type File struct {
 	CreatedAt  time.Time
 
 	FileDestTemplateID uuid.UUID
-	FileDestTemplate   FilePathTemplate
+	FileDestTemplate   FilePathTemplate `json:"-"`
 
 	FileServerTemplateID uuid.UUID
-	FileServerTemplate   FilePathTemplate
+	FileServerTemplate   FilePathTemplate `json:"-"`
 }
 
 type FilePathTemplateType string
