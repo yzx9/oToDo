@@ -8,6 +8,11 @@ import (
 
 var todoLists = make(map[uuid.UUID]entity.TodoList)
 
+func ExistTodoList(id uuid.UUID) bool {
+	_, exist := todoLists[id]
+	return exist
+}
+
 func GetTodoLists(userId uuid.UUID) ([]entity.TodoList, error) {
 	vec := make([]entity.TodoList, 0)
 	for _, v := range todoLists {

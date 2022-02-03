@@ -12,13 +12,13 @@ import (
 func PostFileHandler(c *gin.Context) {
 	file, err := c.FormFile("file")
 	if err != nil {
-		c.String(http.StatusBadRequest, "invalid file")
+		utils.AbortWithJson(c, "invalid file")
 		return
 	}
 
 	filename, err := bll.UploadFile(file)
 	if err != nil {
-		c.String(http.StatusBadRequest, err.Error())
+		utils.AbortWithError(c, err)
 		return
 	}
 
@@ -32,13 +32,14 @@ func GetFileHandler(c *gin.Context) {
 	params := struct{ id string }{}
 	err := c.ShouldBind(&params)
 	if err != nil {
-		c.String(http.StatusBadRequest, "invalid file")
+		utils.AbortWithJson(c, "invalid file")
 		return
 	}
 
 	userID := utils.MustGetAccessUserID(c)
 	filepath, err := bll.GetFilePath(userID, params.id)
 	if err != nil {
+		utils.AbortWithJson(c, "invalid file")
 		return
 	}
 

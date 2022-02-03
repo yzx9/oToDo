@@ -23,13 +23,13 @@ func PostSessionHandler(c *gin.Context) {
 		Password string `json:"password"`
 	}{}
 	if err := c.ShouldBind(&payload); err != nil {
-		c.String(http.StatusBadRequest, err.Error())
+		webUtils.AbortWithError(c, err)
 		return
 	}
 
 	tokens, err := bll.Login(payload.UserName, payload.Password)
 	if err != nil {
-		c.String(http.StatusBadRequest, err.Error())
+		webUtils.AbortWithError(c, err)
 		return
 	}
 
@@ -54,7 +54,7 @@ func DeleteSessionHandler(c *gin.Context) {
 func GetAccessTokenHandler(c *gin.Context) {
 	userID, err := webUtils.GetAccessUserID(c)
 	if err != nil {
-		c.String(http.StatusUnauthorized, err.Error())
+		c.AbortWithError(http.StatusUnauthorized, err)
 		return
 	}
 
@@ -65,13 +65,13 @@ func GetAccessTokenHandler(c *gin.Context) {
 func PostAccessTokenHandler(c *gin.Context) {
 	token, err := parseRefreshToken(c)
 	if err != nil {
-		c.String(http.StatusBadRequest, err.Error())
+		webUtils.AbortWithError(c, err)
 		return
 	}
 
 	claims, ok := token.Claims.(*utils.TokenClaims)
 	if !ok || !token.Valid {
-		c.String(http.StatusBadRequest, "invalid token")
+		webUtils.AbortWithJson(c, "invalid token")
 		return
 	}
 

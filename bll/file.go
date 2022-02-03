@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"mime/multipart"
+	"net/http"
 	"path/filepath"
 	"strings"
 	"time"
@@ -34,8 +35,7 @@ func init() {
 
 func UploadFile(file *multipart.FileHeader) (string, error) {
 	if file.Size > maxFileSize {
-		// TODO How can i set http status to 413?
-		return "", errors.New("file too large")
+		return "", utils.NewErrorWithHttpStatus(http.StatusRequestEntityTooLarge, "file too large")
 	}
 
 	record := entity.File{
@@ -65,12 +65,12 @@ func GetFilePath(userID string, filename string) (string, error) {
 	id := strings.TrimSuffix(filename, filepath.Ext(filename))
 	uuid, err := uuid.Parse(id)
 	if err != nil {
-		return "", errors.New("file not found")
+		return "", utils.NewErrorWithHttpStatus(http.StatusNotFound, "file not found: %v", filename)
 	}
 
 	file, err := dal.GetFile(uuid)
 	if err != nil {
-		return "", errors.New("file not found")
+		return "", utils.NewErrorWithHttpStatus(http.StatusNotFound, "file not found: %v", filename)
 	}
 
 	// TODO valid user right

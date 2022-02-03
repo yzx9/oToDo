@@ -9,15 +9,10 @@ import (
 )
 
 func GetTodoListsHandler(c *gin.Context) {
-	userID, err := utils.GetAccessUserID(c)
-	if err != nil {
-		c.String(http.StatusUnauthorized, err.Error())
-		return
-	}
-
+	userID := utils.MustGetAccessUserID(c)
 	todos, err := bll.GetTodoLists(userID)
 	if err != nil {
-		c.String(http.StatusBadRequest, err.Error())
+		utils.AbortWithError(c, err)
 		return
 	}
 
@@ -27,13 +22,13 @@ func GetTodoListsHandler(c *gin.Context) {
 func GetTodoListHandler(c *gin.Context) {
 	id, ok := c.Params.Get("id")
 	if !ok {
-		c.String(http.StatusPreconditionRequired, "id is required")
+		utils.AbortWithJson(c, "id is required")
 		return
 	}
 
 	todos, err := bll.GetTodos(id)
 	if err != nil {
-		c.String(http.StatusBadRequest, err.Error())
+		utils.AbortWithError(c, err)
 		return
 	}
 

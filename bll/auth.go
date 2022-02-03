@@ -78,7 +78,7 @@ func ParseAccessToken(authorization string) (*jwt.Token, error) {
 		return nil, fmt.Errorf("unauthorized")
 	}
 
-	return utils.ParseJWT(authorization)
+	return utils.ParseJWT(matches[1])
 }
 
 func newAccessToken(user entity.User) (string, int64) {

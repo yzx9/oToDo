@@ -3,10 +3,12 @@ package bll
 import (
 	"errors"
 	"fmt"
+	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/yzx9/otodo/dal"
 	"github.com/yzx9/otodo/entity"
+	"github.com/yzx9/otodo/utils"
 )
 
 func GetTodos(todoListID string) ([]entity.Todo, error) {
@@ -15,7 +17,16 @@ func GetTodos(todoListID string) ([]entity.Todo, error) {
 		return nil, fmt.Errorf("invalid id: %v", todoListID)
 	}
 
-	return dal.GetTodos(id), nil
+	if !dal.ExistTodoList(id) {
+		return nil, utils.NewErrorWithHttpStatus(http.StatusNotFound, "todo list not found: %v", todoListID)
+	}
+
+	todos, err := dal.GetTodos(id)
+	if err != nil {
+		return nil, fmt.Errorf("fails to get todos: %w", err)
+	}
+
+	return todos, nil
 }
 
 func GetTodo(id string) (entity.Todo, error) {
