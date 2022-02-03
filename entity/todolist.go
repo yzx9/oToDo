@@ -8,9 +8,9 @@ import (
 
 type TodoList struct {
 	ID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4()"`
-	Name      string
-	CreatedAt time.Time
+	Name      string    `json:"name"`
+	CreatedAt time.Time `json:"created_at"`
 
-	UserID uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4()"`
+	UserID uuid.UUID `json:"user_id" gorm:"type:uuid;default:uuid_generate_v4()"`
 	User   User      `json:"-"`
 }
