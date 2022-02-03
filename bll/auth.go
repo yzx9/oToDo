@@ -16,8 +16,17 @@ import (
 
 // TODO configurable
 var passwordNonce = []byte("test_nonce")
-var accessTokenExpiresIn = 5 * time.Minute
-var refreshTokenExpiresIn = 15 * 24 * time.Hour
+
+const accessTokenExpiresIn = 15 * time.Minute
+const refreshTokenExpiresIn = 15 * 24 * time.Hour
+const accessTokenRefreshThreshold = 5 * time.Minute
+
+var accessTokenExpiresInSeconds = int64(accessTokenExpiresIn.Seconds())
+
+const tokenType = "Bearer"
+
+var authorizationRegexString = "^Bearer (?P<token>[\\w-]+.[\\w-]+.[\\w-]+)$"
+var authorizationRegex = regexp.MustCompile(authorizationRegexString)
 
 type TokenResult struct {
 	AccessToken  string
@@ -37,11 +46,10 @@ func Login(userName string, password string) (TokenResult, error) {
 		return TokenResult{}, fmt.Errorf("invalid credential")
 	}
 
-	accessToken, exp := newAccessToken(user)
 	return TokenResult{
-		AccessToken:  accessToken,
-		TokenType:    "bearer",
-		ExpiresIn:    exp,
+		AccessToken:  newAccessToken(user),
+		TokenType:    tokenType,
+		ExpiresIn:    accessTokenExpiresInSeconds,
 		RefreshToken: newRefreshToken(user),
 	}, nil
 }
@@ -49,9 +57,6 @@ func Login(userName string, password string) (TokenResult, error) {
 func Logout(refreshToken *jwt.Token) {
 	// TODO use jti for logout
 }
-
-var authorizationRegexString = "^Bearer (?P<token>[\\w-]+.[\\w-]+.[\\w-]+)$"
-var authorizationRegex = regexp.MustCompile(authorizationRegexString)
 
 func NewAccessToken(userID string) (TokenResult, error) {
 	id, err := uuid.Parse(userID)
@@ -64,11 +69,11 @@ func NewAccessToken(userID string) (TokenResult, error) {
 		return TokenResult{}, fmt.Errorf("fails to get user, %w", err)
 	}
 
-	token, exp := newAccessToken(user)
+	token := newAccessToken(user)
 	return TokenResult{
 		AccessToken: token,
-		TokenType:   "bearer",
-		ExpiresIn:   exp,
+		TokenType:   tokenType,
+		ExpiresIn:   accessTokenExpiresInSeconds,
 	}, nil
 }
 
@@ -81,10 +86,23 @@ func ParseAccessToken(authorization string) (*jwt.Token, error) {
 	return utils.ParseJWT(matches[1])
 }
 
-func newAccessToken(user entity.User) (string, int64) {
+func ShouldRefreshAccessToken(oldAccessToken *jwt.Token) bool {
+	if !oldAccessToken.Valid {
+		return false
+	}
+
+	claims, ok := oldAccessToken.Claims.(*utils.TokenClaims)
+	if !ok || claims.ExpiresAt == 0 {
+		return false
+	}
+
+	return time.Now().Add(accessTokenRefreshThreshold).Unix() > claims.ExpiresAt
+}
+
+func newAccessToken(user entity.User) string {
 	claims := utils.NewTokenClaims(user.ID, accessTokenExpiresIn)
 	claims.UserName = user.Name
-	return utils.NewJwt(claims), claims.ExpiresAt
+	return utils.NewJwt(claims)
 }
 
 func newRefreshToken(user entity.User) string {

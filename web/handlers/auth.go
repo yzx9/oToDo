@@ -13,7 +13,7 @@ import (
 
 // Ping Test
 func GetSessionHandler(c *gin.Context) {
-	c.String(http.StatusOK, "Hello, World!")
+	c.String(http.StatusOK, "hello")
 }
 
 // Login
@@ -50,17 +50,6 @@ func DeleteSessionHandler(c *gin.Context) {
 	c.String(http.StatusOK, "See you!")
 }
 
-// Refresh Current Access Token
-func GetAccessTokenHandler(c *gin.Context) {
-	userID, err := webUtils.GetAccessUserID(c)
-	if err != nil {
-		c.AbortWithError(http.StatusUnauthorized, err)
-		return
-	}
-
-	refreshAccessToken(c, userID)
-}
-
 // Create New Access Token by Refresh Token
 func PostAccessTokenHandler(c *gin.Context) {
 	token, err := parseRefreshToken(c)
@@ -75,7 +64,17 @@ func PostAccessTokenHandler(c *gin.Context) {
 		return
 	}
 
-	refreshAccessToken(c, claims.UserID)
+	newToken, err := bll.NewAccessToken(claims.UserID)
+	if err != nil {
+		webUtils.AbortWithJson(c, fmt.Sprintf("fails to refresh an token, %v", err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, struct {
+		AccessToken string `json:"access_token"`
+		TokenType   string `json:"token_type"`
+		ExpiresIn   int64  `json:"expires_in"`
+	}{newToken.AccessToken, newToken.TokenType, newToken.ExpiresIn})
 }
 
 func parseRefreshToken(c *gin.Context) (*jwt.Token, error) {
@@ -92,18 +91,4 @@ func parseRefreshToken(c *gin.Context) (*jwt.Token, error) {
 	}
 
 	return token, nil
-}
-
-func refreshAccessToken(c *gin.Context, userID string) {
-	token, err := bll.NewAccessToken(userID)
-	if err != nil {
-		c.String(http.StatusBadRequest, "fails to refresh an token, %v", err.Error())
-		return
-	}
-
-	c.JSON(http.StatusOK, struct {
-		AccessToken string `json:"access_token"`
-		TokenType   string `json:"token_type"`
-		ExpiresIn   int64  `json:"expires_in"`
-	}{token.AccessToken, token.TokenType, token.ExpiresIn})
 }
