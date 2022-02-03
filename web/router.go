@@ -28,6 +28,10 @@ func setupRouter(e *gin.Engine) {
 		r.GET("/session", handlers.GetSessionHandler)
 		r.GET("/session/token", handlers.PostAccessTokenHandler)
 
+		// File
+		r.GET("/file/:id", handlers.GetFileHandler)
+		r.POST("/file", handlers.PostFileHandler)
+
 		// Todo
 		r.GET("/todo/:id", handlers.GetTodosHandler)
 

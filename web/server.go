@@ -10,7 +10,8 @@ type Server struct {
 }
 
 func CreateServer() *Server {
-	r := gin.Default()
+	r := gin.New()
+	r.Use(gin.Logger(), gin.Recovery())
 	setupRouter(r)
 
 	return &Server{
