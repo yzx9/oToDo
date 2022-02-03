@@ -6,9 +6,9 @@ import (
 	"github.com/yzx9/otodo/entity"
 )
 
+// inject fake data
 func init() {
-	// inject fake data
-
+	// User
 	userID := uuid.MustParse("0c13da37-4593-4b2e-8163-1cbdb6e50830")
 	users[userID] = entity.User{
 		ID:   userID,
@@ -20,6 +20,7 @@ func init() {
 			0xEB, 0x02, 0xDE, 0x90, 0x0A, 0xF2, 0x55, 0x36},
 	}
 
+	// Todo List
 	todoListID := uuid.MustParse("5f5459d1-ffdb-40ce-9e05-02af49938a45")
 	todoLists[todoListID] = entity.TodoList{
 		ID:     todoListID,
@@ -27,6 +28,7 @@ func init() {
 		UserID: userID,
 	}
 
+	// Todo
 	AddTodo(entity.Todo{
 		ID:         uuid.MustParse("32acb375-e9dc-473e-8f5f-8826f7783c1d"),
 		Title:      "Hello, World!",
@@ -40,4 +42,21 @@ func init() {
 		UserID:     userID,
 		TodoListID: todoListID,
 	})
+
+	// File Template
+	fileDestTemplateID := uuid.New()
+	filePathTemplates[fileDestTemplateID] = entity.FilePathTemplate{
+		ID:        fileDestTemplateID,
+		Available: true,
+		Type:      string(entity.FilePathTemplateTypeDest),
+		Template:  "./file/:date/:filename.:ext",
+	}
+
+	fileServerTemplateID := uuid.New()
+	filePathTemplates[fileServerTemplateID] = entity.FilePathTemplate{
+		ID:        fileServerTemplateID,
+		Available: true,
+		Type:      string(entity.FilePathTemplateTypeServer),
+		Template:  "//localhost:8080/file/:filename.:ext",
+	}
 }

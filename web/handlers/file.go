@@ -30,7 +30,7 @@ func PostFileHandler(c *gin.Context) {
 // Upload file, only support single file now
 func GetFileHandler(c *gin.Context) {
 	params := struct{ id string }{}
-	err := c.ShouldBind(params)
+	err := c.ShouldBind(&params)
 	if err != nil {
 		c.String(http.StatusBadRequest, "invalid file")
 		return

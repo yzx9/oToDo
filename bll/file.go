@@ -2,48 +2,113 @@ package bll
 
 import (
 	"errors"
+	"fmt"
 	"mime/multipart"
+	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/yzx9/otodo/dal"
+	"github.com/yzx9/otodo/entity"
 	"github.com/yzx9/otodo/utils"
 )
 
 const maxFileSize = 8 << 20 // 8MiB
 
+var destTemplate entity.FilePathTemplate
+var serverTemplate entity.FilePathTemplate
+
+func init() {
+	var err error
+	destTemplate, err = switchFilePathTemplate(entity.FilePathTemplateTypeDest)
+	if err != nil {
+		panic(err)
+	}
+
+	serverTemplate, err = switchFilePathTemplate(entity.FilePathTemplateTypeServer)
+	if err != nil {
+		panic(err)
+	}
+}
+
 func UploadFile(file *multipart.FileHeader) (string, error) {
-	// router.MaxMultipartMemory = MaxFileSize // 限制 Gin 上传文件时最大内存 (默认 32 MiB)
 	if file.Size > maxFileSize {
+		// TODO How can i set http status to 413?
 		return "", errors.New("file too large")
 	}
 
-	destTemplate, err := dal.GetFileDestTemplate()
-	if err != nil {
-		return "", errors.New("internal error")
+	record := entity.File{
+		ID:                   uuid.New(),
+		FileName:             file.Filename,
+		CreatedAt:            time.Now(),
+		FileDestTemplateID:   destTemplate.ID,
+		FileServerTemplateID: serverTemplate.ID,
 	}
 
-	dest := strings.ReplaceAll(destTemplate, ":filename", file.Filename)
-	err = utils.SaveFile(file, dest)
+	err := utils.SaveFile(file, applyTemplate(destTemplate.Template, record))
 	if err != nil {
 		return "", errors.New("fails to upload file")
 	}
 
-	hostTemplate, err := dal.GetFileServerPathTemplate()
+	err = dal.AddFile(record)
 	if err != nil {
-		return "", errors.New("internal error")
+		return "", errors.New("fails to upload file")
 	}
 
-	// TODO random file name, and save file
-	prefix := time.Now().Format("20060102")
-	path := strings.ReplaceAll(hostTemplate, ":filename", prefix+file.Filename)
+	path := applyTemplate(serverTemplate.Template, record)
 	return path, nil
 }
 
 func GetFilePath(userID string, filename string) (string, error) {
+	// Dest template is assumed to be foo/id.ext
+	id := strings.TrimSuffix(filename, filepath.Ext(filename))
+	uuid, err := uuid.Parse(id)
+	if err != nil {
+		return "", errors.New("file not found")
+	}
+
+	file, err := dal.GetFile(uuid)
+	if err != nil {
+		return "", errors.New("file not found")
+	}
+
 	// TODO valid user right
 
-	// TODO convert file name to origin name
+	path := applyTemplate(destTemplate.Template, file)
+	return path, nil
+}
 
-	return filename, nil
+func switchFilePathTemplate(templateType entity.FilePathTemplateType) (entity.FilePathTemplate, error) {
+	var rawType string
+	switch templateType {
+	case entity.FilePathTemplateTypeDest:
+		rawType = string(entity.FilePathTemplateTypeDest)
+
+	case entity.FilePathTemplateTypeServer:
+		rawType = string(entity.FilePathTemplateTypeServer)
+
+	default:
+		return entity.FilePathTemplate{}, fmt.Errorf("invalid template type")
+	}
+
+	templates, err := dal.GetFilePathTemplates()
+	if err != nil {
+		return entity.FilePathTemplate{}, fmt.Errorf("fails to get templates, %v", err)
+	}
+
+	for _, template := range templates {
+		if template.Available && template.Type == rawType {
+			return template, nil
+		}
+	}
+
+	return entity.FilePathTemplate{}, fmt.Errorf("template not assign, type: %v", rawType)
+}
+
+func applyTemplate(template string, file entity.File) string {
+	template = strings.ReplaceAll(template, ":date", file.CreatedAt.Format("20060102"))
+	template = strings.ReplaceAll(template, ":filename", file.ID.String())
+	template = strings.ReplaceAll(template, ":ext", filepath.Ext(file.FileName))
+	return template
 }

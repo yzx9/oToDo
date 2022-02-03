@@ -1,13 +1,33 @@
 package dal
 
-// Replace :filename with real file name
-func GetFileDestTemplate() (string, error) {
-	// TODO Configurable
-	return "./file/:filename", nil
+import (
+	"errors"
+
+	"github.com/google/uuid"
+	"github.com/yzx9/otodo/entity"
+)
+
+var filePathTemplates = make(map[uuid.UUID]entity.FilePathTemplate)
+var files = make(map[uuid.UUID]entity.File)
+
+func AddFile(file entity.File) error {
+	files[file.ID] = file
+	return nil
 }
 
-// Replace :filename with real file name
-func GetFileServerPathTemplate() (string, error) {
-	// TODO Configurable
-	return "http://localhost:8080/file/:filename", nil
+func GetFile(id uuid.UUID) (entity.File, error) {
+	file, ok := files[id]
+	if !ok {
+		return entity.File{}, errors.New("file not found")
+	}
+
+	return file, nil
+}
+
+func GetFilePathTemplates() ([]entity.FilePathTemplate, error) {
+	vec := []entity.FilePathTemplate{}
+	for _, template := range filePathTemplates {
+		vec = append(vec, template)
+	}
+	return vec, nil
 }

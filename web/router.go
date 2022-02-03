@@ -14,7 +14,9 @@ func setupRouter(e *gin.Engine) {
 	// Public routes
 	{
 		// Ping test
-		r.GET("/ping", func(c *gin.Context) { c.String(http.StatusOK, "pong") })
+		r.GET("/ping", func(c *gin.Context) {
+			c.String(http.StatusOK, "pong")
+		})
 
 		// Auth
 		r.POST("/session", handlers.PostSessionHandler)
@@ -36,6 +38,7 @@ func setupRouter(e *gin.Engine) {
 		r.GET("/todo/:id", handlers.GetTodosHandler)
 
 		// Todo List
+		// r.MaxMultipartMemory = MaxFileSize // 限制 Gin 上传文件时最大内存 (默认 32 MiB)
 		r.GET("/todolist", handlers.GetTodoListsHandler)
 		r.GET("/todolist/:id", handlers.GetTodoListHandler)
 	}

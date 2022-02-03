@@ -22,7 +22,7 @@ func PostSessionHandler(c *gin.Context) {
 		UserName string `json:"user_name"`
 		Password string `json:"password"`
 	}{}
-	if err := c.ShouldBind(payload); err != nil {
+	if err := c.ShouldBind(&payload); err != nil {
 		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
@@ -82,7 +82,7 @@ func parseRefreshToken(c *gin.Context) (*jwt.Token, error) {
 	obj := &struct {
 		RefreshToken string `json:"refresh_token"`
 	}{}
-	if err := c.ShouldBind(obj); err != nil {
+	if err := c.ShouldBind(&obj); err != nil {
 		return nil, err
 	}
 
