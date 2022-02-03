@@ -2,7 +2,6 @@ package dal
 
 import (
 	"github.com/google/uuid"
-
 	"github.com/yzx9/otodo/entity"
 )
 
@@ -11,8 +10,9 @@ func init() {
 	// User
 	userID := uuid.MustParse("0c13da37-4593-4b2e-8163-1cbdb6e50830")
 	users[userID] = entity.User{
-		ID:   userID,
-		Name: "admin",
+		ID:       userID,
+		Name:     "admin",
+		Nickname: "Admin",
 		Password: []byte{ // admin123
 			0x92, 0x0E, 0xE3, 0xA9, 0xBE, 0xFC, 0x3E, 0xB3,
 			0xB5, 0xB9, 0x79, 0x4B, 0xA9, 0xCE, 0x4D, 0xD3,

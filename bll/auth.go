@@ -101,7 +101,7 @@ func ShouldRefreshAccessToken(oldAccessToken *jwt.Token) bool {
 
 func newAccessToken(user entity.User) string {
 	claims := utils.NewTokenClaims(user.ID, accessTokenExpiresIn)
-	claims.UserName = user.Name
+	claims.UserNickname = user.Nickname
 	return utils.NewJwt(claims)
 }
 

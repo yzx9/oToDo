@@ -14,8 +14,8 @@ var tokenHmacSecret = []byte("test_secret") // TODO
 type TokenClaims struct {
 	jwt.StandardClaims
 
-	UserID   string `json:"user_id"`
-	UserName string `json:"user_name,omitempty"`
+	UserID       string `json:"user_id"`
+	UserNickname string `json:"user_nickname,omitempty"`
 }
 
 func ParseJWT(tokenString string) (*jwt.Token, error) {
