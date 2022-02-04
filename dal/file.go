@@ -10,7 +10,7 @@ import (
 var filePathTemplates = make(map[uuid.UUID]entity.FilePathTemplate)
 var files = make(map[uuid.UUID]entity.File)
 
-func AddFile(file entity.File) error {
+func InsertFile(file entity.File) error {
 	files[file.ID] = file
 	return nil
 }
@@ -23,6 +23,8 @@ func GetFile(id uuid.UUID) (entity.File, error) {
 
 	return file, nil
 }
+
+// FilePathTemplate
 
 func GetFilePathTemplates() ([]entity.FilePathTemplate, error) {
 	vec := []entity.FilePathTemplate{}

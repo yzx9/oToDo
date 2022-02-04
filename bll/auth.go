@@ -83,7 +83,7 @@ func NewAccessToken(userID string) (AuthTokenResult, error) {
 }
 
 func ParseAuthToken(token string) (*jwt.Token, error) {
-	return ParseJWT(token, &AuthTokenClaims{})
+	return ParseToken(token, &AuthTokenClaims{})
 }
 
 func ParseAccessToken(authorization string) (*jwt.Token, error) {
@@ -92,7 +92,7 @@ func ParseAccessToken(authorization string) (*jwt.Token, error) {
 		return nil, fmt.Errorf("unauthorized")
 	}
 
-	return ParseJWT(matches[1], &AuthTokenClaims{})
+	return ParseToken(matches[1], &AuthTokenClaims{})
 }
 
 func ShouldRefreshAccessToken(oldAccessToken *jwt.Token) bool {

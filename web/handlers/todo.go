@@ -17,7 +17,23 @@ func PostTodoHandler(c *gin.Context) {
 		return
 	}
 
-	todo, err = bll.AddTodo(todo)
+	todo, err = bll.CreateTodo(todo)
+	if err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, todo)
+}
+
+func GetTodoHandler(c *gin.Context) {
+	id, ok := c.Params.Get("id")
+	if !ok {
+		common.AbortWithJson(c, "id required")
+		return
+	}
+
+	todo, err := bll.GetTodo(id)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -47,22 +63,6 @@ func PatchTodoHandler(c *gin.Context) {
 	// TODO How to do an patch
 	// Can we get fields by reflect json object?
 	c.Status(http.StatusNotImplemented)
-}
-
-func GetTodoHandler(c *gin.Context) {
-	id, ok := c.Params.Get("id")
-	if !ok {
-		common.AbortWithJson(c, "id required")
-		return
-	}
-
-	todo, err := bll.GetTodo(id)
-	if err != nil {
-		common.AbortWithError(c, err)
-		return
-	}
-
-	c.JSON(http.StatusOK, todo)
 }
 
 func DeleteTodoHanlder(c *gin.Context) {

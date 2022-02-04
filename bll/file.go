@@ -54,7 +54,7 @@ func UploadFile(file *multipart.FileHeader) (string, error) {
 		return "", errors.New("fails to upload file")
 	}
 
-	err = dal.AddFile(record)
+	err = dal.InsertFile(record)
 	if err != nil {
 		return "", errors.New("fails to upload file")
 	}

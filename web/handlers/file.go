@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/bll"
-	common "github.com/yzx9/otodo/web/common"
+	"github.com/yzx9/otodo/web/common"
 )
 
 // Upload file, only support single file now

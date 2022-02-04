@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-
 	"github.com/yzx9/otodo/entity"
 )
 

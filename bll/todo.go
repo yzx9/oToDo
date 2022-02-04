@@ -11,6 +11,30 @@ import (
 	"github.com/yzx9/otodo/utils"
 )
 
+func CreateTodo(todo entity.Todo) (entity.Todo, error) {
+	todo.ID = uuid.New()
+	todo, err := dal.InsertTodo(todo)
+	if err != nil {
+		return entity.Todo{}, err
+	}
+
+	return todo, nil
+}
+
+func GetTodo(id string) (entity.Todo, error) {
+	uuid, err := uuid.Parse(id)
+	if err != nil {
+		return entity.Todo{}, errors.New("invalid uuid")
+	}
+
+	todo, err := dal.GetTodo(uuid)
+	if err != nil {
+		return entity.Todo{}, err
+	}
+
+	return todo, nil
+}
+
 func GetTodos(todoListID string) ([]entity.Todo, error) {
 	id, err := uuid.Parse(todoListID)
 	if err != nil {
@@ -29,33 +53,9 @@ func GetTodos(todoListID string) ([]entity.Todo, error) {
 	return todos, nil
 }
 
-func GetTodo(id string) (entity.Todo, error) {
-	uuid, err := uuid.Parse(id)
-	if err != nil {
-		return entity.Todo{}, errors.New("invalid uuid")
-	}
-
-	todo, err := dal.GetTodo(uuid)
-	if err != nil {
-		return entity.Todo{}, err
-	}
-
-	return todo, nil
-}
-
-func AddTodo(todo entity.Todo) (entity.Todo, error) {
-	todo.ID = uuid.New()
-	todo, err := dal.AddTodo(todo)
-	if err != nil {
-		return entity.Todo{}, err
-	}
-
-	return todo, nil
-}
-
 func UpdateTodo(todo entity.Todo) (entity.Todo, error) {
 	todo.ID = uuid.New()
-	todo, err := dal.AddTodo(todo)
+	todo, err := dal.InsertTodo(todo)
 	if err != nil {
 		return entity.Todo{}, err
 	}

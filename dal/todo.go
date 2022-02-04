@@ -10,17 +10,7 @@ import (
 
 var todos = make(map[uuid.UUID]entity.Todo)
 
-func AddTodo(todo entity.Todo) (entity.Todo, error) {
-	todos[todo.ID] = todo
-	return todo, nil
-}
-
-func UpdateTodo(todo entity.Todo) (entity.Todo, error) {
-	_, exists := todos[todo.ID]
-	if !exists {
-		return entity.Todo{}, utils.NewErrorWithHttpStatus(http.StatusNotFound, "todo not found: %v", todo.ID)
-	}
-
+func InsertTodo(todo entity.Todo) (entity.Todo, error) {
 	todos[todo.ID] = todo
 	return todo, nil
 }
@@ -42,6 +32,16 @@ func GetTodo(id uuid.UUID) (entity.Todo, error) {
 		return entity.Todo{}, utils.NewErrorWithHttpStatus(http.StatusNotFound, "todo not found: %v", id)
 	}
 
+	return todo, nil
+}
+
+func UpdateTodo(todo entity.Todo) (entity.Todo, error) {
+	_, exists := todos[todo.ID]
+	if !exists {
+		return entity.Todo{}, utils.NewErrorWithHttpStatus(http.StatusNotFound, "todo not found: %v", todo.ID)
+	}
+
+	todos[todo.ID] = todo
 	return todo, nil
 }
 
