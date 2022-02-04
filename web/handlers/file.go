@@ -5,20 +5,20 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/bll"
-	"github.com/yzx9/otodo/web/utils"
+	common "github.com/yzx9/otodo/web/common"
 )
 
 // Upload file, only support single file now
 func PostFileHandler(c *gin.Context) {
 	file, err := c.FormFile("file")
 	if err != nil {
-		utils.AbortWithJson(c, "invalid file")
+		common.AbortWithJson(c, "invalid file")
 		return
 	}
 
 	filename, err := bll.UploadFile(file)
 	if err != nil {
-		utils.AbortWithError(c, err)
+		common.AbortWithError(c, err)
 		return
 	}
 
@@ -32,14 +32,14 @@ func GetFileHandler(c *gin.Context) {
 	params := struct{ id string }{}
 	err := c.ShouldBind(&params)
 	if err != nil {
-		utils.AbortWithJson(c, "invalid file")
+		common.AbortWithJson(c, "invalid file")
 		return
 	}
 
-	userID := utils.MustGetAccessUserID(c)
+	userID := common.MustGetAccessUserID(c)
 	filepath, err := bll.GetFilePath(params.id, userID)
 	if err != nil {
-		utils.AbortWithJson(c, "invalid file")
+		common.AbortWithJson(c, "invalid file")
 		return
 	}
 

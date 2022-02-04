@@ -8,7 +8,7 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/yzx9/otodo/bll"
 	"github.com/yzx9/otodo/utils"
-	webUtils "github.com/yzx9/otodo/web/utils"
+	"github.com/yzx9/otodo/web/common"
 )
 
 // Ping Test
@@ -23,13 +23,13 @@ func PostSessionHandler(c *gin.Context) {
 		Password string `json:"password"`
 	}{}
 	if err := c.ShouldBind(&payload); err != nil {
-		webUtils.AbortWithError(c, err)
+		common.AbortWithError(c, err)
 		return
 	}
 
 	tokens, err := bll.Login(payload.UserName, payload.Password)
 	if err != nil {
-		webUtils.AbortWithError(c, err)
+		common.AbortWithError(c, err)
 		return
 	}
 
@@ -54,19 +54,19 @@ func DeleteSessionHandler(c *gin.Context) {
 func PostAccessTokenHandler(c *gin.Context) {
 	token, err := parseRefreshToken(c)
 	if err != nil {
-		webUtils.AbortWithError(c, err)
+		common.AbortWithError(c, err)
 		return
 	}
 
 	claims, ok := token.Claims.(*utils.TokenClaims)
 	if !ok || !token.Valid {
-		webUtils.AbortWithJson(c, "invalid token")
+		common.AbortWithJson(c, "invalid token")
 		return
 	}
 
 	newToken, err := bll.NewAccessToken(claims.UserID)
 	if err != nil {
-		webUtils.AbortWithJson(c, fmt.Sprintf("fails to refresh an token, %v", err.Error()))
+		common.AbortWithJson(c, fmt.Sprintf("fails to refresh an token, %v", err.Error()))
 		return
 	}
 

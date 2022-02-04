@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/bll"
-	"github.com/yzx9/otodo/web/utils"
+	"github.com/yzx9/otodo/web/common"
 )
 
 func JwtAuthMiddleware(c *gin.Context) {
@@ -18,10 +18,10 @@ func JwtAuthMiddleware(c *gin.Context) {
 		return
 	}
 
-	utils.SetAccessToken(c, token)
+	common.SetAccessToken(c, token)
 
 	if bll.ShouldRefreshAccessToken(token) {
-		userID := utils.MustGetAccessUserID(c)
+		userID := common.MustGetAccessUserID(c)
 		if newToken, err := bll.NewAccessToken(userID); err == nil {
 			c.Header(key, newToken.TokenType+" "+newToken.AccessToken)
 		}
