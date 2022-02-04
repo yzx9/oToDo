@@ -26,7 +26,7 @@ func setupRouter(e *gin.Engine) {
 	}
 
 	// Authorized routes
-	r = r.Group("/", middlewares.JwtAuthMiddleware)
+	r = r.Group("/", middlewares.JwtAuthMiddleware())
 	{
 		// Auth
 		r.GET("/session", handlers.GetSessionHandler)

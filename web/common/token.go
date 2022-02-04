@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
-	"github.com/yzx9/otodo/utils"
+	"github.com/yzx9/otodo/bll"
 )
 
 var accessTokenKey = "access_token"
@@ -28,13 +28,13 @@ func GetAccessToken(c *gin.Context) (*jwt.Token, error) {
 	return token, nil
 }
 
-func GetAccessTokenClaims(c *gin.Context) (*utils.TokenClaims, error) {
+func GetAccessTokenClaims(c *gin.Context) (*bll.AuthTokenClaims, error) {
 	token, err := GetAccessToken(c)
 	if err != nil {
 		return nil, err
 	}
 
-	claims, ok := token.Claims.(*utils.TokenClaims)
+	claims, ok := token.Claims.(*bll.AuthTokenClaims)
 	if !ok {
 		return nil, fmt.Errorf("invalid token")
 	}
@@ -57,9 +57,9 @@ func MustGetAccessToken(c *gin.Context) *jwt.Token {
 	return token
 }
 
-func MustGetAccessTokenClaims(c *gin.Context) *utils.TokenClaims {
+func MustGetAccessTokenClaims(c *gin.Context) *bll.AuthTokenClaims {
 	token := MustGetAccessToken(c)
-	claims, _ := token.Claims.(*utils.TokenClaims)
+	claims, _ := token.Claims.(*bll.AuthTokenClaims)
 	return claims
 }
 

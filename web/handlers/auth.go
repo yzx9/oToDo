@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 	"github.com/yzx9/otodo/bll"
-	"github.com/yzx9/otodo/utils"
 	"github.com/yzx9/otodo/web/common"
 )
 
@@ -58,7 +57,7 @@ func PostSessionTokenHandler(c *gin.Context) {
 		return
 	}
 
-	claims, ok := token.Claims.(*utils.TokenClaims)
+	claims, ok := token.Claims.(*bll.AuthTokenClaims)
 	if !ok || !token.Valid {
 		common.AbortWithJson(c, "invalid token")
 		return
@@ -85,7 +84,7 @@ func parseRefreshToken(c *gin.Context) (*jwt.Token, error) {
 		return nil, err
 	}
 
-	token, err := utils.ParseJWT(obj.RefreshToken)
+	token, err := bll.ParseAuthToken(obj.RefreshToken)
 	if err != nil || !token.Valid {
 		return nil, fmt.Errorf("invalid token")
 	}

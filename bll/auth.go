@@ -11,46 +11,51 @@ import (
 	"github.com/google/uuid"
 	"github.com/yzx9/otodo/dal"
 	"github.com/yzx9/otodo/entity"
-	"github.com/yzx9/otodo/utils"
 )
 
+// Config
 // TODO configurable
 var passwordNonce = []byte("test_nonce")
+var accessTokenExpiresIn = 15 * time.Minute
+var refreshTokenExpiresIn = 15 * 24 * time.Hour
+var accessTokenRefreshThreshold = 5 * time.Minute
 
-const accessTokenExpiresIn = 15 * time.Minute
-const refreshTokenExpiresIn = 15 * 24 * time.Hour
-const accessTokenRefreshThreshold = 5 * time.Minute
-
+// Constans
 var accessTokenExpiresInSeconds = int64(accessTokenExpiresIn.Seconds())
-
-const tokenType = "Bearer"
-
+var tokenType = "Bearer"
 var authorizationRegexString = "^Bearer (?P<token>[\\w-]+.[\\w-]+.[\\w-]+)$"
 var authorizationRegex = regexp.MustCompile(authorizationRegexString)
 
-type TokenResult struct {
+type AuthTokenResult struct {
 	AccessToken  string
 	TokenType    string
 	ExpiresIn    int64
 	RefreshToken string
 }
 
-func Login(userName string, password string) (TokenResult, error) {
+type AuthTokenClaims struct {
+	jwt.StandardClaims
+
+	UserID       string `json:"user_id"`
+	UserNickname string `json:"user_nickname,omitempty"`
+}
+
+func Login(userName string, password string) (AuthTokenResult, error) {
 	user, err := dal.GetUserByUserName(userName)
 	if err != nil {
-		return TokenResult{}, fmt.Errorf("user not found: %v", userName)
+		return AuthTokenResult{}, fmt.Errorf("user not found: %v", userName)
 	}
 
 	pwd := sha256.Sum256(append([]byte(password), passwordNonce...))
 	if !bytes.Equal(user.Password, pwd[:]) {
-		return TokenResult{}, fmt.Errorf("invalid credential")
+		return AuthTokenResult{}, fmt.Errorf("invalid credential")
 	}
 
-	return TokenResult{
-		AccessToken:  newAccessToken(user),
+	return AuthTokenResult{
+		AccessToken:  newAccessToken(user, accessTokenExpiresIn),
 		TokenType:    tokenType,
 		ExpiresIn:    accessTokenExpiresInSeconds,
-		RefreshToken: newRefreshToken(user),
+		RefreshToken: newRefreshToken(user, refreshTokenExpiresIn),
 	}, nil
 }
 
@@ -58,23 +63,27 @@ func Logout(refreshToken *jwt.Token) {
 	// TODO use jti for logout
 }
 
-func NewAccessToken(userID string) (TokenResult, error) {
+func NewAccessToken(userID string) (AuthTokenResult, error) {
 	id, err := uuid.Parse(userID)
 	if err != nil {
-		return TokenResult{}, fmt.Errorf("invalid id, %v", userID)
+		return AuthTokenResult{}, fmt.Errorf("invalid id, %v", userID)
 	}
 
 	user, err := dal.GetUser(id)
 	if err != nil {
-		return TokenResult{}, fmt.Errorf("fails to get user, %w", err)
+		return AuthTokenResult{}, fmt.Errorf("fails to get user, %w", err)
 	}
 
-	token := newAccessToken(user)
-	return TokenResult{
+	token := newAccessToken(user, accessTokenExpiresIn)
+	return AuthTokenResult{
 		AccessToken: token,
 		TokenType:   tokenType,
 		ExpiresIn:   accessTokenExpiresInSeconds,
 	}, nil
+}
+
+func ParseAuthToken(token string) (*jwt.Token, error) {
+	return ParseJWT(token, &AuthTokenClaims{})
 }
 
 func ParseAccessToken(authorization string) (*jwt.Token, error) {
@@ -83,7 +92,7 @@ func ParseAccessToken(authorization string) (*jwt.Token, error) {
 		return nil, fmt.Errorf("unauthorized")
 	}
 
-	return utils.ParseJWT(matches[1])
+	return ParseJWT(matches[1], &AuthTokenClaims{})
 }
 
 func ShouldRefreshAccessToken(oldAccessToken *jwt.Token) bool {
@@ -91,7 +100,7 @@ func ShouldRefreshAccessToken(oldAccessToken *jwt.Token) bool {
 		return false
 	}
 
-	claims, ok := oldAccessToken.Claims.(*utils.TokenClaims)
+	claims, ok := oldAccessToken.Claims.(*AuthTokenClaims)
 	if !ok || claims.ExpiresAt == 0 {
 		return false
 	}
@@ -99,14 +108,21 @@ func ShouldRefreshAccessToken(oldAccessToken *jwt.Token) bool {
 	return time.Now().Add(accessTokenRefreshThreshold).Unix() > claims.ExpiresAt
 }
 
-func newAccessToken(user entity.User) string {
-	claims := utils.NewTokenClaims(user.ID, accessTokenExpiresIn)
-	claims.UserNickname = user.Nickname
-	return utils.NewJwt(claims)
+func newTokenClaims(userID uuid.UUID, exp time.Duration) AuthTokenClaims {
+	return AuthTokenClaims{
+		StandardClaims: NewClaims(exp),
+		UserID:         userID.String(),
+	}
 }
 
-func newRefreshToken(user entity.User) string {
-	claims := utils.NewTokenClaims(user.ID, refreshTokenExpiresIn)
+func newAccessToken(user entity.User, exp time.Duration) string {
+	claims := newTokenClaims(user.ID, exp)
+	claims.UserNickname = user.Nickname
+	return NewJwt(claims)
+}
+
+func newRefreshToken(user entity.User, exp time.Duration) string {
+	claims := newTokenClaims(user.ID, exp)
 	claims.Id = uuid.NewString()
-	return utils.NewJwt(claims)
+	return NewJwt(claims)
 }
