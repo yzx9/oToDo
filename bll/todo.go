@@ -62,3 +62,17 @@ func UpdateTodo(todo entity.Todo) (entity.Todo, error) {
 
 	return todo, nil
 }
+
+func DeleteTodo(id string) (entity.Todo, error) {
+	uuid, err := uuid.Parse(id)
+	if err != nil {
+		return entity.Todo{}, errors.New("invalid uuid")
+	}
+
+	todo, err := dal.DeleteTodo(uuid)
+	if err != nil {
+		return entity.Todo{}, err
+	}
+
+	return todo, nil
+}

@@ -44,3 +44,13 @@ func GetTodo(id uuid.UUID) (entity.Todo, error) {
 
 	return todo, nil
 }
+
+func DeleteTodo(id uuid.UUID) (entity.Todo, error) {
+	todo, ok := todos[id]
+	if !ok {
+		return entity.Todo{}, utils.NewErrorWithHttpStatus(http.StatusNotFound, "todo not found: %v", id)
+	}
+
+	delete(todos, id)
+	return todo, nil
+}

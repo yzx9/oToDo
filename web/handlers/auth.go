@@ -51,7 +51,7 @@ func DeleteSessionHandler(c *gin.Context) {
 }
 
 // Create New Access Token by Refresh Token
-func PostAccessTokenHandler(c *gin.Context) {
+func PostSessionTokenHandler(c *gin.Context) {
 	token, err := parseRefreshToken(c)
 	if err != nil {
 		common.AbortWithError(c, err)
