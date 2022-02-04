@@ -42,3 +42,23 @@ func GetTodo(id string) (entity.Todo, error) {
 
 	return todo, nil
 }
+
+func AddTodo(todo entity.Todo) (entity.Todo, error) {
+	todo.ID = uuid.New()
+	todo, err := dal.AddTodo(todo)
+	if err != nil {
+		return entity.Todo{}, err
+	}
+
+	return todo, nil
+}
+
+func UpdateTodo(todo entity.Todo) (entity.Todo, error) {
+	todo.ID = uuid.New()
+	todo, err := dal.AddTodo(todo)
+	if err != nil {
+		return entity.Todo{}, err
+	}
+
+	return todo, nil
+}

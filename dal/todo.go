@@ -10,6 +10,21 @@ import (
 
 var todos = make(map[uuid.UUID]entity.Todo)
 
+func AddTodo(todo entity.Todo) (entity.Todo, error) {
+	todos[todo.ID] = todo
+	return todo, nil
+}
+
+func UpdateTodo(todo entity.Todo) (entity.Todo, error) {
+	_, exists := todos[todo.ID]
+	if !exists {
+		return entity.Todo{}, utils.NewErrorWithHttpStatus(http.StatusNotFound, "todo not found: %v", todo.ID)
+	}
+
+	todos[todo.ID] = todo
+	return todo, nil
+}
+
 func GetTodos(todoListID uuid.UUID) ([]entity.Todo, error) {
 	vec := make([]entity.Todo, 0, len(todos))
 	for _, v := range todos {
@@ -28,9 +43,4 @@ func GetTodo(id uuid.UUID) (entity.Todo, error) {
 	}
 
 	return todo, nil
-}
-
-func AddTodo(todo entity.Todo) error {
-	todos[todo.ID] = todo
-	return nil
 }
