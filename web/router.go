@@ -19,32 +19,32 @@ func setupRouter(e *gin.Engine) {
 		})
 
 		// Auth
-		r.POST("/session", handlers.PostSessionHandler)
-		r.DELETE("/session", handlers.DeleteSessionHandler)
+		r.POST("/sessions", handlers.PostSessionHandler)
+		r.DELETE("/sessions", handlers.DeleteSessionHandler)
 
-		r.POST("/session/token", handlers.PostSessionTokenHandler)
+		r.POST("/sessions/token", handlers.PostSessionTokenHandler)
 	}
 
 	// Authorized routes
 	r = r.Group("/", middlewares.JwtAuthMiddleware())
 	{
 		// Auth
-		r.GET("/session", handlers.GetSessionHandler)
+		r.GET("/sessions", handlers.GetSessionHandler)
 
 		// File
-		r.POST("/file", handlers.PostFileHandler)
-		r.GET("/file/:id", handlers.GetFileHandler)
+		r.POST("/files", handlers.PostFileHandler)
+		r.GET("/files/:id", handlers.GetFileHandler)
 
 		// Todo
-		r.POST("/todo", handlers.PostTodoHandler)
-		r.PUT("/todo/:id", handlers.PutTodoHandler)
-		r.PATCH("/todo/:id", handlers.PatchTodoHandler)
-		r.GET("/todo/:id", handlers.GetTodoHandler)
-		r.DELETE("/todo/:id", handlers.DeleteTodoHanlder)
+		r.POST("/todos", handlers.PostTodoHandler)
+		r.PUT("/todos/:id", handlers.PutTodoHandler)
+		r.PATCH("/todos/:id", handlers.PatchTodoHandler)
+		r.GET("/todos/:id", handlers.GetTodoHandler)
+		r.DELETE("/todos/:id", handlers.DeleteTodoHanlder)
 
 		// Todo List
 		// r.MaxMultipartMemory = MaxFileSize // 限制 Gin 上传文件时最大内存 (默认 32 MiB)
-		r.GET("/todolist", handlers.GetTodoListsHandler)
-		r.GET("/todolist/:id", handlers.GetTodoListHandler)
+		r.GET("/todo-lists", handlers.GetTodoListsHandler)
+		r.GET("/todo-lists/:id", handlers.GetTodoListHandler)
 	}
 }
