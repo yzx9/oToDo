@@ -34,9 +34,7 @@ type AuthTokenResult struct {
 }
 
 type AuthTokenClaims struct {
-	jwt.StandardClaims
-
-	UserID       string `json:"user_id"`
+	TokenClaims
 	UserNickname string `json:"user_nickname,omitempty"`
 }
 
@@ -108,21 +106,17 @@ func ShouldRefreshAccessToken(oldAccessToken *jwt.Token) bool {
 	return time.Now().Add(accessTokenRefreshThreshold).Unix() > claims.ExpiresAt
 }
 
-func newTokenClaims(userID uuid.UUID, exp time.Duration) AuthTokenClaims {
-	return AuthTokenClaims{
-		StandardClaims: NewClaims(exp),
-		UserID:         userID.String(),
-	}
-}
-
 func newAccessToken(user entity.User, exp time.Duration) string {
-	claims := newTokenClaims(user.ID, exp)
-	claims.UserNickname = user.Nickname
-	return NewJwt(claims)
+	claims := AuthTokenClaims{
+		TokenClaims:  NewClaims(user.ID, exp),
+		UserNickname: user.Nickname,
+	}
+	return NewToken(claims)
 }
 
 func newRefreshToken(user entity.User, exp time.Duration) string {
-	claims := newTokenClaims(user.ID, exp)
-	claims.Id = uuid.NewString()
-	return NewJwt(claims)
+	claims := AuthTokenClaims{
+		TokenClaims: NewClaims(user.ID, exp),
+	}
+	return NewToken(claims)
 }
