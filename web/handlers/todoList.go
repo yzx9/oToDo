@@ -8,6 +8,7 @@ import (
 	"github.com/yzx9/otodo/web/common"
 )
 
+// Get todo lists
 func GetTodoListsHandler(c *gin.Context) {
 	userID := common.MustGetAccessUserID(c)
 	todos, err := bll.GetTodoLists(userID)
@@ -19,7 +20,8 @@ func GetTodoListsHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, todos)
 }
 
-func GetTodoListHandler(c *gin.Context) {
+// Get Todos by Todo List
+func GetTodosFromTodoListHandler(c *gin.Context) {
 	id, ok := c.Params.Get("id")
 	if !ok {
 		common.AbortWithJson(c, "id is required")

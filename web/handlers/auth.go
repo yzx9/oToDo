@@ -12,7 +12,8 @@ import (
 
 // Ping Test
 func GetSessionHandler(c *gin.Context) {
-	c.String(http.StatusOK, "hello")
+	claims := common.MustGetAccessTokenClaims(c)
+	c.JSON(http.StatusOK, gin.H{"message": fmt.Sprintf("hello, %v", claims.UserNickname)})
 }
 
 // Login
@@ -46,7 +47,7 @@ func DeleteSessionHandler(c *gin.Context) {
 		bll.Logout(token)
 	}
 
-	c.String(http.StatusOK, "see you")
+	c.JSON(http.StatusOK, gin.H{"message": "see you"})
 }
 
 // Create New Access Token by Refresh Token

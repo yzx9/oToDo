@@ -9,6 +9,7 @@ import (
 	"github.com/yzx9/otodo/web/common"
 )
 
+// Create todo
 func PostTodoHandler(c *gin.Context) {
 	todo := entity.Todo{}
 	err := c.ShouldBind(&todo)
@@ -26,6 +27,7 @@ func PostTodoHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, todo)
 }
 
+// Get todo
 func GetTodoHandler(c *gin.Context) {
 	id, ok := c.Params.Get("id")
 	if !ok {
@@ -42,6 +44,7 @@ func GetTodoHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, todo)
 }
 
+// Update todo fully
 func PutTodoHandler(c *gin.Context) {
 	todo := entity.Todo{}
 	err := c.ShouldBind(&todo)
@@ -59,12 +62,14 @@ func PutTodoHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, todo)
 }
 
+// Update todo partial
 func PatchTodoHandler(c *gin.Context) {
 	// TODO How to do an patch
 	// Can we get fields by reflect json object?
 	c.Status(http.StatusNotImplemented)
 }
 
+// Delete Todo
 func DeleteTodoHanlder(c *gin.Context) {
 	id, ok := c.Params.Get("id")
 	if !ok {
