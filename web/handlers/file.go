@@ -8,15 +8,21 @@ import (
 	"github.com/yzx9/otodo/web/common"
 )
 
-// Upload file, only support single file now
-func PostFileHandler(c *gin.Context) {
+// Upload todo file, only support single file now
+func PostTodoFileHandler(c *gin.Context) {
+	id, ok := c.Params.Get("id")
+	if !ok {
+		common.AbortWithJson(c, "id required")
+		return
+	}
+
 	file, err := c.FormFile("file")
 	if err != nil {
 		common.AbortWithJson(c, "invalid file")
 		return
 	}
 
-	filename, err := bll.UploadFile(file)
+	filename, err := bll.UploadTodoFile(id, file)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -37,7 +43,7 @@ func GetFileHandler(c *gin.Context) {
 	}
 
 	userID := common.MustGetAccessUserID(c)
-	filepath, err := bll.GetFilePath(params.id, userID)
+	filepath, err := bll.GetFilePathWithAuth(params.id, userID)
 	if err != nil {
 		common.AbortWithJson(c, "invalid file")
 		return

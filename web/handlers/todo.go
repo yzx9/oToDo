@@ -29,13 +29,13 @@ func PostTodoHandler(c *gin.Context) {
 
 // Get todo
 func GetTodoHandler(c *gin.Context) {
-	id, ok := c.Params.Get("id")
+	todoID, ok := c.Params.Get("id")
 	if !ok {
 		common.AbortWithJson(c, "id required")
 		return
 	}
 
-	todo, err := bll.GetTodo(id)
+	todo, err := bll.GetTodo(todoID)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return

@@ -32,6 +32,23 @@ func GetTodo(id string) (entity.Todo, error) {
 		return entity.Todo{}, err
 	}
 
+	// Fill files
+	for _, file := range todo.Files {
+		filePath, err := GetFilePath(file.ID.String())
+		if err != nil {
+			file.Valid = false
+			continue
+		}
+		file.FilePath = filePath
+
+		record, err := GetFile(file.ID.String())
+		if err != nil {
+			file.Valid = false
+			continue
+		}
+		file.FileName = record.FileName
+	}
+
 	return todo, nil
 }
 

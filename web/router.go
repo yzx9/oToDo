@@ -20,7 +20,6 @@ func setupRouter(e *gin.Engine) {
 
 		// Auth
 		r.POST("/sessions", handlers.PostSessionHandler)
-		r.DELETE("/sessions", handlers.DeleteSessionHandler)
 
 		r.POST("/sessions/token", handlers.PostSessionTokenHandler)
 	}
@@ -30,10 +29,10 @@ func setupRouter(e *gin.Engine) {
 	{
 		// Auth
 		r.GET("/sessions", handlers.GetSessionHandler)
+		r.DELETE("/sessions", handlers.DeleteSessionHandler)
 
 		// File
 		// r.MaxMultipartMemory = MaxFileSize // 限制 Gin 上传文件时最大内存 (默认 32 MiB)
-		r.POST("/files", handlers.PostFileHandler)
 		r.GET("/files/:id", handlers.GetFileHandler)
 
 		// Todo
@@ -44,6 +43,8 @@ func setupRouter(e *gin.Engine) {
 		r.DELETE("/todos/:id", handlers.DeleteTodoHanlder)
 
 		r.GET("/todos/todo-lists/:id", handlers.GetTodosFromTodoListHandler)
+
+		r.POST("/todos/:id/files", handlers.PostTodoFileHandler)
 
 		// Todo List
 		r.GET("/todo-lists", handlers.GetTodoListsHandler)

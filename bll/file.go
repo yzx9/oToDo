@@ -21,6 +21,7 @@ var destTemplate entity.FilePathTemplate
 var serverTemplate entity.FilePathTemplate
 
 func init() {
+	// TODO db init
 	var err error
 	destTemplate, err = switchFilePathTemplate(entity.FilePathTemplateTypeDest)
 	if err != nil {
@@ -33,20 +34,41 @@ func init() {
 	}
 }
 
-func UploadFile(file *multipart.FileHeader) (string, error) {
-	if file.Size > maxFileSize {
-		return "", utils.NewErrorWithHttpStatus(http.StatusRequestEntityTooLarge, "file too large")
+func UploadTodoFile(todoID string, file *multipart.FileHeader) (string, error) {
+	id, err := uuid.Parse(todoID)
+	if err != nil {
+		return "", fmt.Errorf("invalid todo id: %v", todoID)
 	}
 
-	record := entity.File{
-		ID:                   uuid.New(),
+	fileID := uuid.New()
+	path, err := uploadFile(file, entity.File{
+		ID:                   fileID,
 		FileName:             file.Filename,
-		FilePath:             "",                          // TODO add path template
-		AccessType:           string(entity.FileTypeTodo), // TODO controlled by api
-		RelatedID:            uuid.New(),                  // TODO should be filled
+		FilePath:             "", // TODO add path template
+		AccessType:           string(entity.FileTypeTodo),
+		RelatedID:            id,
 		CreatedAt:            time.Now(),
 		FileDestTemplateID:   destTemplate.ID,
 		FileServerTemplateID: serverTemplate.ID,
+	})
+	if err != nil {
+		return "", fmt.Errorf("fails to upload file, %w", err)
+	}
+
+	_, err = dal.InsertTodoFile(id, entity.TodoFile{
+		ID:     uuid.New(),
+		FileID: fileID,
+	})
+	if err != nil {
+		return "", fmt.Errorf("fails to upload todo file, %w", err)
+	}
+
+	return path, err
+}
+
+func uploadFile(file *multipart.FileHeader, record entity.File) (string, error) {
+	if file.Size > maxFileSize {
+		return "", utils.NewErrorWithHttpStatus(http.StatusRequestEntityTooLarge, "file too large")
 	}
 
 	err := utils.SaveFile(file, applyTemplate(destTemplate.Template, record))
@@ -59,21 +81,49 @@ func UploadFile(file *multipart.FileHeader) (string, error) {
 		return "", errors.New("fails to upload file")
 	}
 
-	path := applyTemplate(serverTemplate.Template, record)
-	return path, nil
+	return record.ID.String(), nil
 }
 
-func GetFilePath(filename string, userID string) (string, error) {
-	// Dest template is assumed to be foo/id.ext
-	id := strings.TrimSuffix(filename, filepath.Ext(filename))
-	uuid, err := uuid.Parse(id)
+func GetFile(fileID string) (entity.File, error) {
+	uuid, err := uuid.Parse(fileID)
 	if err != nil {
-		return "", utils.NewErrorWithHttpStatus(http.StatusNotFound, "file not found: %v", filename)
+		return entity.File{}, utils.NewErrorWithNotFound("file not found, file id: %v", fileID)
 	}
 
 	file, err := dal.GetFile(uuid)
 	if err != nil {
-		return "", utils.NewErrorWithHttpStatus(http.StatusNotFound, "file not found: %v", filename)
+		return entity.File{}, utils.NewErrorWithNotFound("file not found, file id: %v", fileID)
+	}
+
+	return file, nil
+}
+
+func GetFileServerPath(fileID string) (string, error) {
+	file, err := GetFile(fileID)
+	if err != nil {
+		return "", err
+	}
+
+	path := applyTemplate(serverTemplate.Template, file)
+	return path, nil
+}
+
+func GetFilePath(fileID string) (string, error) {
+	file, err := GetFile(fileID)
+	if err != nil {
+		return "", err
+	}
+
+	path := applyTemplate(destTemplate.Template, file)
+	return path, nil
+}
+
+func GetFilePathWithAuth(filename string, userID string) (string, error) {
+	// Dest template is assumed to be foo/fileID.ext
+	fileID := strings.TrimSuffix(filename, filepath.Ext(filename))
+	file, err := GetFile(fileID)
+	if err != nil {
+		return "", err
 	}
 
 	err = hasPermission(&file, userID)

@@ -54,3 +54,14 @@ func DeleteTodo(id uuid.UUID) (entity.Todo, error) {
 	delete(todos, id)
 	return todo, nil
 }
+
+// Todo File
+func InsertTodoFile(todoID uuid.UUID, file entity.TodoFile) (entity.Todo, error) {
+	todo, ok := todos[todoID]
+	if !ok {
+		return entity.Todo{}, utils.NewErrorWithNotFound("todo not found: %v", todoID)
+	}
+
+	todo.Files = append(todo.Files, file)
+	return todo, nil
+}
