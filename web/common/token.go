@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 	"github.com/yzx9/otodo/bll"
 )
 
@@ -42,13 +43,18 @@ func GetAccessTokenClaims(c *gin.Context) (*bll.SessionTokenClaims, error) {
 	return claims, nil
 }
 
-func GetAccessUserID(c *gin.Context) (string, error) {
+func GetAccessUserID(c *gin.Context) (uuid.UUID, error) {
 	claims, err := GetAccessTokenClaims(c)
 	if err != nil {
-		return "", err
+		return uuid.UUID{}, err
 	}
 
-	return claims.UserID, nil
+	id, err := uuid.Parse(claims.UserID)
+	if err != nil {
+		return uuid.UUID{}, fmt.Errorf("invalid user_id in access token")
+	}
+
+	return id, nil
 }
 
 func MustGetAccessToken(c *gin.Context) *jwt.Token {
@@ -63,7 +69,8 @@ func MustGetAccessTokenClaims(c *gin.Context) *bll.SessionTokenClaims {
 	return claims
 }
 
-func MustGetAccessUserID(c *gin.Context) string {
+func MustGetAccessUserID(c *gin.Context) uuid.UUID {
 	claims := MustGetAccessTokenClaims(c)
-	return claims.UserID
+	id, _ := uuid.Parse(claims.UserID)
+	return id
 }

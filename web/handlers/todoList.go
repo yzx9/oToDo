@@ -22,9 +22,9 @@ func GetTodoListsHandler(c *gin.Context) {
 
 // Get Todos by Todo List
 func GetTodosFromTodoListHandler(c *gin.Context) {
-	id, ok := c.Params.Get("id")
-	if !ok {
-		common.AbortWithJson(c, "id is required")
+	id, err := common.GetParamUUID(c, "id")
+	if err != nil {
+		common.AbortWithError(c, err)
 		return
 	}
 

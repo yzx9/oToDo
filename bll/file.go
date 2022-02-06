@@ -34,19 +34,14 @@ func init() {
 	}
 }
 
-func UploadTodoFile(todoID string, file *multipart.FileHeader) (string, error) {
-	id, err := uuid.Parse(todoID)
-	if err != nil {
-		return "", fmt.Errorf("invalid todo id: %v", todoID)
-	}
-
+func UploadTodoFile(todoID uuid.UUID, file *multipart.FileHeader) (string, error) {
 	fileID := uuid.New()
 	path, err := uploadFile(file, entity.File{
 		ID:                   fileID,
 		FileName:             file.Filename,
 		FilePath:             "", // TODO add path template
 		AccessType:           string(entity.FileTypeTodo),
-		RelatedID:            id,
+		RelatedID:            todoID,
 		CreatedAt:            time.Now(),
 		FileDestTemplateID:   destTemplate.ID,
 		FileServerTemplateID: serverTemplate.ID,
@@ -55,7 +50,7 @@ func UploadTodoFile(todoID string, file *multipart.FileHeader) (string, error) {
 		return "", fmt.Errorf("fails to upload file, %w", err)
 	}
 
-	_, err = dal.InsertTodoFile(id, entity.TodoFile{
+	_, err = dal.InsertTodoFile(todoID, entity.TodoFile{
 		ID:     uuid.New(),
 		FileID: fileID,
 	})
@@ -118,7 +113,7 @@ func GetFilePath(fileID string) (string, error) {
 	return path, nil
 }
 
-func GetFilePathWithAuth(filename string, userID string) (string, error) {
+func GetFilePathWithAuth(filename string, userID uuid.UUID) (string, error) {
 	// Dest template is assumed to be foo/fileID.ext
 	fileID := strings.TrimSuffix(filename, filepath.Ext(filename))
 	file, err := GetFile(fileID)
@@ -169,7 +164,7 @@ func applyTemplate(template string, file entity.File) string {
 	return template
 }
 
-func hasPermission(file *entity.File, userID string) error {
+func hasPermission(file *entity.File, userID uuid.UUID) error {
 	switch entity.FileAccessType(file.AccessType) {
 	case entity.FileTypePublic:
 		return nil
@@ -180,7 +175,7 @@ func hasPermission(file *entity.File, userID string) error {
 			return fmt.Errorf("fails to get user, %w", err)
 		}
 
-		if userID != user.ID.String() {
+		if userID != user.ID {
 			return utils.NewErrorWithHttpStatus(http.StatusUnauthorized, "no permission")
 		}
 

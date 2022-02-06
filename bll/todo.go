@@ -1,9 +1,7 @@
 package bll
 
 import (
-	"errors"
 	"fmt"
-	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/yzx9/otodo/dal"
@@ -21,13 +19,8 @@ func CreateTodo(todo entity.Todo) (entity.Todo, error) {
 	return todo, nil
 }
 
-func GetTodo(id string) (entity.Todo, error) {
-	uuid, err := uuid.Parse(id)
-	if err != nil {
-		return entity.Todo{}, errors.New("invalid uuid")
-	}
-
-	todo, err := dal.GetTodo(uuid)
+func GetTodo(id uuid.UUID) (entity.Todo, error) {
+	todo, err := dal.GetTodo(id)
 	if err != nil {
 		return entity.Todo{}, err
 	}
@@ -52,17 +45,12 @@ func GetTodo(id string) (entity.Todo, error) {
 	return todo, nil
 }
 
-func GetTodos(todoListID string) ([]entity.Todo, error) {
-	id, err := uuid.Parse(todoListID)
-	if err != nil {
-		return nil, fmt.Errorf("invalid id: %v", todoListID)
+func GetTodos(todoListID uuid.UUID) ([]entity.Todo, error) {
+	if !dal.ExistTodoList(todoListID) {
+		return nil, utils.NewErrorWithNotFound("todo list not found: %v", todoListID)
 	}
 
-	if !dal.ExistTodoList(id) {
-		return nil, utils.NewErrorWithHttpStatus(http.StatusNotFound, "todo list not found: %v", todoListID)
-	}
-
-	todos, err := dal.GetTodos(id)
+	todos, err := dal.GetTodos(todoListID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get todos: %w", err)
 	}
@@ -80,16 +68,6 @@ func UpdateTodo(todo entity.Todo) (entity.Todo, error) {
 	return todo, nil
 }
 
-func DeleteTodo(id string) (entity.Todo, error) {
-	uuid, err := uuid.Parse(id)
-	if err != nil {
-		return entity.Todo{}, errors.New("invalid uuid")
-	}
-
-	todo, err := dal.DeleteTodo(uuid)
-	if err != nil {
-		return entity.Todo{}, err
-	}
-
-	return todo, nil
+func DeleteTodo(id uuid.UUID) (entity.Todo, error) {
+	return dal.DeleteTodo(id)
 }

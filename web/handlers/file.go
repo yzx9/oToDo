@@ -10,9 +10,9 @@ import (
 
 // Upload todo file, only support single file now
 func PostTodoFileHandler(c *gin.Context) {
-	id, ok := c.Params.Get("id")
-	if !ok {
-		common.AbortWithJson(c, "id required")
+	todoID, err := common.GetParamUUID(c, "id")
+	if err != nil {
+		common.AbortWithError(c, err)
 		return
 	}
 
@@ -22,7 +22,7 @@ func PostTodoFileHandler(c *gin.Context) {
 		return
 	}
 
-	filename, err := bll.UploadTodoFile(id, file)
+	filename, err := bll.UploadTodoFile(todoID, file)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return

@@ -9,26 +9,15 @@ import (
 	"github.com/yzx9/otodo/entity"
 )
 
-func CreateInvalidUserRefreshToken(userID string, tokenID string) (entity.UserRefreshToken, error) {
-	userUUID, err := uuid.Parse(userID)
-	if err != nil {
-		return entity.UserRefreshToken{}, fmt.Errorf("invalid user id: %v", userID)
-	}
-
-	tokenUUID, err := uuid.Parse(tokenID)
-	if err != nil {
-		return entity.UserRefreshToken{}, fmt.Errorf("invalid token id: %v", tokenID)
-	}
-
-	model := entity.UserRefreshToken{
+func CreateInvalidUserRefreshToken(userID uuid.UUID, tokenID uuid.UUID) (entity.UserRefreshToken, error) {
+	model, err := dal.InsertInvalidUserRefreshToken(entity.UserRefreshToken{
 		ID:        uuid.New(),
-		UserID:    userUUID,
-		TokenID:   tokenUUID,
+		UserID:    userID,
+		TokenID:   tokenID,
 		CreatedAt: time.Now(),
-	}
-	model, err = dal.InsertInvalidUserRefreshToken(model)
+	})
 	if err != nil {
-		return entity.UserRefreshToken{}, fmt.Errorf("fails to insert invalid user refresh token")
+		return entity.UserRefreshToken{}, fmt.Errorf("fails to invalid user refresh token, %w", err)
 	}
 
 	return model, nil

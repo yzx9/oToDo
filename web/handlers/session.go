@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 	"github.com/yzx9/otodo/bll"
 	"github.com/yzx9/otodo/web/common"
 )
@@ -44,9 +44,20 @@ func PostSessionHandler(c *gin.Context) {
 // Logout, unactive refresh token
 func DeleteSessionHandler(c *gin.Context) {
 	claims := common.MustGetAccessTokenClaims(c)
-	err := bll.Logout(claims.UserID, claims.RefreshTokenID)
+	userID, err := uuid.Parse(claims.UserID)
+	if err != nil {
+		common.AbortWithError(c, fmt.Errorf("invalid user id: %v", claims.UserID))
+	}
+
+	refreshTokenID, err := uuid.Parse(claims.RefreshTokenID)
+	if err != nil {
+		common.AbortWithError(c, fmt.Errorf("invalid token id: %v", claims.RefreshTokenID))
+	}
+
+	err = bll.Logout(userID, refreshTokenID)
 	if err != nil {
 		// TODO log
+		fmt.Println(err.Error())
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "see you"})
@@ -54,19 +65,13 @@ func DeleteSessionHandler(c *gin.Context) {
 
 // Create New Access Token by Refresh Token
 func PostSessionTokenHandler(c *gin.Context) {
-	token, err := parseRefreshToken(c)
+	userID, refreshTokenID, err := parseRefreshToken(c)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
 
-	claims, ok := token.Claims.(*bll.SessionTokenClaims)
-	if !ok || !token.Valid {
-		common.AbortWithJson(c, "invalid token")
-		return
-	}
-
-	newToken, err := bll.NewAccessToken(claims.UserID, claims.RefreshTokenID)
+	newToken, err := bll.NewAccessToken(userID, refreshTokenID)
 	if err != nil {
 		common.AbortWithJson(c, fmt.Sprintf("fails to refresh an token, %v", err.Error()))
 		return
@@ -79,18 +84,35 @@ func PostSessionTokenHandler(c *gin.Context) {
 	}{newToken.AccessToken, newToken.TokenType, newToken.ExpiresIn})
 }
 
-func parseRefreshToken(c *gin.Context) (*jwt.Token, error) {
+func parseRefreshToken(c *gin.Context) (uuid.UUID, uuid.UUID, error) {
+	u := uuid.UUID{}
+
 	obj := &struct {
 		RefreshToken string `json:"refresh_token"`
 	}{}
 	if err := c.ShouldBind(&obj); err != nil {
-		return nil, err
+		return u, u, err
 	}
 
-	token, err := bll.ParseAuthToken(obj.RefreshToken)
+	token, err := bll.ParseSessionToken(obj.RefreshToken)
 	if err != nil || !token.Valid {
-		return nil, fmt.Errorf("invalid token")
+		return u, u, fmt.Errorf("invalid token")
 	}
 
-	return token, nil
+	claims, ok := token.Claims.(*bll.SessionTokenClaims)
+	if !ok || !token.Valid {
+		return u, u, fmt.Errorf("invalid token")
+	}
+
+	userID, err := uuid.Parse(claims.UserID)
+	if err != nil {
+		return u, u, fmt.Errorf("invalid user id: %v", claims.RefreshTokenID)
+	}
+
+	refreshTokenID, err := uuid.Parse(claims.RefreshTokenID)
+	if err != nil {
+		return u, u, fmt.Errorf("invalid refresh token id: %v", claims.RefreshTokenID)
+	}
+
+	return userID, refreshTokenID, nil
 }

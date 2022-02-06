@@ -59,18 +59,13 @@ func Login(userName string, password string) (AuthTokenResult, error) {
 	}, nil
 }
 
-func Logout(userID string, refreshTokenID string) error {
+func Logout(userID uuid.UUID, refreshTokenID uuid.UUID) error {
 	_, err := CreateInvalidUserRefreshToken(userID, refreshTokenID)
 	return err
 }
 
-func NewAccessToken(userID string, refreshTokenID string) (AuthTokenResult, error) {
-	id, err := uuid.Parse(userID)
-	if err != nil {
-		return AuthTokenResult{}, fmt.Errorf("invalid id, %v", userID)
-	}
-
-	user, err := dal.GetUser(id)
+func NewAccessToken(userID uuid.UUID, refreshTokenID uuid.UUID) (AuthTokenResult, error) {
+	user, err := dal.GetUser(userID)
 	if err != nil {
 		return AuthTokenResult{}, fmt.Errorf("fails to get user, %w", err)
 	}
@@ -82,7 +77,7 @@ func NewAccessToken(userID string, refreshTokenID string) (AuthTokenResult, erro
 	}, nil
 }
 
-func ParseAuthToken(token string) (*jwt.Token, error) {
+func ParseSessionToken(token string) (*jwt.Token, error) {
 	return ParseToken(token, &SessionTokenClaims{})
 }
 
@@ -108,16 +103,18 @@ func ShouldRefreshAccessToken(oldAccessToken *jwt.Token) bool {
 	return time.Now().Add(accessTokenRefreshThreshold).Unix() > claims.ExpiresAt
 }
 
-func newAccessToken(user entity.User, refreshTokenID string, exp time.Duration) string {
+func newAccessToken(user entity.User, refreshTokenID uuid.UUID, exp time.Duration) string {
 	claims := SessionTokenClaims{
-		TokenClaims:  NewClaims(user.ID, exp),
-		UserNickname: user.Nickname,
+		TokenClaims:    NewClaims(user.ID, exp),
+		UserNickname:   user.Nickname,
+		RefreshTokenID: refreshTokenID.String(),
 	}
 	return NewToken(claims)
 }
 
-func newRefreshToken(user entity.User, exp time.Duration) (string, string) {
+func newRefreshToken(user entity.User, exp time.Duration) (string, uuid.UUID) {
+	id := uuid.New()
 	claims := SessionTokenClaims{TokenClaims: NewClaims(user.ID, exp)}
-	claims.Id = uuid.NewString()
-	return NewToken(claims), claims.Id
+	claims.Id = id.String()
+	return NewToken(claims), id
 }
