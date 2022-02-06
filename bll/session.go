@@ -33,9 +33,10 @@ type AuthTokenResult struct {
 	RefreshToken string
 }
 
-type AuthTokenClaims struct {
+type SessionTokenClaims struct {
 	TokenClaims
-	UserNickname string `json:"user_nickname,omitempty"`
+	RefreshTokenID string `json:"rti,omitempty"`
+	UserNickname   string `json:"nickname,omitempty"`
 }
 
 func Login(userName string, password string) (AuthTokenResult, error) {
@@ -49,19 +50,21 @@ func Login(userName string, password string) (AuthTokenResult, error) {
 		return AuthTokenResult{}, fmt.Errorf("invalid credential")
 	}
 
+	refreshToken, refreshTokenID := newRefreshToken(user, refreshTokenExpiresIn)
 	return AuthTokenResult{
-		AccessToken:  newAccessToken(user, accessTokenExpiresIn),
+		AccessToken:  newAccessToken(user, refreshTokenID, accessTokenExpiresIn),
 		TokenType:    tokenType,
 		ExpiresIn:    accessTokenExpiresInSeconds,
-		RefreshToken: newRefreshToken(user, refreshTokenExpiresIn),
+		RefreshToken: refreshToken,
 	}, nil
 }
 
-func Logout(refreshToken *jwt.Token) {
-	// TODO use jti for logout
+func Logout(userID string, refreshTokenID string) error {
+	_, err := CreateInvalidUserRefreshToken(userID, refreshTokenID)
+	return err
 }
 
-func NewAccessToken(userID string) (AuthTokenResult, error) {
+func NewAccessToken(userID string, refreshTokenID string) (AuthTokenResult, error) {
 	id, err := uuid.Parse(userID)
 	if err != nil {
 		return AuthTokenResult{}, fmt.Errorf("invalid id, %v", userID)
@@ -72,16 +75,15 @@ func NewAccessToken(userID string) (AuthTokenResult, error) {
 		return AuthTokenResult{}, fmt.Errorf("fails to get user, %w", err)
 	}
 
-	token := newAccessToken(user, accessTokenExpiresIn)
 	return AuthTokenResult{
-		AccessToken: token,
+		AccessToken: newAccessToken(user, refreshTokenID, accessTokenExpiresIn),
 		TokenType:   tokenType,
 		ExpiresIn:   accessTokenExpiresInSeconds,
 	}, nil
 }
 
 func ParseAuthToken(token string) (*jwt.Token, error) {
-	return ParseToken(token, &AuthTokenClaims{})
+	return ParseToken(token, &SessionTokenClaims{})
 }
 
 func ParseAccessToken(authorization string) (*jwt.Token, error) {
@@ -90,7 +92,7 @@ func ParseAccessToken(authorization string) (*jwt.Token, error) {
 		return nil, fmt.Errorf("unauthorized")
 	}
 
-	return ParseToken(matches[1], &AuthTokenClaims{})
+	return ParseToken(matches[1], &SessionTokenClaims{})
 }
 
 func ShouldRefreshAccessToken(oldAccessToken *jwt.Token) bool {
@@ -98,7 +100,7 @@ func ShouldRefreshAccessToken(oldAccessToken *jwt.Token) bool {
 		return false
 	}
 
-	claims, ok := oldAccessToken.Claims.(*AuthTokenClaims)
+	claims, ok := oldAccessToken.Claims.(*SessionTokenClaims)
 	if !ok || claims.ExpiresAt == 0 {
 		return false
 	}
@@ -106,17 +108,16 @@ func ShouldRefreshAccessToken(oldAccessToken *jwt.Token) bool {
 	return time.Now().Add(accessTokenRefreshThreshold).Unix() > claims.ExpiresAt
 }
 
-func newAccessToken(user entity.User, exp time.Duration) string {
-	claims := AuthTokenClaims{
+func newAccessToken(user entity.User, refreshTokenID string, exp time.Duration) string {
+	claims := SessionTokenClaims{
 		TokenClaims:  NewClaims(user.ID, exp),
 		UserNickname: user.Nickname,
 	}
 	return NewToken(claims)
 }
 
-func newRefreshToken(user entity.User, exp time.Duration) string {
-	claims := AuthTokenClaims{
-		TokenClaims: NewClaims(user.ID, exp),
-	}
-	return NewToken(claims)
+func newRefreshToken(user entity.User, exp time.Duration) (string, string) {
+	claims := SessionTokenClaims{TokenClaims: NewClaims(user.ID, exp)}
+	claims.Id = uuid.NewString()
+	return NewToken(claims), claims.Id
 }

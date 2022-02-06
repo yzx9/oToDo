@@ -22,8 +22,9 @@ func JwtAuthMiddleware() func(*gin.Context) {
 		common.SetAccessToken(c, token)
 
 		if bll.ShouldRefreshAccessToken(token) {
-			userID := common.MustGetAccessUserID(c)
-			if newToken, err := bll.NewAccessToken(userID); err == nil {
+			claims := common.MustGetAccessTokenClaims(c)
+			newToken, err := bll.NewAccessToken(claims.UserID, claims.RefreshTokenID)
+			if err == nil {
 				c.Header(key, newToken.TokenType+" "+newToken.AccessToken)
 			}
 		}

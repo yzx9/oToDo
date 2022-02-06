@@ -28,13 +28,13 @@ func GetAccessToken(c *gin.Context) (*jwt.Token, error) {
 	return token, nil
 }
 
-func GetAccessTokenClaims(c *gin.Context) (*bll.AuthTokenClaims, error) {
+func GetAccessTokenClaims(c *gin.Context) (*bll.SessionTokenClaims, error) {
 	token, err := GetAccessToken(c)
 	if err != nil {
 		return nil, err
 	}
 
-	claims, ok := token.Claims.(*bll.AuthTokenClaims)
+	claims, ok := token.Claims.(*bll.SessionTokenClaims)
 	if !ok {
 		return nil, fmt.Errorf("invalid token")
 	}
@@ -57,9 +57,9 @@ func MustGetAccessToken(c *gin.Context) *jwt.Token {
 	return token
 }
 
-func MustGetAccessTokenClaims(c *gin.Context) *bll.AuthTokenClaims {
+func MustGetAccessTokenClaims(c *gin.Context) *bll.SessionTokenClaims {
 	token := MustGetAccessToken(c)
-	claims, _ := token.Claims.(*bll.AuthTokenClaims)
+	claims, _ := token.Claims.(*bll.SessionTokenClaims)
 	return claims
 }
 

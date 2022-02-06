@@ -15,14 +15,13 @@ var tokenHmacSecret = []byte("test_secret")
 
 type TokenClaims struct {
 	jwt.StandardClaims
-	UserID string `json:"user_id"`
+	UserID string `json:"uid"`
 }
 
 func NewClaims(userID uuid.UUID, exp time.Duration) TokenClaims {
 	now := time.Now().UTC()
 	return TokenClaims{
 		StandardClaims: jwt.StandardClaims{
-			Id:        uuid.NewString(),
 			Issuer:    tokenIssuer,
 			IssuedAt:  now.Unix(),
 			NotBefore: now.Unix(),

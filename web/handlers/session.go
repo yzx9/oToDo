@@ -41,10 +41,12 @@ func PostSessionHandler(c *gin.Context) {
 	}{tokens.AccessToken, tokens.TokenType, tokens.ExpiresIn, tokens.RefreshToken})
 }
 
-// Logout, unactive refresh token if exists
+// Logout, unactive refresh token
 func DeleteSessionHandler(c *gin.Context) {
-	if token, err := parseRefreshToken(c); err == nil {
-		bll.Logout(token)
+	claims := common.MustGetAccessTokenClaims(c)
+	err := bll.Logout(claims.UserID, claims.RefreshTokenID)
+	if err != nil {
+		// TODO log
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "see you"})
@@ -58,13 +60,13 @@ func PostSessionTokenHandler(c *gin.Context) {
 		return
 	}
 
-	claims, ok := token.Claims.(*bll.AuthTokenClaims)
+	claims, ok := token.Claims.(*bll.SessionTokenClaims)
 	if !ok || !token.Valid {
 		common.AbortWithJson(c, "invalid token")
 		return
 	}
 
-	newToken, err := bll.NewAccessToken(claims.UserID)
+	newToken, err := bll.NewAccessToken(claims.UserID, claims.RefreshTokenID)
 	if err != nil {
 		common.AbortWithJson(c, fmt.Sprintf("fails to refresh an token, %v", err.Error()))
 		return
