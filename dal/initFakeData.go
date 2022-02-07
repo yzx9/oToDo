@@ -49,7 +49,7 @@ func init() {
 		ID:        fileDestTemplateID,
 		Available: true,
 		Type:      string(entity.FilePathTemplateTypeDest),
-		Template:  ":date/:id.:ext",
+		Template:  ":date/:id:ext",
 	}
 
 	fileServerTemplateID := uuid.New()

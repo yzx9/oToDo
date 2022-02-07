@@ -1,7 +1,6 @@
 package bll
 
 import (
-	"errors"
 	"fmt"
 	"mime/multipart"
 	"net/http"
@@ -15,8 +14,8 @@ import (
 	"github.com/yzx9/otodo/utils"
 )
 
-const maxFileSize = 8 << 20 // 8MiB
-const fileDest = "./files"  // TODO Configurable
+const maxFileSize = 8 << 20  // 8MiB
+const fileDest = "tmp/files" // TODO Configurable
 
 var destTemplate entity.FilePathTemplate
 var serverTemplate entity.FilePathTemplate
@@ -50,7 +49,7 @@ func UploadTodoFile(todoID uuid.UUID, file *multipart.FileHeader) (uuid.UUID, er
 	record.FilePath = filepath.Join(fileDest, filePath)
 	path, err := uploadFile(file, record)
 	if err != nil {
-		return uuid.UUID{}, fmt.Errorf("fails to upload file, %w", err)
+		return uuid.UUID{}, err
 	}
 
 	_, err = dal.InsertTodoFile(todoID, entity.TodoFile{
@@ -71,12 +70,12 @@ func uploadFile(file *multipart.FileHeader, record entity.File) (uuid.UUID, erro
 
 	err := utils.SaveFile(file, record.FilePath)
 	if err != nil {
-		return uuid.UUID{}, errors.New("fails to upload file")
+		return uuid.UUID{}, fmt.Errorf("fails to upload file, %w", err)
 	}
 
 	err = dal.InsertFile(record)
 	if err != nil {
-		return uuid.UUID{}, errors.New("fails to upload file")
+		return uuid.UUID{}, fmt.Errorf("fails to upload file, %w", err)
 	}
 
 	return record.ID, nil

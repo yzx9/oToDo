@@ -4,6 +4,7 @@ import (
 	"io"
 	"mime/multipart"
 	"os"
+	"path/filepath"
 )
 
 func SaveFile(file *multipart.FileHeader, dst string) error {
@@ -12,6 +13,10 @@ func SaveFile(file *multipart.FileHeader, dst string) error {
 		return err
 	}
 	defer src.Close()
+
+	if os.MkdirAll(filepath.Dir(dst), os.ModePerm) != nil {
+		return err
+	}
 
 	out, err := os.Create(dst)
 	if err != nil {
