@@ -22,28 +22,27 @@ func PostTodoFileHandler(c *gin.Context) {
 		return
 	}
 
-	filename, err := bll.UploadTodoFile(todoID, file)
+	fileID, err := bll.UploadTodoFile(todoID, file)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
 
 	c.JSON(http.StatusOK, struct {
-		FileName string `json:"file_name"`
-	}{filename})
+		FileID string `json:"file_id"`
+	}{fileID.String()})
 }
 
 // Upload file, only support single file now
 func GetFileHandler(c *gin.Context) {
-	params := struct{ id string }{}
-	err := c.ShouldBind(&params)
+	id, err := common.GetParamUUID(c, "id")
 	if err != nil {
-		common.AbortWithJson(c, "invalid file")
+		common.AbortWithError(c, err)
 		return
 	}
 
 	userID := common.MustGetAccessUserID(c)
-	filepath, err := bll.GetFilePathWithAuth(params.id, userID)
+	filepath, err := bll.GetFilePathWithAuth(id, userID)
 	if err != nil {
 		common.AbortWithJson(c, "invalid file")
 		return

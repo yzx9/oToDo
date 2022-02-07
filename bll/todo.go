@@ -27,14 +27,14 @@ func GetTodo(id uuid.UUID) (entity.Todo, error) {
 
 	// Fill files
 	for _, file := range todo.Files {
-		filePath, err := GetFilePath(file.ID.String())
+		filePath, err := GetFilePath(file.ID)
 		if err != nil {
 			file.Valid = false
 			continue
 		}
 		file.FilePath = filePath
 
-		record, err := GetFile(file.ID.String())
+		record, err := GetFile(file.ID)
 		if err != nil {
 			file.Valid = false
 			continue
