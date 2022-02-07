@@ -39,7 +39,9 @@ func setupRouter(e *gin.Engine) {
 		r.GET("/files/:id", handlers.GetFileHandler)
 
 		// User
+		r.GET("/users/current", handlers.GetCurrentUserHandler)
 		r.GET("/users/current/todo-lists", handlers.GetCurrentUserTodoListsHandler)
+		r.GET("/users/current/todo-lists/basic", handlers.GetCurrentUserBasicTodoListHandler)
 
 		// Todo
 		r.POST("/todos", handlers.PostTodoHandler)

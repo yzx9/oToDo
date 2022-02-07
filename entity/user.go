@@ -14,7 +14,7 @@ type User struct {
 	Email           string    `json:"email"`
 	Telephone       string    `json:"telephone"`
 	Avatar          string    `json:"avatar"`
-	BasicTodoListID uuid.UUID `json:"-" gorm:"type:uuid;default:uuid_generate_v4()"`
+	BasicTodoListID uuid.UUID `json:"basic_todo_list_id" gorm:"type:uuid;default:uuid_generate_v4()"`
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
 }
