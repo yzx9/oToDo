@@ -17,6 +17,10 @@ func CreateTodoList(userID uuid.UUID, todoListName string) (entity.TodoList, err
 	})
 }
 
+func GetTodoList(todoListID uuid.UUID) (entity.TodoList, error) {
+	return dal.GetTodoList(todoListID)
+}
+
 func GetTodoLists(userID uuid.UUID) ([]entity.TodoList, error) {
 	vec, err := dal.GetTodoLists(userID)
 	if err != nil {

@@ -46,8 +46,25 @@ func GetCurrentUserTodoListsHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, todos)
 }
 
+// Get Todo
+func GetTodoListHandler(c *gin.Context) {
+	id, err := common.GetParamUUID(c, "id")
+	if err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
+	todoList, err := bll.GetTodoList(id)
+	if err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, todoList)
+}
+
 // Get Todos by Todo List
-func GetTodosByTodoListHandler(c *gin.Context) {
+func GetTodoListTodosHandler(c *gin.Context) {
 	id, err := common.GetParamUUID(c, "id")
 	if err != nil {
 		common.AbortWithError(c, err)

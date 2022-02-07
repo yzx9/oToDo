@@ -53,6 +53,7 @@ func setupRouter(e *gin.Engine) {
 		r.POST("/todos/:id/files", handlers.PostTodoFileHandler)
 
 		// Todo List
-		r.GET("/todo-lists/:id/todos", handlers.GetTodosByTodoListHandler)
+		r.GET("/todo-lists/:id", handlers.GetTodoListHandler)
+		r.GET("/todo-lists/:id/todos", handlers.GetTodoListTodosHandler)
 	}
 }
