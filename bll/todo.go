@@ -59,7 +59,6 @@ func GetTodos(todoListID uuid.UUID) ([]entity.Todo, error) {
 }
 
 func UpdateTodo(todo entity.Todo) (entity.Todo, error) {
-	todo.ID = uuid.New()
 	todo, err := dal.InsertTodo(todo)
 	if err != nil {
 		return entity.Todo{}, err
