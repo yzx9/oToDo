@@ -21,7 +21,7 @@ func setupRouter(e *gin.Engine) {
 		// Session
 		r.POST("/sessions", handlers.PostSessionHandler)
 
-		r.POST("/sessions/tokens", handlers.PostSessionTokenHandler)
+		r.POST("/sessions/current/tokens", handlers.PostSessionTokenHandler)
 
 		// User
 		r.POST("/users", handlers.PostUserHandler)
