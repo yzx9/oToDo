@@ -63,5 +63,6 @@ func InsertTodoFile(todoID uuid.UUID, file entity.TodoFile) (entity.Todo, error)
 	}
 
 	todo.Files = append(todo.Files, file)
+	todos[todoID] = todo
 	return todo, nil
 }
