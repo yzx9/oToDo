@@ -18,10 +18,10 @@ func setupRouter(e *gin.Engine) {
 			c.String(http.StatusOK, "pong")
 		})
 
-		// Auth
+		// Session
 		r.POST("/sessions", handlers.PostSessionHandler)
 
-		r.POST("/sessions/token", handlers.PostSessionTokenHandler)
+		r.POST("/sessions/tokens", handlers.PostSessionTokenHandler)
 
 		// User
 		r.POST("/users", handlers.PostUserHandler)
@@ -30,13 +30,16 @@ func setupRouter(e *gin.Engine) {
 	// Authorized routes
 	r = r.Group("/", middlewares.JwtAuthMiddleware())
 	{
-		// Auth
+		// Session
 		r.GET("/sessions", handlers.GetSessionHandler)
 		r.DELETE("/sessions", handlers.DeleteSessionHandler)
 
 		// File
 		// r.MaxMultipartMemory = MaxFileSize // 限制 Gin 上传文件时最大内存 (默认 32 MiB)
 		r.GET("/files/:id", handlers.GetFileHandler)
+
+		// User
+		r.GET("/users/current/todo-lists", handlers.GetCurrentUserTodoListsHandler)
 
 		// Todo
 		r.POST("/todos", handlers.PostTodoHandler)
@@ -45,11 +48,9 @@ func setupRouter(e *gin.Engine) {
 		r.GET("/todos/:id", handlers.GetTodoHandler)
 		r.DELETE("/todos/:id", handlers.DeleteTodoHanlder)
 
-		r.GET("/todos/todo-lists/:id", handlers.GetTodosFromTodoListHandler)
-
 		r.POST("/todos/:id/files", handlers.PostTodoFileHandler)
 
 		// Todo List
-		r.GET("/todo-lists", handlers.GetTodoListsHandler)
+		r.GET("/todo-lists/:id/todos", handlers.GetTodosByTodoListHandler)
 	}
 }

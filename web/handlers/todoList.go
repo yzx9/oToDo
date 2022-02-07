@@ -8,8 +8,8 @@ import (
 	"github.com/yzx9/otodo/web/common"
 )
 
-// Get todo lists
-func GetTodoListsHandler(c *gin.Context) {
+// Get todo lists for current user
+func GetCurrentUserTodoListsHandler(c *gin.Context) {
 	userID := common.MustGetAccessUserID(c)
 	todos, err := bll.GetTodoLists(userID)
 	if err != nil {
@@ -21,7 +21,7 @@ func GetTodoListsHandler(c *gin.Context) {
 }
 
 // Get Todos by Todo List
-func GetTodosFromTodoListHandler(c *gin.Context) {
+func GetTodosByTodoListHandler(c *gin.Context) {
 	id, err := common.GetParamUUID(c, "id")
 	if err != nil {
 		common.AbortWithError(c, err)
