@@ -22,14 +22,21 @@ type CreateUserPayload struct {
 }
 
 func CreateUser(payload CreateUserPayload) (entity.User, error) {
+	basicTodoListID := uuid.New()
 	user, err := dal.InsertUser(entity.User{
-		ID:       uuid.New(),
-		Name:     payload.UserName,
-		Nickname: payload.Nickname,
-		Password: GetCryptoPassword(payload.Password),
+		ID:              uuid.New(),
+		Name:            payload.UserName,
+		Nickname:        payload.Nickname,
+		Password:        GetCryptoPassword(payload.Password),
+		BasicTodoListID: basicTodoListID,
 	})
 
-	// TODO create base todo list
+	dal.InsertTodoList(entity.TodoList{
+		ID:        basicTodoListID,
+		Name:      "Todos", // i18n
+		Deletable: false,
+		UserID:    user.ID,
+	})
 
 	return user, err
 }
