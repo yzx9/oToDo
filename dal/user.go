@@ -9,6 +9,11 @@ import (
 var users = make(map[uuid.UUID]entity.User)
 var invalidRefreshTokens = make(map[uuid.UUID]entity.UserRefreshToken)
 
+func InsertUser(user entity.User) (entity.User, error) {
+	users[user.ID] = user
+	return user, nil
+}
+
 func GetUser(id uuid.UUID) (entity.User, error) {
 	user, ok := users[id]
 	if !ok {

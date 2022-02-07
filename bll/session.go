@@ -2,7 +2,6 @@ package bll
 
 import (
 	"bytes"
-	"crypto/sha256"
 	"fmt"
 	"regexp"
 	"time"
@@ -15,7 +14,6 @@ import (
 
 // Config
 // TODO configurable
-var passwordNonce = []byte("test_nonce")
 var accessTokenExpiresIn = 15 * time.Minute
 var refreshTokenExpiresIn = 15 * 24 * time.Hour
 var accessTokenRefreshThreshold = 5 * time.Minute
@@ -45,8 +43,7 @@ func Login(userName string, password string) (AuthTokenResult, error) {
 		return AuthTokenResult{}, fmt.Errorf("user not found: %v", userName)
 	}
 
-	pwd := sha256.Sum256(append([]byte(password), passwordNonce...))
-	if !bytes.Equal(user.Password, pwd[:]) {
+	if !bytes.Equal(user.Password, GetCryptoPassword(password)) {
 		return AuthTokenResult{}, fmt.Errorf("invalid credential")
 	}
 

@@ -1,6 +1,7 @@
 package bll
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"time"
 
@@ -8,6 +9,36 @@ import (
 	"github.com/yzx9/otodo/dal"
 	"github.com/yzx9/otodo/entity"
 )
+
+// Config
+// TODO configurable
+var passwordNonce = []byte("test_nonce")
+
+// User
+type CreateUserPayload struct {
+	UserName string `json:"user_name"`
+	Password string `json:"password"`
+	Nickname string `json:"nickname"`
+}
+
+func CreateUser(payload CreateUserPayload) (entity.User, error) {
+	user, err := dal.InsertUser(entity.User{
+		ID:       uuid.New(),
+		Name:     payload.UserName,
+		Nickname: payload.Nickname,
+		Password: GetCryptoPassword(payload.Password),
+	})
+
+	// TODO create base todo list
+
+	return user, err
+}
+
+func GetUser(userID uuid.UUID) (entity.User, error) {
+	return dal.GetUser(userID)
+}
+
+// Invalid User Refresh Token
 
 func CreateInvalidUserRefreshToken(userID uuid.UUID, tokenID uuid.UUID) (entity.UserRefreshToken, error) {
 	model, err := dal.InsertInvalidUserRefreshToken(entity.UserRefreshToken{
@@ -37,4 +68,10 @@ func IsValidRefreshToken(userID string, tokenID string) bool {
 	}
 
 	return !dal.ExistInvalidUserRefreshToken(userUUID, tokenUUID)
+}
+
+// Password
+func GetCryptoPassword(password string) []byte {
+	pwd := sha256.Sum256(append([]byte(password), passwordNonce...))
+	return pwd[:]
 }

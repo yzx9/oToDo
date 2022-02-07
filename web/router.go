@@ -22,6 +22,9 @@ func setupRouter(e *gin.Engine) {
 		r.POST("/sessions", handlers.PostSessionHandler)
 
 		r.POST("/sessions/token", handlers.PostSessionTokenHandler)
+
+		// User
+		r.POST("/users", handlers.PostUserHandler)
 	}
 
 	// Authorized routes
