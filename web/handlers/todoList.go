@@ -57,7 +57,8 @@ func GetCurrentUserBasicTodoListHandler(c *gin.Context) {
 }
 
 func getTodoListHandler(c *gin.Context, todoListID uuid.UUID) {
-	todoList, err := bll.GetTodoList(todoListID)
+	userID := common.MustGetAccessUserID(c)
+	todoList, err := bll.GetTodoList(userID, todoListID)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
