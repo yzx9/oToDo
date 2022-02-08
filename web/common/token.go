@@ -9,23 +9,21 @@ import (
 	"github.com/yzx9/otodo/bll"
 )
 
-var accessTokenKey = "access_token"
+const AuthorizationHeaderKey = "Authorization"
+const contextAccessTokenKey = "access_token"
 
-func SetAccessToken(c *gin.Context, token *jwt.Token) {
-	c.Set(accessTokenKey, token)
+func setAccessToken(c *gin.Context, token *jwt.Token) {
+	c.Set(contextAccessTokenKey, token)
 }
 
 func GetAccessToken(c *gin.Context) (*jwt.Token, error) {
-	value, exists := c.Get(accessTokenKey)
-	if !exists {
-		return nil, fmt.Errorf("access token not existed")
+	authorization := c.Request.Header.Get(AuthorizationHeaderKey)
+	token, err := bll.ParseAccessToken(authorization)
+	if err != nil {
+		return nil, fmt.Errorf("invalid token: %w", err)
 	}
 
-	token, ok := value.(*jwt.Token)
-	if !ok || !token.Valid {
-		return nil, fmt.Errorf("invalid token")
-	}
-
+	setAccessToken(c, token)
 	return token, nil
 }
 
@@ -51,14 +49,14 @@ func GetAccessUserID(c *gin.Context) (uuid.UUID, error) {
 
 	id, err := uuid.Parse(claims.UserID)
 	if err != nil {
-		return uuid.UUID{}, fmt.Errorf("invalid user_id in access token")
+		return uuid.UUID{}, fmt.Errorf("invalid user id in access token")
 	}
 
 	return id, nil
 }
 
 func MustGetAccessToken(c *gin.Context) *jwt.Token {
-	value := c.MustGet(accessTokenKey)
+	value := c.MustGet(contextAccessTokenKey)
 	token, _ := value.(*jwt.Token)
 	return token
 }

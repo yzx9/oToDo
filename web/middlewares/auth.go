@@ -11,16 +11,11 @@ import (
 
 func JwtAuthMiddleware() func(*gin.Context) {
 	return func(c *gin.Context) {
-		const key = "Authorization"
-
-		authorization := c.Request.Header.Get(key)
-		token, err := bll.ParseAccessToken(authorization)
+		token, err := common.GetAccessToken(c)
 		if err != nil {
-			c.AbortWithError(http.StatusUnauthorized, err)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, "invalid token")
 			return
 		}
-
-		common.SetAccessToken(c, token)
 
 		if bll.ShouldRefreshAccessToken(token) {
 			claims := common.MustGetAccessTokenClaims(c)
@@ -29,7 +24,7 @@ func JwtAuthMiddleware() func(*gin.Context) {
 			newToken, err := bll.NewAccessToken(userID, refreshTokenID)
 
 			if err == nil {
-				c.Header(key, newToken.TokenType+" "+newToken.AccessToken)
+				c.Header(common.AuthorizationHeaderKey, newToken.TokenType+" "+newToken.AccessToken)
 			}
 		}
 

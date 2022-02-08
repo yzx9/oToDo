@@ -21,7 +21,7 @@ var accessTokenRefreshThreshold = 5 * time.Minute
 // Constans
 var accessTokenExpiresInSeconds = int64(accessTokenExpiresIn.Seconds())
 var tokenType = "Bearer"
-var authorizationRegexString = "^Bearer (?P<token>[\\w-]+.[\\w-]+.[\\w-]+)$"
+var authorizationRegexString = "^[Bb]earer (?P<token>[\\w-]+.[\\w-]+.[\\w-]+)$"
 var authorizationRegex = regexp.MustCompile(authorizationRegexString)
 
 type AuthTokenResult struct {
@@ -84,7 +84,18 @@ func ParseAccessToken(authorization string) (*jwt.Token, error) {
 		return nil, fmt.Errorf("unauthorized")
 	}
 
-	return ParseToken(matches[1], &SessionTokenClaims{})
+	token, err := ParseToken(matches[1], &SessionTokenClaims{})
+	if err != nil {
+		return nil, fmt.Errorf("fails to parse access token: %w", err)
+	}
+
+	claims, ok := token.Claims.(*SessionTokenClaims)
+	_, err = uuid.Parse(claims.UserID)
+	if !ok || err != nil {
+		return nil, fmt.Errorf("invalid access token")
+	}
+
+	return token, nil
 }
 
 func ShouldRefreshAccessToken(oldAccessToken *jwt.Token) bool {
