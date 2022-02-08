@@ -40,8 +40,11 @@ func setupRouter(e *gin.Engine) {
 
 		// User
 		r.GET("/users/current", handlers.GetCurrentUserHandler)
+
 		r.GET("/users/current/todo-lists", handlers.GetCurrentUserTodoListsHandler)
 		r.GET("/users/current/todo-lists/basic", handlers.GetCurrentUserBasicTodoListHandler)
+
+		r.GET("/users/current/todo-list-folders", handlers.GetCurrentUserTodoListFoldersHandler)
 
 		// Todo
 		r.POST("/todos", handlers.PostTodoHandler)
@@ -54,6 +57,12 @@ func setupRouter(e *gin.Engine) {
 
 		// Todo List
 		r.GET("/todo-lists/:id", handlers.GetTodoListHandler)
+		r.DELETE("/todo-lists/:id", handlers.DeleteTodoListHandler)
+
 		r.GET("/todo-lists/:id/todos", handlers.GetTodoListTodosHandler)
+
+		// Todo List Folder
+		r.GET("/todo-list-folders/:id", handlers.GetTodoListFolderHandler)
+		r.DELETE("/todo-list-folders/:id", handlers.DeleteTodoListFolderHandler)
 	}
 }
