@@ -9,8 +9,9 @@ import (
 	"github.com/yzx9/otodo/utils"
 )
 
-func CreateTodo(todo entity.Todo) (entity.Todo, error) {
+func CreateTodo(userID uuid.UUID, todo entity.Todo) (entity.Todo, error) {
 	todo.ID = uuid.New()
+	todo.UserID = userID // override user
 	todo, err := dal.InsertTodo(todo)
 	if err != nil {
 		return entity.Todo{}, err
@@ -19,18 +20,13 @@ func CreateTodo(todo entity.Todo) (entity.Todo, error) {
 	return todo, nil
 }
 
-func GetTodo(id uuid.UUID) (entity.Todo, error) {
-	todo, err := dal.GetTodo(id)
-	if err != nil {
-		return entity.Todo{}, err
-	}
-
-	return todo, nil
+func GetTodo(userID uuid.UUID, todoID uuid.UUID) (entity.Todo, error) {
+	return OwnTodo(userID, todoID)
 }
 
-func GetTodos(todoListID uuid.UUID) ([]entity.Todo, error) {
-	if !dal.ExistTodoList(todoListID) {
-		return nil, utils.NewErrorWithNotFound("todo list not found: %v", todoListID)
+func GetTodos(userID uuid.UUID, todoListID uuid.UUID) ([]entity.Todo, error) {
+	if _, err := OwnTodoList(userID, todoListID); err != nil {
+		return nil, err
 	}
 
 	todos, err := dal.GetTodos(todoListID)
@@ -38,13 +34,20 @@ func GetTodos(todoListID uuid.UUID) ([]entity.Todo, error) {
 		return nil, fmt.Errorf("fails to get todos: %w", err)
 	}
 
-	// TODO verify perm
-
 	return todos, nil
 }
 
-func UpdateTodo(todo entity.Todo) (entity.Todo, error) {
-	todo, err := dal.InsertTodo(todo)
+func UpdateTodo(userID uuid.UUID, todo entity.Todo) (entity.Todo, error) {
+	oldTodo, err := OwnTodo(userID, todo.ID)
+	if err != nil {
+		return entity.Todo{}, err
+	}
+
+	if oldTodo.UserID != todo.UserID {
+		return entity.Todo{}, fmt.Errorf("unable to update todo owner")
+	}
+
+	todo, err = dal.UpdateTodo(todo)
 	if err != nil {
 		return entity.Todo{}, err
 	}
@@ -52,6 +55,24 @@ func UpdateTodo(todo entity.Todo) (entity.Todo, error) {
 	return todo, nil
 }
 
-func DeleteTodo(id uuid.UUID) (entity.Todo, error) {
-	return dal.DeleteTodo(id)
+func DeleteTodo(userID uuid.UUID, todoID uuid.UUID) (entity.Todo, error) {
+	if _, err := OwnTodo(userID, todoID); err != nil {
+		return entity.Todo{}, err
+	}
+
+	return dal.DeleteTodo(todoID)
+}
+
+func OwnTodo(userID uuid.UUID, todoID uuid.UUID) (entity.Todo, error) {
+	todo, err := dal.GetTodo(todoID)
+	if err != nil {
+		return entity.Todo{}, fmt.Errorf("fails to get todo: %v", todoID)
+	}
+
+	// TODO todo in shared todo list
+	if todo.UserID != userID {
+		return entity.Todo{}, utils.NewErrorWithForbidden("unable to handle non-owned todo: %v", todo.ID)
+	}
+
+	return todo, nil
 }

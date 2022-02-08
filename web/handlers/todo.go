@@ -18,7 +18,8 @@ func PostTodoHandler(c *gin.Context) {
 		return
 	}
 
-	todo, err = bll.CreateTodo(todo)
+	userID := common.MustGetAccessUserID(c)
+	todo, err = bll.CreateTodo(userID, todo)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -35,7 +36,8 @@ func GetTodoHandler(c *gin.Context) {
 		return
 	}
 
-	todo, err := bll.GetTodo(todoID)
+	userID := common.MustGetAccessUserID(c)
+	todo, err := bll.GetTodo(userID, todoID)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -53,7 +55,8 @@ func PutTodoHandler(c *gin.Context) {
 		return
 	}
 
-	todo, err = bll.UpdateTodo(todo)
+	userID := common.MustGetAccessUserID(c)
+	todo, err = bll.UpdateTodo(userID, todo)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -77,7 +80,8 @@ func DeleteTodoHanlder(c *gin.Context) {
 		return
 	}
 
-	todo, err := bll.DeleteTodo(todoID)
+	userID := common.MustGetAccessUserID(c)
+	todo, err := bll.DeleteTodo(userID, todoID)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return

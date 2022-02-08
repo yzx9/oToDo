@@ -68,12 +68,7 @@ func GetFile(fileID uuid.UUID) (entity.File, error) {
 }
 
 func GetFilePath(userID uuid.UUID, fileID uuid.UUID) (string, error) {
-	file, err := GetFile(fileID)
-	if err != nil {
-		return "", err
-	}
-
-	err = hasPermission(file, userID)
+	file, err := OwnFile(userID, fileID)
 	if err != nil {
 		return "", err
 	}
@@ -91,24 +86,29 @@ func applyTemplate(template string, file entity.File) string {
 	return template
 }
 
-func hasPermission(file entity.File, userID uuid.UUID) error {
+func OwnFile(userID uuid.UUID, fileID uuid.UUID) (entity.File, error) {
+	file, err := GetFile(fileID)
+	if err != nil {
+		return entity.File{}, err
+	}
+
 	switch entity.FileAccessType(file.AccessType) {
 	case entity.FileTypePublic:
-		return nil
+		return entity.File{}, nil
 
 	case entity.FileTypeTodo:
 		user, err := dal.GetUserByTodo(file.RelatedID)
 		if err != nil {
-			return fmt.Errorf("fails to get user, %w", err)
+			return entity.File{}, fmt.Errorf("fails to get user: %w", err)
 		}
 
 		if userID != user.ID {
-			return utils.NewErrorWithForbidden("unable to get non-owned file: %v", file.ID)
+			return entity.File{}, utils.NewErrorWithForbidden("unable to get non-owned file: %v", file.ID)
 		}
 
 	default:
-		return fmt.Errorf("invalid file access type: %v", file.AccessType)
+		return entity.File{}, fmt.Errorf("invalid file access type: %v", file.AccessType)
 	}
 
-	return nil
+	return file, nil
 }

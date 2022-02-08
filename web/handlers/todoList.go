@@ -69,13 +69,14 @@ func getTodoListHandler(c *gin.Context, todoListID uuid.UUID) {
 
 // Get todos in todo list
 func GetTodoListTodosHandler(c *gin.Context) {
-	id, err := common.GetParamUUID(c, "id")
+	todoListID, err := common.GetParamUUID(c, "id")
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
 
-	todos, err := bll.GetTodos(id)
+	userID := common.MustGetAccessUserID(c)
+	todos, err := bll.GetTodos(userID, todoListID)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
