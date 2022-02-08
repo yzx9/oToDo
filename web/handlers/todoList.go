@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/yzx9/otodo/bll"
 	"github.com/yzx9/otodo/web/common"
 )
@@ -20,20 +21,6 @@ func GetCurrentUserHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-// Get basic todo lists for current user
-func GetCurrentUserBasicTodoListHandler(c *gin.Context) {
-	userID := common.MustGetAccessUserID(c)
-	user, err := bll.GetUser(userID)
-	if err != nil {
-		common.AbortWithError(c, err)
-		return
-	}
-
-	c.JSON(http.StatusOK, struct {
-		TodoListID string `json:"todo_list_id"`
-	}{user.BasicTodoListID.String()})
-}
-
 // Get todo lists for current user
 func GetCurrentUserTodoListsHandler(c *gin.Context) {
 	userID := common.MustGetAccessUserID(c)
@@ -46,7 +33,7 @@ func GetCurrentUserTodoListsHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, todos)
 }
 
-// Get Todo
+// Get todo list
 func GetTodoListHandler(c *gin.Context) {
 	id, err := common.GetParamUUID(c, "id")
 	if err != nil {
@@ -54,7 +41,23 @@ func GetTodoListHandler(c *gin.Context) {
 		return
 	}
 
-	todoList, err := bll.GetTodoList(id)
+	getTodoListHandler(c, id)
+}
+
+// Get basic todo lists for current user
+func GetCurrentUserBasicTodoListHandler(c *gin.Context) {
+	userID := common.MustGetAccessUserID(c)
+	user, err := bll.GetUser(userID)
+	if err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
+	getTodoListHandler(c, user.BasicTodoListID)
+}
+
+func getTodoListHandler(c *gin.Context, todoListID uuid.UUID) {
+	todoList, err := bll.GetTodoList(todoListID)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -63,7 +66,7 @@ func GetTodoListHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, todoList)
 }
 
-// Get Todos by Todo List
+// Get todos in todo list
 func GetTodoListTodosHandler(c *gin.Context) {
 	id, err := common.GetParamUUID(c, "id")
 	if err != nil {
