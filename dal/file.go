@@ -7,7 +7,6 @@ import (
 	"github.com/yzx9/otodo/entity"
 )
 
-var filePathTemplates = make(map[uuid.UUID]entity.FilePathTemplate)
 var files = make(map[uuid.UUID]entity.File)
 
 func InsertFile(file entity.File) error {
@@ -22,14 +21,4 @@ func GetFile(id uuid.UUID) (entity.File, error) {
 	}
 
 	return file, nil
-}
-
-// FilePathTemplate
-
-func GetFilePathTemplates() ([]entity.FilePathTemplate, error) {
-	vec := []entity.FilePathTemplate{}
-	for _, template := range filePathTemplates {
-		vec = append(vec, template)
-	}
-	return vec, nil
 }

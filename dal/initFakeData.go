@@ -41,21 +41,4 @@ func init() {
 		UserID:     admin.ID,
 		TodoListID: todoList.ID,
 	})
-
-	// File Template
-	fileDestTemplateID := uuid.New()
-	filePathTemplates[fileDestTemplateID] = entity.FilePathTemplate{
-		ID:        fileDestTemplateID,
-		Available: true,
-		Type:      string(entity.FilePathTemplateTypeDest),
-		Template:  ":date/:id:ext",
-	}
-
-	fileServerTemplateID := uuid.New()
-	filePathTemplates[fileServerTemplateID] = entity.FilePathTemplate{
-		ID:        fileServerTemplateID,
-		Available: true,
-		Type:      string(entity.FilePathTemplateTypeServer),
-		Template:  "//localhost:8080/files/:id",
-	}
 }

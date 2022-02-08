@@ -25,8 +25,6 @@ type Todo struct {
 type TodoFile struct {
 	ID       uuid.UUID `json:"id" gorm:"type:uuid;default:uuid_generate_v4()"`
 	FileID   uuid.UUID `json:"file_id"`
-	File     File      `json:"-"`
 	FileName string    `json:"file_name" gorm:"-"`
-	FilePath string    `json:"file_path" gorm:"-"`
-	Valid    bool      `json:"valid" gorm:"-"`
+	File     File      `json:"-"`
 }

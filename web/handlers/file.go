@@ -8,6 +8,9 @@ import (
 	"github.com/yzx9/otodo/web/common"
 )
 
+// TODO simplify file details, remove templates
+// TODO support create temporary opening aceess url
+
 // Upload todo file, only support single file now
 func PostTodoFileHandler(c *gin.Context) {
 	todoID, err := common.GetParamUUID(c, "id")
@@ -42,7 +45,7 @@ func GetFileHandler(c *gin.Context) {
 	}
 
 	userID := common.MustGetAccessUserID(c)
-	filepath, err := bll.GetFilePathWithAuth(id, userID)
+	filepath, err := bll.GetFilePath(userID, id)
 	if err != nil {
 		common.AbortWithJson(c, "invalid file")
 		return

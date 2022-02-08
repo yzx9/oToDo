@@ -25,23 +25,6 @@ func GetTodo(id uuid.UUID) (entity.Todo, error) {
 		return entity.Todo{}, err
 	}
 
-	// Fill files
-	for _, file := range todo.Files {
-		filePath, err := GetFilePath(file.ID)
-		if err != nil {
-			file.Valid = false
-			continue
-		}
-		file.FilePath = filePath
-
-		record, err := GetFile(file.ID)
-		if err != nil {
-			file.Valid = false
-			continue
-		}
-		file.FileName = record.FileName
-	}
-
 	return todo, nil
 }
 
@@ -54,6 +37,8 @@ func GetTodos(todoListID uuid.UUID) ([]entity.Todo, error) {
 	if err != nil {
 		return nil, fmt.Errorf("fails to get todos: %w", err)
 	}
+
+	// TODO verify perm
 
 	return todos, nil
 }
