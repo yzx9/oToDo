@@ -83,3 +83,21 @@ func GetTodoListTodosHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, todos)
 }
+
+// Delete todo list
+func DeleteTodoListHandler(c *gin.Context) {
+	id, err := common.GetParamUUID(c, "id")
+	if err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
+	userID := common.MustGetAccessUserID(c)
+	todo, err := bll.DeleteTodoList(userID, id)
+	if err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, todo)
+}
