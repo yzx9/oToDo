@@ -30,9 +30,9 @@ func CreateUser(payload CreateUserPayload) (entity.User, error) {
 		return entity.User{}, fmt.Errorf("password too short")
 	}
 
-	basicTodoListID := uuid.New()
+	basicTodoListID := uuid.NewString()
 	user := entity.User{
-		ID:              uuid.New(),
+		ID:              uuid.NewString(),
 		Name:            payload.UserName,
 		Nickname:        payload.Nickname,
 		Password:        GetCryptoPassword(payload.Password),
@@ -51,15 +51,15 @@ func CreateUser(payload CreateUserPayload) (entity.User, error) {
 	return user, err
 }
 
-func GetUser(userID uuid.UUID) (entity.User, error) {
+func GetUser(userID string) (entity.User, error) {
 	return dal.GetUser(userID)
 }
 
 // Invalid User Refresh Token
 
-func CreateInvalidUserRefreshToken(userID, tokenID uuid.UUID) (entity.UserRefreshToken, error) {
+func CreateInvalidUserRefreshToken(userID, tokenID string) (entity.UserRefreshToken, error) {
 	model := entity.UserRefreshToken{
-		ID:        uuid.New(),
+		ID:        uuid.NewString(),
 		UserID:    userID,
 		TokenID:   tokenID,
 		CreatedAt: time.Now(),
@@ -73,7 +73,7 @@ func CreateInvalidUserRefreshToken(userID, tokenID uuid.UUID) (entity.UserRefres
 
 // Verify is it an valid token.
 // Note: This func don't check token expire time
-func IsValidRefreshToken(userID, tokenID uuid.UUID) bool {
+func IsValidRefreshToken(userID, tokenID string) bool {
 	return !dal.ExistInvalidUserRefreshToken(userID, tokenID)
 }
 

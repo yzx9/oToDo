@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -12,9 +13,9 @@ import (
 
 // Upload todo file, only support single file now
 func PostTodoFileHandler(c *gin.Context) {
-	todoID, err := common.GetParamUUID(c, "id")
-	if err != nil {
-		common.AbortWithError(c, err)
+	todoID, ok := c.Params.Get("id")
+	if !ok {
+		common.AbortWithError(c, fmt.Errorf("id required"))
 		return
 	}
 
@@ -32,14 +33,14 @@ func PostTodoFileHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, struct {
 		FileID string `json:"file_id"`
-	}{fileID.String()})
+	}{fileID})
 }
 
 // Upload file, only support single file now
 func GetFileHandler(c *gin.Context) {
-	id, err := common.GetParamUUID(c, "id")
-	if err != nil {
-		common.AbortWithError(c, err)
+	id, ok := c.Params.Get("id")
+	if !ok {
+		common.AbortWithError(c, fmt.Errorf("id required"))
 		return
 	}
 

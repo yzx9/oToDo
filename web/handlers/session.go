@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/yzx9/otodo/bll"
 	"github.com/yzx9/otodo/web/common"
 )
@@ -44,17 +43,7 @@ func PostSessionHandler(c *gin.Context) {
 // Logout, unactive refresh token
 func DeleteSessionHandler(c *gin.Context) {
 	claims := common.MustGetAccessTokenClaims(c)
-	userID, err := uuid.Parse(claims.UserID)
-	if err != nil {
-		common.AbortWithError(c, fmt.Errorf("invalid user id: %v", claims.UserID))
-	}
-
-	refreshTokenID, err := uuid.Parse(claims.RefreshTokenID)
-	if err != nil {
-		common.AbortWithError(c, fmt.Errorf("invalid token id: %v", claims.RefreshTokenID))
-	}
-
-	err = bll.Logout(userID, refreshTokenID)
+	err := bll.Logout(claims.UserID, claims.RefreshTokenID)
 	if err != nil {
 		// TODO log
 		fmt.Println(err.Error())
@@ -89,30 +78,19 @@ func PostSessionTokenHandler(c *gin.Context) {
 	}{newToken.AccessToken, newToken.TokenType, newToken.ExpiresIn})
 }
 
-func parseRefreshToken(c *gin.Context) (uuid.UUID, uuid.UUID, error) {
-	u := uuid.UUID{}
+func parseRefreshToken(c *gin.Context) (string, string, error) {
 	obj := &struct {
 		RefreshToken string `json:"refresh_token"`
 	}{}
 	if err := c.ShouldBind(&obj); err != nil {
-		return u, u, err
+		return "", "", fmt.Errorf("refresh_token required")
 	}
 
 	token, err := bll.ParseSessionToken(obj.RefreshToken)
 	claims, ok := token.Claims.(*bll.SessionTokenClaims)
 	if err != nil || !ok || !token.Valid {
-		return u, u, fmt.Errorf("invalid token")
+		return "", "", fmt.Errorf("invalid token")
 	}
 
-	userID, err := uuid.Parse(claims.UserID)
-	if err != nil {
-		return u, u, fmt.Errorf("invalid user id: %v", claims.RefreshTokenID)
-	}
-
-	refreshTokenID, err := uuid.Parse(claims.RefreshTokenID)
-	if err != nil {
-		return u, u, fmt.Errorf("invalid refresh token id: %v", claims.RefreshTokenID)
-	}
-
-	return userID, refreshTokenID, nil
+	return claims.UserID, claims.RefreshTokenID, nil
 }

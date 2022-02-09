@@ -10,14 +10,14 @@ import (
 	"github.com/yzx9/otodo/utils"
 )
 
-func CreateTodoStep(userID, todoID uuid.UUID, name string) (entity.TodoStep, error) {
+func CreateTodoStep(userID, todoID string, name string) (entity.TodoStep, error) {
 	_, err := OwnTodo(userID, todoID)
 	if err != nil {
 		return entity.TodoStep{}, fmt.Errorf("todo not found: %v", todoID)
 	}
 
 	step := entity.TodoStep{
-		ID:     uuid.New(),
+		ID:     uuid.NewString(),
 		Name:   name,
 		TodoID: todoID,
 	}
@@ -28,7 +28,7 @@ func CreateTodoStep(userID, todoID uuid.UUID, name string) (entity.TodoStep, err
 	return step, nil
 }
 
-func UpdateTodoStep(userID uuid.UUID, step entity.TodoStep) (entity.TodoStep, error) {
+func UpdateTodoStep(userID string, step entity.TodoStep) (entity.TodoStep, error) {
 	oldStep, err := OwnTodoStep(userID, step.ID)
 	if err != nil {
 		return entity.TodoStep{}, err
@@ -49,7 +49,7 @@ func UpdateTodoStep(userID uuid.UUID, step entity.TodoStep) (entity.TodoStep, er
 	return step, nil
 }
 
-func DeleteTodoStep(userID, todoID, todoStepID uuid.UUID) (entity.TodoStep, error) {
+func DeleteTodoStep(userID, todoID, todoStepID string) (entity.TodoStep, error) {
 	step, err := OwnTodoStep(userID, todoStepID)
 	if err != nil {
 		return entity.TodoStep{}, err
@@ -62,7 +62,7 @@ func DeleteTodoStep(userID, todoID, todoStepID uuid.UUID) (entity.TodoStep, erro
 	return step, dal.DeleteTodoStep(todoStepID)
 }
 
-func OwnTodoStep(userID, todoStepID uuid.UUID) (entity.TodoStep, error) {
+func OwnTodoStep(userID, todoStepID string) (entity.TodoStep, error) {
 	step, err := dal.GetTodoStep(todoStepID)
 	if err != nil {
 		return entity.TodoStep{}, fmt.Errorf("fails to get todo step: %v", todoStepID)

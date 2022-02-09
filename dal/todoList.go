@@ -3,19 +3,18 @@ package dal
 import (
 	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/yzx9/otodo/entity"
 	"github.com/yzx9/otodo/utils"
 )
 
-var todoLists = make(map[uuid.UUID]entity.TodoList)
+var todoLists = make(map[string]entity.TodoList)
 
 func InsertTodoList(todoList entity.TodoList) error {
 	todoLists[todoList.ID] = todoList
 	return nil
 }
 
-func GetTodoList(id uuid.UUID) (entity.TodoList, error) {
+func GetTodoList(id string) (entity.TodoList, error) {
 	for _, v := range todoLists {
 		if v.ID == id {
 			return v, nil
@@ -25,7 +24,7 @@ func GetTodoList(id uuid.UUID) (entity.TodoList, error) {
 	return entity.TodoList{}, fmt.Errorf("todo list not found: %v", id)
 }
 
-func GetTodoLists(userId uuid.UUID) ([]entity.TodoList, error) {
+func GetTodoLists(userId string) ([]entity.TodoList, error) {
 	vec := make([]entity.TodoList, 0)
 	for _, v := range todoLists {
 		if v.UserID == userId {
@@ -36,7 +35,7 @@ func GetTodoLists(userId uuid.UUID) ([]entity.TodoList, error) {
 	return vec, nil
 }
 
-func DeleteTodoList(todoListID uuid.UUID) error {
+func DeleteTodoList(todoListID string) error {
 	_, ok := todoLists[todoListID]
 	if !ok {
 		return utils.NewErrorWithNotFound("todo list not found: %v", todoListID)
@@ -46,7 +45,7 @@ func DeleteTodoList(todoListID uuid.UUID) error {
 	return nil
 }
 
-func ExistTodoList(id uuid.UUID) bool {
+func ExistTodoList(id string) bool {
 	_, exist := todoLists[id]
 	return exist
 }

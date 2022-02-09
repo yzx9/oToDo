@@ -1,14 +1,13 @@
 package dal
 
 import (
-	"github.com/google/uuid"
 	"github.com/yzx9/otodo/entity"
 )
 
 // inject fake data
 func init() {
 	// User
-	adminID := uuid.MustParse("0c13da37-4593-4b2e-8163-1cbdb6e50830")
+	adminID := "0c13da37-4593-4b2e-8163-1cbdb6e50830"
 	InsertUser(entity.User{
 		ID:       adminID,
 		Name:     "admin",
@@ -21,7 +20,7 @@ func init() {
 	})
 
 	// Todo List
-	todoListID := uuid.MustParse("5f5459d1-ffdb-40ce-9e05-02af49938a45")
+	todoListID := "5f5459d1-ffdb-40ce-9e05-02af49938a45"
 	InsertTodoList(entity.TodoList{
 		ID:        todoListID,
 		Name:      "To-Do",
@@ -31,14 +30,14 @@ func init() {
 
 	// Todo
 	InsertTodo(entity.Todo{
-		ID:         uuid.MustParse("32acb375-e9dc-473e-8f5f-8826f7783c1d"),
+		ID:         "32acb375-e9dc-473e-8f5f-8826f7783c1d",
 		Title:      "Hello, World!",
 		UserID:     adminID,
 		TodoListID: todoListID,
 	})
 
 	InsertTodo(entity.Todo{
-		ID:         uuid.MustParse("343dc2ce-1fbc-43ad-98d6-9cac1c67f2a6"),
+		ID:         "343dc2ce-1fbc-43ad-98d6-9cac1c67f2a6",
 		Title:      "你好，世界！",
 		UserID:     adminID,
 		TodoListID: todoListID,

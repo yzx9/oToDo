@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -22,14 +23,14 @@ func GetCurrentUserTodoListFoldersHandler(c *gin.Context) {
 
 // Get todo list folder
 func GetTodoListFolderHandler(c *gin.Context) {
-	todoListFolderID, err := common.GetParamUUID(c, "id")
-	if err != nil {
-		common.AbortWithError(c, err)
+	id, ok := c.Params.Get("id")
+	if !ok {
+		common.AbortWithError(c, fmt.Errorf("id required"))
 		return
 	}
 
 	userID := common.MustGetAccessUserID(c)
-	folder, err := bll.GetTodoListFolder(userID, todoListFolderID)
+	folder, err := bll.GetTodoListFolder(userID, id)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -40,9 +41,9 @@ func GetTodoListFolderHandler(c *gin.Context) {
 
 // Delete todo list folder
 func DeleteTodoListFolderHandler(c *gin.Context) {
-	id, err := common.GetParamUUID(c, "id")
-	if err != nil {
-		common.AbortWithError(c, err)
+	id, ok := c.Params.Get("id")
+	if !ok {
+		common.AbortWithError(c, fmt.Errorf("id required"))
 		return
 	}
 

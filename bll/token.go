@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
-	"github.com/google/uuid"
 )
 
 // Config
@@ -18,7 +17,7 @@ type TokenClaims struct {
 	UserID string `json:"uid"`
 }
 
-func NewClaims(userID uuid.UUID, exp time.Duration) TokenClaims {
+func NewClaims(userID string, exp time.Duration) TokenClaims {
 	now := time.Now().UTC()
 	return TokenClaims{
 		StandardClaims: jwt.StandardClaims{
@@ -27,7 +26,7 @@ func NewClaims(userID uuid.UUID, exp time.Duration) TokenClaims {
 			NotBefore: now.Unix(),
 			ExpiresAt: now.Add(exp).Unix(),
 		},
-		UserID: userID.String(),
+		UserID: userID,
 	}
 }
 

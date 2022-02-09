@@ -12,9 +12,9 @@ import (
 
 // Create todo step
 func PostTodoStepHandler(c *gin.Context) {
-	todoID, err := common.GetParamUUID(c, "id")
-	if err != nil {
-		common.AbortWithError(c, err)
+	todoID, ok := c.Params.Get("id")
+	if !ok {
+		common.AbortWithError(c, fmt.Errorf("todo-id required"))
 		return
 	}
 
@@ -57,15 +57,15 @@ func PutTodoStepHandler(c *gin.Context) {
 
 // Delete todo step
 func DeleteTodoStepHandler(c *gin.Context) {
-	todoID, err := common.GetParamUUID(c, "todo-id")
-	if err != nil {
-		common.AbortWithError(c, err)
+	todoID, ok := c.Params.Get("id")
+	if !ok {
+		common.AbortWithError(c, fmt.Errorf("todo-id required"))
 		return
 	}
 
-	stepID, err := common.GetParamUUID(c, "step-id")
-	if err != nil {
-		common.AbortWithError(c, err)
+	stepID, ok := c.Params.Get("step-id")
+	if !ok {
+		common.AbortWithError(c, fmt.Errorf("step-id required"))
 		return
 	}
 

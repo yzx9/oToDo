@@ -56,12 +56,12 @@ func Login(userName, password string) (AuthTokenResult, error) {
 	}, nil
 }
 
-func Logout(userID, refreshTokenID uuid.UUID) error {
+func Logout(userID, refreshTokenID string) error {
 	_, err := CreateInvalidUserRefreshToken(userID, refreshTokenID)
 	return err
 }
 
-func NewAccessToken(userID, refreshTokenID uuid.UUID) (AuthTokenResult, error) {
+func NewAccessToken(userID, refreshTokenID string) (AuthTokenResult, error) {
 	user, err := dal.GetUser(userID)
 	if err != nil {
 		return AuthTokenResult{}, fmt.Errorf("fails to get user, %w", err)
@@ -111,18 +111,18 @@ func ShouldRefreshAccessToken(oldAccessToken *jwt.Token) bool {
 	return time.Now().Add(accessTokenRefreshThreshold).Unix() > claims.ExpiresAt
 }
 
-func newAccessToken(user entity.User, refreshTokenID uuid.UUID, exp time.Duration) string {
+func newAccessToken(user entity.User, refreshTokenID string, exp time.Duration) string {
 	claims := SessionTokenClaims{
 		TokenClaims:    NewClaims(user.ID, exp),
 		UserNickname:   user.Nickname,
-		RefreshTokenID: refreshTokenID.String(),
+		RefreshTokenID: refreshTokenID,
 	}
 	return NewToken(claims)
 }
 
-func newRefreshToken(user entity.User, exp time.Duration) (string, uuid.UUID) {
-	id := uuid.New()
+func newRefreshToken(user entity.User, exp time.Duration) (string, string) {
+	id := uuid.NewString()
 	claims := SessionTokenClaims{TokenClaims: NewClaims(user.ID, exp)}
-	claims.Id = id.String()
+	claims.Id = id
 	return NewToken(claims), id
 }

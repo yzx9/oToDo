@@ -10,8 +10,8 @@ import (
 	"github.com/yzx9/otodo/utils"
 )
 
-func CreateTodo(userID uuid.UUID, todo entity.Todo) (entity.Todo, error) {
-	todo.ID = uuid.New()
+func CreateTodo(userID string, todo entity.Todo) (entity.Todo, error) {
+	todo.ID = uuid.NewString()
 	todo.UserID = userID // override user
 	if err := dal.InsertTodo(todo); err != nil {
 		return entity.Todo{}, fmt.Errorf("fails to create todo: %w", err)
@@ -20,11 +20,11 @@ func CreateTodo(userID uuid.UUID, todo entity.Todo) (entity.Todo, error) {
 	return todo, nil
 }
 
-func GetTodo(userID, todoID uuid.UUID) (entity.Todo, error) {
+func GetTodo(userID, todoID string) (entity.Todo, error) {
 	return OwnTodo(userID, todoID)
 }
 
-func GetTodos(userID, todoListID uuid.UUID) ([]entity.Todo, error) {
+func GetTodos(userID, todoListID string) ([]entity.Todo, error) {
 	if _, err := OwnTodoList(userID, todoListID); err != nil {
 		return nil, err
 	}
@@ -37,7 +37,7 @@ func GetTodos(userID, todoListID uuid.UUID) ([]entity.Todo, error) {
 	return todos, nil
 }
 
-func UpdateTodo(userID uuid.UUID, todo entity.Todo) (entity.Todo, error) {
+func UpdateTodo(userID string, todo entity.Todo) (entity.Todo, error) {
 	r := func(err error) (entity.Todo, error) {
 		return entity.Todo{}, err
 	}
@@ -62,7 +62,7 @@ func UpdateTodo(userID uuid.UUID, todo entity.Todo) (entity.Todo, error) {
 	return todo, nil
 }
 
-func DeleteTodo(userID, todoID uuid.UUID) (entity.Todo, error) {
+func DeleteTodo(userID, todoID string) (entity.Todo, error) {
 	todo, err := OwnTodo(userID, todoID)
 	if err != nil {
 		return entity.Todo{}, err
@@ -76,7 +76,7 @@ func DeleteTodo(userID, todoID uuid.UUID) (entity.Todo, error) {
 	return todo, nil
 }
 
-func OwnTodo(userID, todoID uuid.UUID) (entity.Todo, error) {
+func OwnTodo(userID, todoID string) (entity.Todo, error) {
 	r := func(err error) (entity.Todo, error) {
 		return entity.Todo{}, err
 	}

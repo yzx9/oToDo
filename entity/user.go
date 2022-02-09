@@ -2,26 +2,24 @@ package entity
 
 import (
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type User struct {
-	ID              uuid.UUID `json:"id" gorm:"type:uuid;default:uuid_generate_v4()"`
+	ID              string    `json:"id"`
 	Name            string    `json:"name"`
 	Nickname        string    `json:"nickname"`
 	Password        []byte    `json:"password"`
 	Email           string    `json:"email"`
 	Telephone       string    `json:"telephone"`
 	Avatar          string    `json:"avatar"`
-	BasicTodoListID uuid.UUID `json:"basic_todo_list_id" gorm:"type:uuid;default:uuid_generate_v4()"`
+	BasicTodoListID string    `json:"basic_todo_list_id"`
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
 }
 
 type UserRefreshToken struct {
-	ID        uuid.UUID `json:"id" gorm:"type:uuid;default:uuid_generate_v4()"`
-	UserID    uuid.UUID `json:"user_id" gorm:"type:uuid;default:uuid_generate_v4()"`
-	TokenID   uuid.UUID `json:"token_id" gorm:"type:uuid;default:uuid_generate_v4()"`
+	ID        string    `json:"id"`
+	UserID    string    `json:"user_id"`
+	TokenID   string    `json:"token_id"`
 	CreatedAt time.Time `json:"created_at"`
 }

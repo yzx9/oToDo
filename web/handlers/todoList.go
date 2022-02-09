@@ -1,10 +1,10 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/yzx9/otodo/bll"
 	"github.com/yzx9/otodo/web/common"
 )
@@ -35,9 +35,9 @@ func GetCurrentUserTodoListsHandler(c *gin.Context) {
 
 // Get todo list
 func GetTodoListHandler(c *gin.Context) {
-	id, err := common.GetParamUUID(c, "id")
-	if err != nil {
-		common.AbortWithError(c, err)
+	id, ok := c.Params.Get("id")
+	if !ok {
+		common.AbortWithError(c, fmt.Errorf("id required"))
 		return
 	}
 
@@ -56,7 +56,7 @@ func GetCurrentUserBasicTodoListHandler(c *gin.Context) {
 	getTodoListHandler(c, user.BasicTodoListID)
 }
 
-func getTodoListHandler(c *gin.Context, todoListID uuid.UUID) {
+func getTodoListHandler(c *gin.Context, todoListID string) {
 	userID := common.MustGetAccessUserID(c)
 	todoList, err := bll.GetTodoList(userID, todoListID)
 	if err != nil {
@@ -69,9 +69,9 @@ func getTodoListHandler(c *gin.Context, todoListID uuid.UUID) {
 
 // Get todos in todo list
 func GetTodoListTodosHandler(c *gin.Context) {
-	todoListID, err := common.GetParamUUID(c, "id")
-	if err != nil {
-		common.AbortWithError(c, err)
+	todoListID, ok := c.Params.Get("id")
+	if !ok {
+		common.AbortWithError(c, fmt.Errorf("id required"))
 		return
 	}
 
@@ -87,9 +87,9 @@ func GetTodoListTodosHandler(c *gin.Context) {
 
 // Delete todo list
 func DeleteTodoListHandler(c *gin.Context) {
-	id, err := common.GetParamUUID(c, "id")
-	if err != nil {
-		common.AbortWithError(c, err)
+	id, ok := c.Params.Get("id")
+	if !ok {
+		common.AbortWithError(c, fmt.Errorf("id required"))
 		return
 	}
 

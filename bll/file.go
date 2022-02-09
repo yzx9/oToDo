@@ -16,8 +16,8 @@ import (
 const maxFileSize = 8 << 20                        // 8MiB
 const fileDestTemplate = "tmp/files/:date/:id:ext" // TODO Configurable
 
-func UploadTodoFile(todoID uuid.UUID, file *multipart.FileHeader) (uuid.UUID, error) {
-	fileID := uuid.New()
+func UploadTodoFile(todoID string, file *multipart.FileHeader) (string, error) {
+	fileID := uuid.NewString()
 	path, err := uploadFile(file, entity.File{
 		ID:         fileID,
 		FileName:   file.Filename,
@@ -25,41 +25,41 @@ func UploadTodoFile(todoID uuid.UUID, file *multipart.FileHeader) (uuid.UUID, er
 		RelatedID:  todoID,
 	})
 	if err != nil {
-		return uuid.UUID{}, err
+		return "", err
 	}
 
 	err = dal.InsertTodoFile(entity.TodoFile{
-		ID:     uuid.New(),
+		ID:     uuid.NewString(),
 		FileID: fileID,
 		TodoID: todoID,
 	})
 	if err != nil {
-		return uuid.UUID{}, fmt.Errorf("fails to upload todo file: %w", err)
+		return "", fmt.Errorf("fails to upload todo file: %w", err)
 	}
 
 	return path, err
 }
 
-func uploadFile(file *multipart.FileHeader, record entity.File) (uuid.UUID, error) {
+func uploadFile(file *multipart.FileHeader, record entity.File) (string, error) {
 	if file.Size > maxFileSize {
-		return uuid.UUID{}, utils.NewErrorWithHttpStatus(http.StatusRequestEntityTooLarge, "file too large")
+		return "", utils.NewErrorWithHttpStatus(http.StatusRequestEntityTooLarge, "file too large")
 	}
 
 	record.FilePath = applyTemplate(fileDestTemplate, record)
 	err := utils.SaveFile(file, record.FilePath)
 	if err != nil {
-		return uuid.UUID{}, fmt.Errorf("fails to upload file: %w", err)
+		return "", fmt.Errorf("fails to upload file: %w", err)
 	}
 
 	err = dal.InsertFile(record)
 	if err != nil {
-		return uuid.UUID{}, fmt.Errorf("fails to upload file: %w", err)
+		return "", fmt.Errorf("fails to upload file: %w", err)
 	}
 
 	return record.ID, nil
 }
 
-func GetFile(fileID uuid.UUID) (entity.File, error) {
+func GetFile(fileID string) (entity.File, error) {
 	file, err := dal.GetFile(fileID)
 	if err != nil {
 		return entity.File{}, utils.NewErrorWithNotFound("file not found: %v", fileID)
@@ -68,7 +68,7 @@ func GetFile(fileID uuid.UUID) (entity.File, error) {
 	return file, nil
 }
 
-func GetFilePath(userID, fileID uuid.UUID) (string, error) {
+func GetFilePath(userID, fileID string) (string, error) {
 	file, err := OwnFile(userID, fileID)
 	if err != nil {
 		return "", err
@@ -79,7 +79,7 @@ func GetFilePath(userID, fileID uuid.UUID) (string, error) {
 }
 
 func applyTemplate(template string, file entity.File) string {
-	template = strings.ReplaceAll(template, ":id", file.ID.String())
+	template = strings.ReplaceAll(template, ":id", file.ID)
 	template = strings.ReplaceAll(template, ":ext", filepath.Ext(file.FileName))
 	template = strings.ReplaceAll(template, ":name", file.FileName)
 	template = strings.ReplaceAll(template, ":path", file.FilePath)
@@ -87,7 +87,7 @@ func applyTemplate(template string, file entity.File) string {
 	return template
 }
 
-func OwnFile(userID, fileID uuid.UUID) (entity.File, error) {
+func OwnFile(userID, fileID string) (entity.File, error) {
 	r := func(err error) (entity.File, error) {
 		return entity.File{}, err
 	}

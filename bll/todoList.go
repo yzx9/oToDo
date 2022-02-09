@@ -9,9 +9,9 @@ import (
 	"github.com/yzx9/otodo/utils"
 )
 
-func CreateTodoList(userID uuid.UUID, todoListName string) (entity.TodoList, error) {
+func CreateTodoList(userID string, todoListName string) (entity.TodoList, error) {
 	list := entity.TodoList{
-		ID:        uuid.New(),
+		ID:        uuid.NewString(),
 		Name:      todoListName,
 		Deletable: true,
 		UserID:    userID,
@@ -23,11 +23,11 @@ func CreateTodoList(userID uuid.UUID, todoListName string) (entity.TodoList, err
 	return list, nil
 }
 
-func GetTodoList(userID, todoListID uuid.UUID) (entity.TodoList, error) {
+func GetTodoList(userID, todoListID string) (entity.TodoList, error) {
 	return OwnTodoList(userID, todoListID)
 }
 
-func GetTodoLists(userID uuid.UUID) ([]entity.TodoList, error) {
+func GetTodoLists(userID string) ([]entity.TodoList, error) {
 	vec, err := dal.GetTodoLists(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get user: %w", err)
@@ -38,7 +38,7 @@ func GetTodoLists(userID uuid.UUID) ([]entity.TodoList, error) {
 	return vec, nil
 }
 
-func DeleteTodoList(userID, todoListID uuid.UUID) (entity.TodoList, error) {
+func DeleteTodoList(userID, todoListID string) (entity.TodoList, error) {
 	todoList, err := OwnTodoList(userID, todoListID)
 	if err != nil {
 		return entity.TodoList{}, err
@@ -56,7 +56,7 @@ func DeleteTodoList(userID, todoListID uuid.UUID) (entity.TodoList, error) {
 }
 
 // Verify permission
-func OwnTodoList(userID, todoListID uuid.UUID) (entity.TodoList, error) {
+func OwnTodoList(userID, todoListID string) (entity.TodoList, error) {
 	todoList, err := dal.GetTodoList(todoListID)
 	if err != nil {
 		return entity.TodoList{}, fmt.Errorf("fails to get todo list: %v", todoListID)

@@ -3,19 +3,18 @@ package dal
 import (
 	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/yzx9/otodo/entity"
 	"github.com/yzx9/otodo/utils"
 )
 
-var todoListFolders = make(map[uuid.UUID]entity.TodoListFolder)
+var todoListFolders = make(map[string]entity.TodoListFolder)
 
 func InsertTodoListFolder(todoListFolder entity.TodoListFolder) error {
 	todoListFolders[todoListFolder.ID] = todoListFolder
 	return nil
 }
 
-func GetTodoListFolder(todoListFolderID uuid.UUID) (entity.TodoListFolder, error) {
+func GetTodoListFolder(todoListFolderID string) (entity.TodoListFolder, error) {
 	for _, v := range todoListFolders {
 		if v.ID == todoListFolderID {
 			return v, nil
@@ -25,7 +24,7 @@ func GetTodoListFolder(todoListFolderID uuid.UUID) (entity.TodoListFolder, error
 	return entity.TodoListFolder{}, fmt.Errorf("todo list folder not found: %v", todoListFolderID)
 }
 
-func GetTodoListFolders(userId uuid.UUID) ([]entity.TodoListFolder, error) {
+func GetTodoListFolders(userId string) ([]entity.TodoListFolder, error) {
 	vec := make([]entity.TodoListFolder, 0)
 	for _, v := range todoListFolders {
 		if v.UserID == userId {
@@ -36,7 +35,7 @@ func GetTodoListFolders(userId uuid.UUID) ([]entity.TodoListFolder, error) {
 	return vec, nil
 }
 
-func DeleteTodoListFolder(todoListFolderID uuid.UUID) error {
+func DeleteTodoListFolder(todoListFolderID string) error {
 	_, ok := todoListFolders[todoListFolderID]
 	if !ok {
 		return utils.NewErrorWithNotFound("todo list folder not found: %v", todoListFolderID)
@@ -46,7 +45,7 @@ func DeleteTodoListFolder(todoListFolderID uuid.UUID) error {
 	return nil
 }
 
-func ExistTodoListFolder(id uuid.UUID) bool {
+func ExistTodoListFolder(id string) bool {
 	_, exist := todoLists[id]
 	return exist
 }

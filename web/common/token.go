@@ -67,8 +67,7 @@ func MustGetAccessTokenClaims(c *gin.Context) *bll.SessionTokenClaims {
 	return claims
 }
 
-func MustGetAccessUserID(c *gin.Context) uuid.UUID {
+func MustGetAccessUserID(c *gin.Context) string {
 	claims := MustGetAccessTokenClaims(c)
-	id, _ := uuid.Parse(claims.UserID)
-	return id
+	return claims.UserID
 }
