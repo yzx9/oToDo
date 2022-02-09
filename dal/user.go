@@ -53,7 +53,7 @@ func InsertInvalidUserRefreshToken(entity entity.UserRefreshToken) (entity.UserR
 	return entity, nil
 }
 
-func ExistInvalidUserRefreshToken(userID uuid.UUID, tokenID uuid.UUID) bool {
+func ExistInvalidUserRefreshToken(userID, tokenID uuid.UUID) bool {
 	for _, token := range invalidRefreshTokens {
 		if token.UserID == userID && token.TokenID == tokenID {
 			return true

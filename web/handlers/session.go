@@ -71,6 +71,11 @@ func PostSessionTokenHandler(c *gin.Context) {
 		return
 	}
 
+	if !bll.IsValidRefreshToken(userID, refreshTokenID) {
+		common.AbortWithError(c, err)
+		return
+	}
+
 	newToken, err := bll.NewAccessToken(userID, refreshTokenID)
 	if err != nil {
 		common.AbortWithJson(c, fmt.Sprintf("fails to refresh an token, %v", err.Error()))
@@ -86,7 +91,6 @@ func PostSessionTokenHandler(c *gin.Context) {
 
 func parseRefreshToken(c *gin.Context) (uuid.UUID, uuid.UUID, error) {
 	u := uuid.UUID{}
-
 	obj := &struct {
 		RefreshToken string `json:"refresh_token"`
 	}{}
@@ -95,12 +99,8 @@ func parseRefreshToken(c *gin.Context) (uuid.UUID, uuid.UUID, error) {
 	}
 
 	token, err := bll.ParseSessionToken(obj.RefreshToken)
-	if err != nil || !token.Valid {
-		return u, u, fmt.Errorf("invalid token")
-	}
-
 	claims, ok := token.Claims.(*bll.SessionTokenClaims)
-	if !ok || !token.Valid {
+	if err != nil || !ok || !token.Valid {
 		return u, u, fmt.Errorf("invalid token")
 	}
 

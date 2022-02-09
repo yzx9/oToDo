@@ -22,6 +22,14 @@ type CreateUserPayload struct {
 }
 
 func CreateUser(payload CreateUserPayload) (entity.User, error) {
+	if len(payload.UserName) < 5 {
+		return entity.User{}, fmt.Errorf("invalid user name: %v", payload.UserName)
+	}
+
+	if len(payload.Password) < 6 {
+		return entity.User{}, fmt.Errorf("password too short")
+	}
+
 	basicTodoListID := uuid.New()
 	user, err := dal.InsertUser(entity.User{
 		ID:              uuid.New(),
@@ -33,7 +41,7 @@ func CreateUser(payload CreateUserPayload) (entity.User, error) {
 
 	dal.InsertTodoList(entity.TodoList{
 		ID:        basicTodoListID,
-		Name:      "Todos", // i18n
+		Name:      "Todos", // TODO i18n
 		Deletable: false,
 		UserID:    user.ID,
 	})
@@ -63,18 +71,8 @@ func CreateInvalidUserRefreshToken(userID, tokenID uuid.UUID) (entity.UserRefres
 
 // Verify is it an valid token.
 // Note: This func don't check token expire time
-func IsValidRefreshToken(userID, tokenID string) bool {
-	userUUID, err := uuid.Parse(userID)
-	if err != nil {
-		return false
-	}
-
-	tokenUUID, err := uuid.Parse(tokenID)
-	if err != nil {
-		return false
-	}
-
-	return !dal.ExistInvalidUserRefreshToken(userUUID, tokenUUID)
+func IsValidRefreshToken(userID, tokenID uuid.UUID) bool {
+	return !dal.ExistInvalidUserRefreshToken(userID, tokenID)
 }
 
 // Password

@@ -16,16 +16,6 @@ func PostUserHandler(c *gin.Context) {
 		return
 	}
 
-	if len(payload.UserName) < 5 {
-		c.String(http.StatusBadRequest, "invalid user name")
-		return
-	}
-
-	if len(payload.Password) < 6 {
-		c.String(http.StatusBadRequest, "password too short")
-		return
-	}
-
 	user, err := bll.CreateUser(payload)
 	if err != nil {
 		common.AbortWithError(c, err)
