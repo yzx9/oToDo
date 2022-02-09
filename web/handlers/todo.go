@@ -73,7 +73,7 @@ func PatchTodoHandler(c *gin.Context) {
 }
 
 // Delete Todo
-func DeleteTodoHanlder(c *gin.Context) {
+func DeleteTodoHandler(c *gin.Context) {
 	todoID, err := common.GetParamUUID(c, "id")
 	if err != nil {
 		common.AbortWithError(c, err)

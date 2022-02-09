@@ -22,6 +22,8 @@ type Todo struct {
 	TodoList   TodoList  `json:"-"`
 
 	Files []TodoFile `json:"files"`
+
+	Steps []TodoStep `json:"steps"`
 }
 
 type TodoFile struct {
@@ -29,4 +31,17 @@ type TodoFile struct {
 	FileID   uuid.UUID `json:"file_id"`
 	FileName string    `json:"file_name" gorm:"-"`
 	File     File      `json:"-"`
+
+	TodoID uuid.UUID `json:"todo_id"`
+	Todo   Todo      `json:"-"`
+}
+
+type TodoStep struct {
+	ID     uuid.UUID `json:"id" gorm:"type:uuid;default:uuid_generate_v4()"`
+	Name   string    `json:"name" gorm:"-"`
+	Done   bool      `json:"done"`
+	DoneAt time.Time `json:"done_at"`
+
+	TodoID uuid.UUID `json:"todo_id"`
+	Todo   Todo      `json:"-"`
 }

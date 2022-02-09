@@ -19,6 +19,12 @@ func GetTodos(todoListID uuid.UUID) ([]entity.Todo, error) {
 	vec := make([]entity.Todo, 0, len(todos))
 	for _, v := range todos {
 		if v.TodoListID == todoListID {
+			files, _ := GetTodoFiles(v.ID)
+			v.Files = files
+
+			steps, _ := GetTodoSteps(v.ID)
+			v.Steps = steps
+
 			vec = append(vec, v)
 		}
 	}
@@ -29,7 +35,7 @@ func GetTodos(todoListID uuid.UUID) ([]entity.Todo, error) {
 func GetTodo(id uuid.UUID) (entity.Todo, error) {
 	todo, ok := todos[id]
 	if !ok {
-		return entity.Todo{}, utils.NewErrorWithHttpStatus(http.StatusNotFound, "todo not found: %v", id)
+		return entity.Todo{}, utils.NewErrorWithNotFound("todo not found: %v", id)
 	}
 
 	return todo, nil
@@ -38,7 +44,7 @@ func GetTodo(id uuid.UUID) (entity.Todo, error) {
 func UpdateTodo(todo entity.Todo) (entity.Todo, error) {
 	_, exists := todos[todo.ID]
 	if !exists {
-		return entity.Todo{}, utils.NewErrorWithHttpStatus(http.StatusNotFound, "todo not found: %v", todo.ID)
+		return entity.Todo{}, utils.NewErrorWithNotFound("todo not found: %v", todo.ID)
 	}
 
 	todos[todo.ID] = todo
@@ -52,17 +58,5 @@ func DeleteTodo(id uuid.UUID) (entity.Todo, error) {
 	}
 
 	delete(todos, id)
-	return todo, nil
-}
-
-// Todo File
-func InsertTodoFile(todoID uuid.UUID, file entity.TodoFile) (entity.Todo, error) {
-	todo, ok := todos[todoID]
-	if !ok {
-		return entity.Todo{}, utils.NewErrorWithNotFound("todo not found: %v", todoID)
-	}
-
-	todo.Files = append(todo.Files, file)
-	todos[todoID] = todo
 	return todo, nil
 }

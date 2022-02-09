@@ -51,9 +51,11 @@ func setupRouter(e *gin.Engine) {
 		r.PUT("/todos/:id", handlers.PutTodoHandler)
 		r.PATCH("/todos/:id", handlers.PatchTodoHandler)
 		r.GET("/todos/:id", handlers.GetTodoHandler)
-		r.DELETE("/todos/:id", handlers.DeleteTodoHanlder)
+		r.DELETE("/todos/:id", handlers.DeleteTodoHandler)
 
 		r.POST("/todos/:id/files", handlers.PostTodoFileHandler)
+
+		r.POST("/todos/:id/steps", handlers.PostTodoStepHandler)
 
 		// Todo List
 		r.GET("/todo-lists/:id", handlers.GetTodoListHandler)
