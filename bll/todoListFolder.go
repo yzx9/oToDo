@@ -36,17 +36,12 @@ func GetTodoListFolders(userID uuid.UUID) ([]entity.TodoListFolder, error) {
 }
 
 func DeleteTodoListFolder(userID, todoListFolderID uuid.UUID) (entity.TodoListFolder, error) {
-	// TODO this is a BUG
-	todoListFolder, err := OwnTodoList(userID, todoListFolderID)
+	folder, err := OwnTodoListFolder(userID, todoListFolderID)
 	if err != nil {
 		return entity.TodoListFolder{}, err
 	}
 
-	if !todoListFolder.Deletable {
-		return entity.TodoListFolder{}, fmt.Errorf("todo list folder not deletable: %v", todoListFolderID)
-	}
-
-	return entity.TodoListFolder{}, dal.DeleteTodoListFolder(todoListFolderID)
+	return folder, dal.DeleteTodoListFolder(todoListFolderID)
 }
 
 // Verify permission
