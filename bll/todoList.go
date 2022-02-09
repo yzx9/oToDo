@@ -17,8 +17,7 @@ func CreateTodoList(userID uuid.UUID, todoListName string) (entity.TodoList, err
 		UserID:    userID,
 	}
 	if err := dal.InsertTodoList(list); err != nil {
-		// 	return entity.TodoList{}, fmt.Errorf("fails to create todo list: %v", todoListName)
-		return entity.TodoList{}, err
+		return entity.TodoList{}, fmt.Errorf("fails to create todo list: %v", todoListName)
 	}
 
 	return list, nil

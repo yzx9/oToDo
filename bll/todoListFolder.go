@@ -41,7 +41,11 @@ func DeleteTodoListFolder(userID, todoListFolderID uuid.UUID) (entity.TodoListFo
 		return entity.TodoListFolder{}, err
 	}
 
-	return folder, dal.DeleteTodoListFolder(todoListFolderID)
+	if err = dal.DeleteTodoListFolder(todoListFolderID); err != nil {
+		return entity.TodoListFolder{}, fmt.Errorf("fails to delete todo list folder: %w", err)
+	}
+
+	return folder, nil
 }
 
 // Verify permission

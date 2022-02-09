@@ -14,7 +14,7 @@ func CreateTodo(userID uuid.UUID, todo entity.Todo) (entity.Todo, error) {
 	todo.ID = uuid.New()
 	todo.UserID = userID // override user
 	if err := dal.InsertTodo(todo); err != nil {
-		return entity.Todo{}, err
+		return entity.Todo{}, fmt.Errorf("fails to create todo: %w", err)
 	}
 
 	return todo, nil
@@ -38,13 +38,17 @@ func GetTodos(userID, todoListID uuid.UUID) ([]entity.Todo, error) {
 }
 
 func UpdateTodo(userID uuid.UUID, todo entity.Todo) (entity.Todo, error) {
-	oldTodo, err := OwnTodo(userID, todo.ID)
-	if err != nil {
+	r := func(err error) (entity.Todo, error) {
 		return entity.Todo{}, err
 	}
 
+	oldTodo, err := OwnTodo(userID, todo.ID)
+	if err != nil {
+		return r(err)
+	}
+
 	if oldTodo.UserID != todo.UserID {
-		return entity.Todo{}, fmt.Errorf("unable to update todo owner")
+		return r(fmt.Errorf("unable to update todo owner"))
 	}
 
 	if !oldTodo.Done && todo.Done {
@@ -52,7 +56,7 @@ func UpdateTodo(userID uuid.UUID, todo entity.Todo) (entity.Todo, error) {
 	}
 
 	if err = dal.UpdateTodo(todo); err != nil {
-		return entity.Todo{}, err
+		return r(err)
 	}
 
 	return todo, nil
@@ -73,14 +77,18 @@ func DeleteTodo(userID, todoID uuid.UUID) (entity.Todo, error) {
 }
 
 func OwnTodo(userID, todoID uuid.UUID) (entity.Todo, error) {
+	r := func(err error) (entity.Todo, error) {
+		return entity.Todo{}, err
+	}
+
 	todo, err := dal.GetTodo(todoID)
 	if err != nil {
-		return entity.Todo{}, fmt.Errorf("fails to get todo: %v", todoID)
+		return r(fmt.Errorf("fails to get todo: %v", todoID))
 	}
 
 	// TODO todo in shared todo list
 	if todo.UserID != userID {
-		return entity.Todo{}, utils.NewErrorWithForbidden("unable to handle non-owned todo: %v", todo.ID)
+		return r(utils.NewErrorWithForbidden("unable to handle non-owned todo: %v", todo.ID))
 	}
 
 	return todo, nil

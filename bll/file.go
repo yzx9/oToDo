@@ -34,7 +34,7 @@ func UploadTodoFile(todoID uuid.UUID, file *multipart.FileHeader) (uuid.UUID, er
 		TodoID: todoID,
 	})
 	if err != nil {
-		return uuid.UUID{}, fmt.Errorf("fails to upload todo file, %w", err)
+		return uuid.UUID{}, fmt.Errorf("fails to upload todo file: %w", err)
 	}
 
 	return path, err
@@ -48,12 +48,12 @@ func uploadFile(file *multipart.FileHeader, record entity.File) (uuid.UUID, erro
 	record.FilePath = applyTemplate(fileDestTemplate, record)
 	err := utils.SaveFile(file, record.FilePath)
 	if err != nil {
-		return uuid.UUID{}, fmt.Errorf("fails to upload file, %w", err)
+		return uuid.UUID{}, fmt.Errorf("fails to upload file: %w", err)
 	}
 
 	err = dal.InsertFile(record)
 	if err != nil {
-		return uuid.UUID{}, fmt.Errorf("fails to upload file, %w", err)
+		return uuid.UUID{}, fmt.Errorf("fails to upload file: %w", err)
 	}
 
 	return record.ID, nil
@@ -62,7 +62,7 @@ func uploadFile(file *multipart.FileHeader, record entity.File) (uuid.UUID, erro
 func GetFile(fileID uuid.UUID) (entity.File, error) {
 	file, err := dal.GetFile(fileID)
 	if err != nil {
-		return entity.File{}, utils.NewErrorWithNotFound("file not found, file id: %v", fileID)
+		return entity.File{}, utils.NewErrorWithNotFound("file not found: %v", fileID)
 	}
 
 	return file, nil
@@ -88,27 +88,31 @@ func applyTemplate(template string, file entity.File) string {
 }
 
 func OwnFile(userID, fileID uuid.UUID) (entity.File, error) {
+	r := func(err error) (entity.File, error) {
+		return entity.File{}, err
+	}
+
 	file, err := GetFile(fileID)
 	if err != nil {
-		return entity.File{}, err
+		return r(err)
 	}
 
 	switch entity.FileAccessType(file.AccessType) {
 	case entity.FileTypePublic:
-		return entity.File{}, nil
+		break
 
 	case entity.FileTypeTodo:
 		user, err := dal.GetUserByTodo(file.RelatedID)
 		if err != nil {
-			return entity.File{}, fmt.Errorf("fails to get user: %w", err)
+			return r(fmt.Errorf("fails to get user: %w", err))
 		}
 
 		if userID != user.ID {
-			return entity.File{}, utils.NewErrorWithForbidden("unable to get non-owned file: %v", file.ID)
+			return r(utils.NewErrorWithForbidden("unable to get non-owned file: %v", file.ID))
 		}
 
 	default:
-		return entity.File{}, fmt.Errorf("invalid file access type: %v", file.AccessType)
+		return r(fmt.Errorf("invalid file access type: %v", file.AccessType))
 	}
 
 	return file, nil
