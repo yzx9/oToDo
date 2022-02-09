@@ -47,7 +47,7 @@ func GetUser(userID uuid.UUID) (entity.User, error) {
 
 // Invalid User Refresh Token
 
-func CreateInvalidUserRefreshToken(userID uuid.UUID, tokenID uuid.UUID) (entity.UserRefreshToken, error) {
+func CreateInvalidUserRefreshToken(userID, tokenID uuid.UUID) (entity.UserRefreshToken, error) {
 	model, err := dal.InsertInvalidUserRefreshToken(entity.UserRefreshToken{
 		ID:        uuid.New(),
 		UserID:    userID,
@@ -63,7 +63,7 @@ func CreateInvalidUserRefreshToken(userID uuid.UUID, tokenID uuid.UUID) (entity.
 
 // Verify is it an valid token.
 // Note: This func don't check token expire time
-func IsValidRefreshToken(userID string, tokenID string) bool {
+func IsValidRefreshToken(userID, tokenID string) bool {
 	userUUID, err := uuid.Parse(userID)
 	if err != nil {
 		return false

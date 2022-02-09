@@ -37,7 +37,7 @@ type SessionTokenClaims struct {
 	UserNickname   string `json:"nickname,omitempty"`
 }
 
-func Login(userName string, password string) (AuthTokenResult, error) {
+func Login(userName, password string) (AuthTokenResult, error) {
 	user, err := dal.GetUserByUserName(userName)
 	if err != nil {
 		return AuthTokenResult{}, fmt.Errorf("user not found: %v", userName)
@@ -56,12 +56,12 @@ func Login(userName string, password string) (AuthTokenResult, error) {
 	}, nil
 }
 
-func Logout(userID uuid.UUID, refreshTokenID uuid.UUID) error {
+func Logout(userID, refreshTokenID uuid.UUID) error {
 	_, err := CreateInvalidUserRefreshToken(userID, refreshTokenID)
 	return err
 }
 
-func NewAccessToken(userID uuid.UUID, refreshTokenID uuid.UUID) (AuthTokenResult, error) {
+func NewAccessToken(userID, refreshTokenID uuid.UUID) (AuthTokenResult, error) {
 	user, err := dal.GetUser(userID)
 	if err != nil {
 		return AuthTokenResult{}, fmt.Errorf("fails to get user, %w", err)

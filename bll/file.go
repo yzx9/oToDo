@@ -67,7 +67,7 @@ func GetFile(fileID uuid.UUID) (entity.File, error) {
 	return file, nil
 }
 
-func GetFilePath(userID uuid.UUID, fileID uuid.UUID) (string, error) {
+func GetFilePath(userID, fileID uuid.UUID) (string, error) {
 	file, err := OwnFile(userID, fileID)
 	if err != nil {
 		return "", err
@@ -86,7 +86,7 @@ func applyTemplate(template string, file entity.File) string {
 	return template
 }
 
-func OwnFile(userID uuid.UUID, fileID uuid.UUID) (entity.File, error) {
+func OwnFile(userID, fileID uuid.UUID) (entity.File, error) {
 	file, err := GetFile(fileID)
 	if err != nil {
 		return entity.File{}, err

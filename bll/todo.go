@@ -20,11 +20,11 @@ func CreateTodo(userID uuid.UUID, todo entity.Todo) (entity.Todo, error) {
 	return todo, nil
 }
 
-func GetTodo(userID uuid.UUID, todoID uuid.UUID) (entity.Todo, error) {
+func GetTodo(userID, todoID uuid.UUID) (entity.Todo, error) {
 	return OwnTodo(userID, todoID)
 }
 
-func GetTodos(userID uuid.UUID, todoListID uuid.UUID) ([]entity.Todo, error) {
+func GetTodos(userID, todoListID uuid.UUID) ([]entity.Todo, error) {
 	if _, err := OwnTodoList(userID, todoListID); err != nil {
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func UpdateTodo(userID uuid.UUID, todo entity.Todo) (entity.Todo, error) {
 	return todo, nil
 }
 
-func DeleteTodo(userID uuid.UUID, todoID uuid.UUID) (entity.Todo, error) {
+func DeleteTodo(userID, todoID uuid.UUID) (entity.Todo, error) {
 	if _, err := OwnTodo(userID, todoID); err != nil {
 		return entity.Todo{}, err
 	}
@@ -63,7 +63,7 @@ func DeleteTodo(userID uuid.UUID, todoID uuid.UUID) (entity.Todo, error) {
 	return dal.DeleteTodo(todoID)
 }
 
-func OwnTodo(userID uuid.UUID, todoID uuid.UUID) (entity.Todo, error) {
+func OwnTodo(userID, todoID uuid.UUID) (entity.Todo, error) {
 	todo, err := dal.GetTodo(todoID)
 	if err != nil {
 		return entity.Todo{}, fmt.Errorf("fails to get todo: %v", todoID)

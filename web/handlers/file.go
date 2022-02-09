@@ -8,7 +8,6 @@ import (
 	"github.com/yzx9/otodo/web/common"
 )
 
-// TODO simplify file details, remove templates
 // TODO support create temporary opening aceess url
 
 // Upload todo file, only support single file now

@@ -18,7 +18,7 @@ func CreateTodoList(userID uuid.UUID, todoListName string) (entity.TodoList, err
 	})
 }
 
-func GetTodoList(userID uuid.UUID, todoListID uuid.UUID) (entity.TodoList, error) {
+func GetTodoList(userID, todoListID uuid.UUID) (entity.TodoList, error) {
 	return OwnTodoList(userID, todoListID)
 }
 
@@ -33,7 +33,7 @@ func GetTodoLists(userID uuid.UUID) ([]entity.TodoList, error) {
 	return vec, nil
 }
 
-func DeleteTodoList(userID uuid.UUID, todoListID uuid.UUID) (entity.TodoList, error) {
+func DeleteTodoList(userID, todoListID uuid.UUID) (entity.TodoList, error) {
 	todoList, err := OwnTodoList(userID, todoListID)
 	if err != nil {
 		return entity.TodoList{}, err
@@ -47,7 +47,7 @@ func DeleteTodoList(userID uuid.UUID, todoListID uuid.UUID) (entity.TodoList, er
 }
 
 // Verify permission
-func OwnTodoList(userID uuid.UUID, todoListID uuid.UUID) (entity.TodoList, error) {
+func OwnTodoList(userID, todoListID uuid.UUID) (entity.TodoList, error) {
 	todoList, err := dal.GetTodoList(todoListID)
 	if err != nil {
 		return entity.TodoList{}, fmt.Errorf("fails to get todo list: %v", todoListID)
