@@ -2,6 +2,7 @@ package bll
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/yzx9/otodo/dal"
@@ -45,6 +46,10 @@ func UpdateTodo(userID uuid.UUID, todo entity.Todo) (entity.Todo, error) {
 
 	if oldTodo.UserID != todo.UserID {
 		return entity.Todo{}, fmt.Errorf("unable to update todo owner")
+	}
+
+	if !oldTodo.Done && todo.Done {
+		todo.DoneAt = time.Now()
 	}
 
 	todo, err = dal.UpdateTodo(todo)

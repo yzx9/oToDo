@@ -11,6 +11,8 @@ type Todo struct {
 	Title     string    `json:"title"`
 	Content   string    `json:"content"`
 	Tags      []Tag     `json:"tags"`
+	Done      bool      `json:"done"`
+	DoneAt    time.Time `json:"done_at"`
 	CreatedAt time.Time `json:"created_at"`
 
 	UserID uuid.UUID `json:"user_id" gorm:"type:uuid;default:uuid_generate_v4()"`
