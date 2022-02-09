@@ -49,9 +49,14 @@ func UpdateTodoStep(userID uuid.UUID, step entity.TodoStep) (entity.TodoStep, er
 	return step, nil
 }
 
-func DeleteTodoStep(userID, todoStepID uuid.UUID) (entity.TodoStep, error) {
-	if _, err := OwnTodoStep(userID, todoStepID); err != nil {
+func DeleteTodoStep(userID, todoID, todoStepID uuid.UUID) (entity.TodoStep, error) {
+	step, err := OwnTodoStep(userID, todoStepID)
+	if err != nil {
 		return entity.TodoStep{}, err
+	}
+
+	if step.TodoID != todoID {
+		return entity.TodoStep{}, fmt.Errorf("todo step not found in todo: %v", todoStepID)
 	}
 
 	return dal.DeleteTodoStep(todoStepID)

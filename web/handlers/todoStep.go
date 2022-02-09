@@ -37,7 +37,7 @@ func PostTodoStepHandler(c *gin.Context) {
 }
 
 // Update todo step
-func UpdateTodoStepHandler(c *gin.Context) {
+func PutTodoStepHandler(c *gin.Context) {
 	step := entity.TodoStep{}
 	err := c.ShouldBind(&step)
 	if err != nil {
@@ -57,14 +57,20 @@ func UpdateTodoStepHandler(c *gin.Context) {
 
 // Delete todo step
 func DeleteTodoStepHandler(c *gin.Context) {
-	stepID, err := common.GetParamUUID(c, "id")
+	todoID, err := common.GetParamUUID(c, "todo-id")
+	if err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
+	stepID, err := common.GetParamUUID(c, "step-id")
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
 
 	userID := common.MustGetAccessUserID(c)
-	newStep, err := bll.DeleteTodoStep(userID, stepID)
+	newStep, err := bll.DeleteTodoStep(userID, todoID, stepID)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
