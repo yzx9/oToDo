@@ -10,12 +10,18 @@ import (
 )
 
 func CreateTodoList(userID uuid.UUID, todoListName string) (entity.TodoList, error) {
-	return dal.InsertTodoList(entity.TodoList{
+	list := entity.TodoList{
 		ID:        uuid.New(),
 		Name:      todoListName,
 		Deletable: true,
 		UserID:    userID,
-	})
+	}
+	if err := dal.InsertTodoList(list); err != nil {
+		// 	return entity.TodoList{}, fmt.Errorf("fails to create todo list: %v", todoListName)
+		return entity.TodoList{}, err
+	}
+
+	return list, nil
 }
 
 func GetTodoList(userID, todoListID uuid.UUID) (entity.TodoList, error) {
@@ -43,7 +49,11 @@ func DeleteTodoList(userID, todoListID uuid.UUID) (entity.TodoList, error) {
 		return entity.TodoList{}, fmt.Errorf("todo list not deletable: %v", todoListID)
 	}
 
-	return dal.DeleteTodoList(todoListID)
+	if err = dal.DeleteTodoList(todoListID); err != nil {
+		return entity.TodoList{}, err
+	}
+
+	return todoList, nil
 }
 
 // Verify permission

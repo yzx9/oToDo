@@ -9,9 +9,9 @@ import (
 var users = make(map[uuid.UUID]entity.User)
 var invalidRefreshTokens = make(map[uuid.UUID]entity.UserRefreshToken)
 
-func InsertUser(user entity.User) (entity.User, error) {
+func InsertUser(user entity.User) error {
 	users[user.ID] = user
-	return user, nil
+	return nil
 }
 
 func GetUser(id uuid.UUID) (entity.User, error) {
@@ -48,9 +48,9 @@ func GetUserByTodo(todoID uuid.UUID) (entity.User, error) {
 	return entity.User{}, utils.NewErrorWithNotFound("user not found, todo id: %v", todoID)
 }
 
-func InsertInvalidUserRefreshToken(entity entity.UserRefreshToken) (entity.UserRefreshToken, error) {
+func InsertInvalidUserRefreshToken(entity entity.UserRefreshToken) error {
 	invalidRefreshTokens[entity.ID] = entity
-	return entity, nil
+	return nil
 }
 
 func ExistInvalidUserRefreshToken(userID, tokenID uuid.UUID) bool {

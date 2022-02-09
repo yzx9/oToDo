@@ -28,7 +28,7 @@ func UploadTodoFile(todoID uuid.UUID, file *multipart.FileHeader) (uuid.UUID, er
 		return uuid.UUID{}, err
 	}
 
-	_, err = dal.InsertTodoFile(entity.TodoFile{
+	err = dal.InsertTodoFile(entity.TodoFile{
 		ID:     uuid.New(),
 		FileID: fileID,
 		TodoID: todoID,

@@ -7,9 +7,9 @@ import (
 
 var todoFiles = make(map[uuid.UUID]entity.TodoFile)
 
-func InsertTodoFile(file entity.TodoFile) (entity.TodoFile, error) {
+func InsertTodoFile(file entity.TodoFile) error {
 	todoFiles[file.ID] = file
-	return file, nil
+	return nil
 }
 
 func GetTodoFiles(todoID uuid.UUID) ([]entity.TodoFile, error) {

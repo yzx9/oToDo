@@ -10,11 +10,16 @@ import (
 )
 
 func CreateTodoListFolder(userID uuid.UUID, todoListFolderName string) (entity.TodoListFolder, error) {
-	return dal.InsertTodoListFolder(entity.TodoListFolder{
+	folder := entity.TodoListFolder{
 		ID:     uuid.New(),
 		Name:   todoListFolderName,
 		UserID: userID,
-	})
+	}
+	if err := dal.InsertTodoListFolder(folder); err != nil {
+		return entity.TodoListFolder{}, err
+	}
+
+	return folder, nil
 }
 
 func GetTodoListFolder(userID, todoListFolderID uuid.UUID) (entity.TodoListFolder, error) {
@@ -31,6 +36,7 @@ func GetTodoListFolders(userID uuid.UUID) ([]entity.TodoListFolder, error) {
 }
 
 func DeleteTodoListFolder(userID, todoListFolderID uuid.UUID) (entity.TodoListFolder, error) {
+	// TODO this is a BUG
 	todoListFolder, err := OwnTodoList(userID, todoListFolderID)
 	if err != nil {
 		return entity.TodoListFolder{}, err
@@ -40,7 +46,7 @@ func DeleteTodoListFolder(userID, todoListFolderID uuid.UUID) (entity.TodoListFo
 		return entity.TodoListFolder{}, fmt.Errorf("todo list folder not deletable: %v", todoListFolderID)
 	}
 
-	return dal.DeleteTodoListFolder(todoListFolderID)
+	return entity.TodoListFolder{}, dal.DeleteTodoListFolder(todoListFolderID)
 }
 
 // Verify permission

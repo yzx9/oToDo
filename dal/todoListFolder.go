@@ -10,9 +10,9 @@ import (
 
 var todoListFolders = make(map[uuid.UUID]entity.TodoListFolder)
 
-func InsertTodoListFolder(todoListFolder entity.TodoListFolder) (entity.TodoListFolder, error) {
+func InsertTodoListFolder(todoListFolder entity.TodoListFolder) error {
 	todoListFolders[todoListFolder.ID] = todoListFolder
-	return todoListFolder, nil
+	return nil
 }
 
 func GetTodoListFolder(todoListFolderID uuid.UUID) (entity.TodoListFolder, error) {
@@ -36,14 +36,14 @@ func GetTodoListFolders(userId uuid.UUID) ([]entity.TodoListFolder, error) {
 	return vec, nil
 }
 
-func DeleteTodoListFolder(todoListFolderID uuid.UUID) (entity.TodoListFolder, error) {
-	todoListFolder, ok := todoListFolders[todoListFolderID]
+func DeleteTodoListFolder(todoListFolderID uuid.UUID) error {
+	_, ok := todoListFolders[todoListFolderID]
 	if !ok {
-		return entity.TodoListFolder{}, utils.NewErrorWithNotFound("todo list folder not found: %v", todoListFolderID)
+		return utils.NewErrorWithNotFound("todo list folder not found: %v", todoListFolderID)
 	}
 
 	delete(todoListFolders, todoListFolderID)
-	return todoListFolder, nil
+	return nil
 }
 
 func ExistTodoListFolder(id uuid.UUID) bool {

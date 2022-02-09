@@ -10,8 +10,17 @@ import (
 
 var todos = make(map[uuid.UUID]entity.Todo)
 
-func InsertTodo(todo entity.Todo) (entity.Todo, error) {
+func InsertTodo(todo entity.Todo) error {
 	todos[todo.ID] = todo
+	return nil
+}
+
+func GetTodo(id uuid.UUID) (entity.Todo, error) {
+	todo, ok := todos[id]
+	if !ok {
+		return entity.Todo{}, utils.NewErrorWithNotFound("todo not found: %v", id)
+	}
+
 	return todo, nil
 }
 
@@ -32,31 +41,22 @@ func GetTodos(todoListID uuid.UUID) ([]entity.Todo, error) {
 	return vec, nil
 }
 
-func GetTodo(id uuid.UUID) (entity.Todo, error) {
-	todo, ok := todos[id]
-	if !ok {
-		return entity.Todo{}, utils.NewErrorWithNotFound("todo not found: %v", id)
-	}
-
-	return todo, nil
-}
-
-func UpdateTodo(todo entity.Todo) (entity.Todo, error) {
+func UpdateTodo(todo entity.Todo) error {
 	_, exists := todos[todo.ID]
 	if !exists {
-		return entity.Todo{}, utils.NewErrorWithNotFound("todo not found: %v", todo.ID)
+		return utils.NewErrorWithNotFound("todo not found: %v", todo.ID)
 	}
 
 	todos[todo.ID] = todo
-	return todo, nil
+	return nil
 }
 
-func DeleteTodo(id uuid.UUID) (entity.Todo, error) {
-	todo, ok := todos[id]
+func DeleteTodo(id uuid.UUID) error {
+	_, ok := todos[id]
 	if !ok {
-		return entity.Todo{}, utils.NewErrorWithHttpStatus(http.StatusNotFound, "todo not found: %v", id)
+		return utils.NewErrorWithHttpStatus(http.StatusNotFound, "todo not found: %v", id)
 	}
 
 	delete(todos, id)
-	return todo, nil
+	return nil
 }

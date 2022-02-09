@@ -21,7 +21,7 @@ func CreateTodoStep(userID, todoID uuid.UUID, name string) (entity.TodoStep, err
 		Name:   name,
 		TodoID: todoID,
 	}
-	if _, err = dal.InsertTodoStep(step); err != nil {
+	if err = dal.InsertTodoStep(step); err != nil {
 		return entity.TodoStep{}, fmt.Errorf("fails to create todo step")
 	}
 
@@ -42,7 +42,7 @@ func UpdateTodoStep(userID uuid.UUID, step entity.TodoStep) (entity.TodoStep, er
 		step.DoneAt = time.Now()
 	}
 
-	if _, err = dal.UpdateTodoStep(step); err != nil {
+	if err = dal.UpdateTodoStep(step); err != nil {
 		return entity.TodoStep{}, fmt.Errorf("fails to update todo step")
 	}
 
@@ -59,7 +59,7 @@ func DeleteTodoStep(userID, todoID, todoStepID uuid.UUID) (entity.TodoStep, erro
 		return entity.TodoStep{}, fmt.Errorf("todo step not found in todo: %v", todoStepID)
 	}
 
-	return dal.DeleteTodoStep(todoStepID)
+	return step, dal.DeleteTodoStep(todoStepID)
 }
 
 func OwnTodoStep(userID, todoStepID uuid.UUID) (entity.TodoStep, error) {

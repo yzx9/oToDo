@@ -13,8 +13,7 @@ import (
 func CreateTodo(userID uuid.UUID, todo entity.Todo) (entity.Todo, error) {
 	todo.ID = uuid.New()
 	todo.UserID = userID // override user
-	todo, err := dal.InsertTodo(todo)
-	if err != nil {
+	if err := dal.InsertTodo(todo); err != nil {
 		return entity.Todo{}, err
 	}
 
@@ -52,8 +51,7 @@ func UpdateTodo(userID uuid.UUID, todo entity.Todo) (entity.Todo, error) {
 		todo.DoneAt = time.Now()
 	}
 
-	todo, err = dal.UpdateTodo(todo)
-	if err != nil {
+	if err = dal.UpdateTodo(todo); err != nil {
 		return entity.Todo{}, err
 	}
 
@@ -61,11 +59,17 @@ func UpdateTodo(userID uuid.UUID, todo entity.Todo) (entity.Todo, error) {
 }
 
 func DeleteTodo(userID, todoID uuid.UUID) (entity.Todo, error) {
-	if _, err := OwnTodo(userID, todoID); err != nil {
+	todo, err := OwnTodo(userID, todoID)
+	if err != nil {
 		return entity.Todo{}, err
 	}
 
-	return dal.DeleteTodo(todoID)
+	err = dal.DeleteTodo(todoID)
+	if err != nil {
+		return entity.Todo{}, fmt.Errorf("fails to delete todo: %v", todoID)
+	}
+
+	return todo, nil
 }
 
 func OwnTodo(userID, todoID uuid.UUID) (entity.Todo, error) {

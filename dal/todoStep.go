@@ -8,9 +8,9 @@ import (
 
 var todoSteps = make(map[uuid.UUID]entity.TodoStep)
 
-func InsertTodoStep(step entity.TodoStep) (entity.TodoStep, error) {
+func InsertTodoStep(step entity.TodoStep) error {
 	todoSteps[step.ID] = step
-	return step, nil
+	return nil
 }
 
 func GetTodoStep(id uuid.UUID) (entity.TodoStep, error) {
@@ -33,22 +33,22 @@ func GetTodoSteps(todoID uuid.UUID) ([]entity.TodoStep, error) {
 	return vec, nil
 }
 
-func UpdateTodoStep(todoStep entity.TodoStep) (entity.TodoStep, error) {
+func UpdateTodoStep(todoStep entity.TodoStep) error {
 	_, exists := todoSteps[todoStep.ID]
 	if !exists {
-		return entity.TodoStep{}, utils.NewErrorWithNotFound("todo step not found: %v", todoStep.ID)
+		return utils.NewErrorWithNotFound("todo step not found: %v", todoStep.ID)
 	}
 
 	todoSteps[todoStep.ID] = todoStep
-	return todoStep, nil
+	return nil
 }
 
-func DeleteTodoStep(id uuid.UUID) (entity.TodoStep, error) {
-	step, exists := todoSteps[id]
+func DeleteTodoStep(id uuid.UUID) error {
+	_, exists := todoSteps[id]
 	if !exists {
-		return entity.TodoStep{}, utils.NewErrorWithNotFound("todo step not found: %v", id)
+		return utils.NewErrorWithNotFound("todo step not found: %v", id)
 	}
 
 	delete(todoSteps, id)
-	return step, nil
+	return nil
 }
