@@ -43,6 +43,8 @@ func setupRouter(e *gin.Engine) {
 
 		r.GET("/users/current/todo-lists", handlers.GetCurrentUserTodoListsHandler)
 		r.GET("/users/current/todo-lists/basic", handlers.GetCurrentUserBasicTodoListHandler)
+		r.GET("/users/current/todo-lists/my-day", handlers.GetCurrentUserMyDayTodoListHandler)
+		r.GET("/users/current/todo-lists/planed", handlers.GetCurrentUserPlanedTodoListHandler)
 
 		r.GET("/users/current/todo-list-folders", handlers.GetCurrentUserTodoListFoldersHandler)
 

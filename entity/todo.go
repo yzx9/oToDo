@@ -10,6 +10,7 @@ type Todo struct {
 	Content   string    `json:"content"`
 	Done      bool      `json:"done"`
 	DoneAt    time.Time `json:"done_at"`
+	Deadline  time.Time `json:"deadline"`
 	CreatedAt time.Time `json:"created_at"`
 
 	UserID string `json:"user_id"`
