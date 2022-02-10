@@ -9,18 +9,6 @@ import (
 	"github.com/yzx9/otodo/web/common"
 )
 
-// Get todo lists folder for current user
-func GetCurrentUserTodoListFoldersHandler(c *gin.Context) {
-	userID := common.MustGetAccessUserID(c)
-	folders, err := bll.GetTodoListFolders(userID)
-	if err != nil {
-		common.AbortWithError(c, err)
-		return
-	}
-
-	c.JSON(http.StatusOK, folders)
-}
-
 // Get todo list folder
 func GetTodoListFolderHandler(c *gin.Context) {
 	id, ok := c.Params.Get("id")
