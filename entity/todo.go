@@ -8,7 +8,6 @@ type Todo struct {
 	ID        string    `json:"id"`
 	Title     string    `json:"title"`
 	Content   string    `json:"content"`
-	Tags      []Tag     `json:"tags"`
 	Done      bool      `json:"done"`
 	DoneAt    time.Time `json:"done_at"`
 	CreatedAt time.Time `json:"created_at"`

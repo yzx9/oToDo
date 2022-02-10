@@ -38,26 +38,34 @@ func GetTodos(userID, todoListID string) ([]entity.Todo, error) {
 }
 
 func UpdateTodo(userID string, todo entity.Todo) (entity.Todo, error) {
-	r := func(err error) (entity.Todo, error) {
+	// Limits
+	oldTodo, err := OwnTodo(userID, todo.ID)
+	if err != nil {
 		return entity.Todo{}, err
 	}
 
-	oldTodo, err := OwnTodo(userID, todo.ID)
-	if err != nil {
-		return r(err)
-	}
-
 	if oldTodo.UserID != todo.UserID {
-		return r(fmt.Errorf("unable to update todo owner"))
+		return entity.Todo{}, fmt.Errorf("unable to update todo owner")
 	}
 
+	// Update time
 	if !oldTodo.Done && todo.Done {
 		todo.DoneAt = time.Now()
 	}
 
+	// Save
 	if err = dal.UpdateTodo(todo); err != nil {
-		return r(err)
+		return entity.Todo{}, err
 	}
+
+	// Update tags
+	if oldTodo.Title != todo.Title {
+		// TODO How to update shared user
+		// TODO record following error, but dont throw
+		UpdateTag(userID, todo.ID, todo.Title, oldTodo.Title)
+	}
+
+	// create new todo if repeat
 
 	return todo, nil
 }
@@ -72,6 +80,10 @@ func DeleteTodo(userID, todoID string) (entity.Todo, error) {
 	if err != nil {
 		return entity.Todo{}, fmt.Errorf("fails to delete todo: %v", todoID)
 	}
+
+	// TODO How to update shared user
+	// TODO record following error, but dont throw
+	UpdateTag(userID, todo.ID, todo.Title, "")
 
 	return todo, nil
 }
