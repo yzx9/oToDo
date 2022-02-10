@@ -2,6 +2,7 @@ package web
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/yzx9/otodo/web/middlewares"
 )
 
 type Server struct {
@@ -11,7 +12,11 @@ type Server struct {
 
 func CreateServer() *Server {
 	r := gin.New()
-	r.Use(gin.Logger(), gin.Recovery())
+	r.Use(
+		gin.Logger(),
+		gin.Recovery(),
+		middlewares.ErrorMiddleware())
+
 	setupRouter(r)
 
 	return &Server{

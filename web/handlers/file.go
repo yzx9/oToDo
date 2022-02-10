@@ -21,7 +21,7 @@ func PostTodoFileHandler(c *gin.Context) {
 
 	file, err := c.FormFile("file")
 	if err != nil {
-		common.AbortWithJson(c, "invalid file")
+		c.AbortWithStatusJSON(http.StatusBadRequest, "invalid file")
 		return
 	}
 
@@ -47,7 +47,7 @@ func GetFileHandler(c *gin.Context) {
 	userID := common.MustGetAccessUserID(c)
 	filepath, err := bll.GetFilePath(userID, id)
 	if err != nil {
-		common.AbortWithJson(c, "invalid file")
+		c.AbortWithStatusJSON(http.StatusBadRequest, "invalid file")
 		return
 	}
 

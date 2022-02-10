@@ -10,7 +10,7 @@ type ErrorWithHttpStatus struct {
 	message string
 }
 
-func (err *ErrorWithHttpStatus) Error() string {
+func (err ErrorWithHttpStatus) Error() string {
 	return err.message
 }
 

@@ -67,7 +67,8 @@ func PostSessionTokenHandler(c *gin.Context) {
 
 	newToken, err := bll.NewAccessToken(userID, refreshTokenID)
 	if err != nil {
-		common.AbortWithJson(c, fmt.Sprintf("fails to refresh an token, %v", err.Error()))
+		msg := fmt.Sprintf("fails to refresh an token, %v", err.Error())
+		c.AbortWithStatusJSON(http.StatusBadRequest, msg)
 		return
 	}
 
