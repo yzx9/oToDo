@@ -44,6 +44,11 @@ func getHttpCodeFromError(err otodo.Error) int {
 		return http.StatusNotFound
 
 	// Logic
+	case otodo.ErrorDuplicateID:
+		return http.StatusInternalServerError
+
+	case otodo.ErrorAbort:
+		return http.StatusBadRequest
 
 	default:
 		return http.StatusBadRequest

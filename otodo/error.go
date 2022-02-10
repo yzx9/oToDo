@@ -23,7 +23,9 @@ const (
 	ErrorRequestEntityTooLarge ErrorCode = 11000
 
 	// Resource
-	ErrorNotFound ErrorCode = 30000
+	ErrorDuplicateID ErrorCode = 20000
+	ErrorNotFound    ErrorCode = 20001
 
 	// Logic
+	ErrorAbort ErrorCode = 30000
 )

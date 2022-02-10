@@ -12,6 +12,12 @@ type Todo struct {
 	DoneAt    time.Time `json:"done_at"`
 	Deadline  time.Time `json:"deadline"`
 	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+
+	IsRepeat       bool      `json:"is_repeat"`
+	RepeatBefore   time.Time `json:"repeat_before"`
+	RepeatInterval int       `json:"repeat_interval"` // 单位：秒
+	RepeatFrom     string    `json:"repeat_from"`     // 上一次Todo ID
 
 	UserID string `json:"user_id"`
 	User   User   `json:"-"`
