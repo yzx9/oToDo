@@ -1,10 +1,10 @@
 package middlewares
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/bll"
+	"github.com/yzx9/otodo/otodo"
+	"github.com/yzx9/otodo/utils"
 	"github.com/yzx9/otodo/web/common"
 )
 
@@ -12,7 +12,7 @@ func JwtAuthMiddleware() func(*gin.Context) {
 	return func(c *gin.Context) {
 		token, err := common.GetAccessToken(c)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, "invalid token")
+			common.AbortWithError(c, utils.NewError(otodo.ErrorUnauthorized, "invalid token"))
 			return
 		}
 

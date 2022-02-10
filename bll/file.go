@@ -3,13 +3,13 @@ package bll
 import (
 	"fmt"
 	"mime/multipart"
-	"net/http"
 	"path/filepath"
 	"strings"
 
 	"github.com/google/uuid"
 	"github.com/yzx9/otodo/dal"
 	"github.com/yzx9/otodo/entity"
+	"github.com/yzx9/otodo/otodo"
 	"github.com/yzx9/otodo/utils"
 )
 
@@ -42,7 +42,7 @@ func UploadTodoFile(todoID string, file *multipart.FileHeader) (string, error) {
 
 func uploadFile(file *multipart.FileHeader, record entity.File) (string, error) {
 	if file.Size > maxFileSize {
-		return "", utils.NewErrorWithHttpStatus(http.StatusRequestEntityTooLarge, "file too large")
+		return "", utils.NewError(otodo.ErrorRequestEntityTooLarge, "file too large")
 	}
 
 	record.FilePath = applyTemplate(fileDestTemplate, record)

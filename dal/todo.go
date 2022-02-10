@@ -1,8 +1,6 @@
 package dal
 
 import (
-	"net/http"
-
 	"github.com/yzx9/otodo/entity"
 	"github.com/yzx9/otodo/utils"
 )
@@ -53,7 +51,7 @@ func UpdateTodo(todo entity.Todo) error {
 func DeleteTodo(id string) error {
 	_, ok := todos[id]
 	if !ok {
-		return utils.NewErrorWithHttpStatus(http.StatusNotFound, "todo not found: %v", id)
+		return utils.NewErrorWithNotFound("todo not found: %v", id)
 	}
 
 	delete(todos, id)

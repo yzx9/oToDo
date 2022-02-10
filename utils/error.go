@@ -2,27 +2,19 @@ package utils
 
 import (
 	"fmt"
-	"net/http"
+
+	"github.com/yzx9/otodo/otodo"
 )
 
-type ErrorWithHttpStatus struct {
-	Code    int
-	message string
-}
-
-func (err ErrorWithHttpStatus) Error() string {
-	return err.message
-}
-
-func NewErrorWithHttpStatus(code int, format string, values ...interface{}) *ErrorWithHttpStatus {
+func NewError(code otodo.ErrorCode, format string, values ...interface{}) *otodo.Error {
 	message := fmt.Sprintf(format, values...)
-	return &ErrorWithHttpStatus{Code: code, message: message}
+	return &otodo.Error{Code: code, Message: message}
 }
 
-func NewErrorWithForbidden(format string, values ...interface{}) *ErrorWithHttpStatus {
-	return NewErrorWithHttpStatus(http.StatusForbidden, format, values...)
+func NewErrorWithForbidden(format string, values ...interface{}) *otodo.Error {
+	return NewError(otodo.ErrorForbidden, format, values...)
 }
 
-func NewErrorWithNotFound(format string, values ...interface{}) *ErrorWithHttpStatus {
-	return NewErrorWithHttpStatus(http.StatusNotFound, format, values...)
+func NewErrorWithNotFound(format string, values ...interface{}) *otodo.Error {
+	return NewError(otodo.ErrorNotFound, format, values...)
 }

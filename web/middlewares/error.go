@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yzx9/otodo/utils"
+	"github.com/yzx9/otodo/otodo"
 )
 
 func ErrorMiddleware() func(*gin.Context) {
@@ -14,7 +14,7 @@ func ErrorMiddleware() func(*gin.Context) {
 
 		if c.IsAborted() {
 			err := c.Errors.Last()
-			typedError := utils.ErrorWithHttpStatus{}
+			typedError := otodo.Error{}
 			if errors.As(err, &typedError) {
 				code := getHttpCodeFromError(typedError)
 				c.AbortWithError(code, typedError)
@@ -26,6 +26,26 @@ func ErrorMiddleware() func(*gin.Context) {
 	}
 }
 
-func getHttpCodeFromError(err utils.ErrorWithHttpStatus) int {
-	return err.Code
+func getHttpCodeFromError(err otodo.Error) int {
+	switch err.Code {
+	// Auth
+	case otodo.ErrorUnauthorized:
+		return http.StatusUnauthorized
+
+	case otodo.ErrorForbidden:
+		return http.StatusForbidden
+
+	// Request
+	case otodo.ErrorRequestEntityTooLarge:
+		return http.StatusRequestEntityTooLarge
+
+	// Resource
+	case otodo.ErrorNotFound:
+		return http.StatusNotFound
+
+	// Logic
+
+	default:
+		return http.StatusBadRequest
+	}
 }
