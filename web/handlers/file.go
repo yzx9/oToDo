@@ -1,12 +1,10 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/bll"
-	"github.com/yzx9/otodo/otodo"
 	"github.com/yzx9/otodo/utils"
 	"github.com/yzx9/otodo/web/common"
 )
@@ -15,13 +13,13 @@ import (
 func PostTodoFileHandler(c *gin.Context) {
 	todoID, ok := c.Params.Get("id")
 	if !ok {
-		common.AbortWithError(c, fmt.Errorf("id required"))
+		common.AbortWithError(c, utils.NewErrorWithPreconditionRequired("id required"))
 		return
 	}
 
 	file, err := c.FormFile("file")
 	if err != nil {
-		common.AbortWithError(c, err)
+		common.AbortWithError(c, utils.NewErrorWithPreconditionRequired("file required"))
 		return
 	}
 
@@ -40,11 +38,15 @@ func PostTodoFileHandler(c *gin.Context) {
 func GetFileHandler(c *gin.Context) {
 	id, ok := c.Params.Get("id")
 	if !ok {
-		common.AbortWithError(c, utils.NewError(otodo.ErrPreconditionRequired, "id required"))
+		common.AbortWithError(c, utils.NewErrorWithPreconditionRequired("id required"))
 		return
 	}
 
-	userID := common.MustGetAccessUserID(c)
+	userID, err := common.GetAccessUserID(c)
+	if err != nil {
+		userID = ""
+	}
+
 	filepath, err := bll.GetFilePath(userID, id)
 	if err != nil {
 		common.AbortWithError(c, err)
@@ -58,7 +60,7 @@ func GetFileHandler(c *gin.Context) {
 func PostFilePresignHandler(c *gin.Context) {
 	id, ok := c.Params.Get("id")
 	if !ok {
-		common.AbortWithError(c, utils.NewError(otodo.ErrPreconditionRequired, "id required"))
+		common.AbortWithError(c, utils.NewErrorWithPreconditionRequired("id required"))
 		return
 	}
 
@@ -73,7 +75,7 @@ func PostFilePresignHandler(c *gin.Context) {
 func GetFilePresignedHandler(c *gin.Context) {
 	presignedID, ok := c.Params.Get("id")
 	if !ok {
-		common.AbortWithError(c, utils.NewError(otodo.ErrPreconditionRequired, "id required"))
+		common.AbortWithError(c, utils.NewErrorWithPreconditionRequired("id required"))
 		return
 	}
 

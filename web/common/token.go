@@ -1,12 +1,11 @@
 package common
 
 import (
-	"fmt"
-
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
-	"github.com/google/uuid"
 	"github.com/yzx9/otodo/bll"
+	"github.com/yzx9/otodo/otodo"
+	"github.com/yzx9/otodo/utils"
 )
 
 const AuthorizationHeaderKey = "Authorization"
@@ -20,7 +19,7 @@ func GetAccessToken(c *gin.Context) (*jwt.Token, error) {
 	authorization := c.Request.Header.Get(AuthorizationHeaderKey)
 	token, err := bll.ParseAccessToken(authorization)
 	if err != nil {
-		return nil, fmt.Errorf("invalid token: %w", err)
+		return nil, utils.NewError(otodo.ErrUnauthorized, "invalid token: %w", err)
 	}
 
 	setAccessToken(c, token)
@@ -35,24 +34,19 @@ func GetAccessTokenClaims(c *gin.Context) (*bll.SessionTokenClaims, error) {
 
 	claims, ok := token.Claims.(*bll.SessionTokenClaims)
 	if !ok {
-		return nil, fmt.Errorf("invalid token")
+		return nil, utils.NewError(otodo.ErrUnauthorized, "invalid token")
 	}
 
 	return claims, nil
 }
 
-func GetAccessUserID(c *gin.Context) (uuid.UUID, error) {
+func GetAccessUserID(c *gin.Context) (string, error) {
 	claims, err := GetAccessTokenClaims(c)
 	if err != nil {
-		return uuid.UUID{}, err
+		return "", err
 	}
 
-	id, err := uuid.Parse(claims.UserID)
-	if err != nil {
-		return uuid.UUID{}, fmt.Errorf("invalid user id in access token")
-	}
-
-	return id, nil
+	return claims.UserID, nil
 }
 
 func MustGetAccessToken(c *gin.Context) *jwt.Token {
