@@ -1,8 +1,6 @@
 package dal
 
 import (
-	"fmt"
-
 	"github.com/yzx9/otodo/entity"
 	"github.com/yzx9/otodo/utils"
 )
@@ -21,7 +19,7 @@ func GetTodoList(id string) (entity.TodoList, error) {
 		}
 	}
 
-	return entity.TodoList{}, fmt.Errorf("todo list not found: %v", id)
+	return entity.TodoList{}, utils.NewErrorWithNotFound("todo list not found: %v", id)
 }
 
 func GetTodoLists(userId string) ([]entity.TodoList, error) {
