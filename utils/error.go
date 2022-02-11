@@ -18,3 +18,7 @@ func NewErrorWithForbidden(format string, values ...interface{}) *otodo.Error {
 func NewErrorWithNotFound(format string, values ...interface{}) *otodo.Error {
 	return NewError(otodo.ErrorNotFound, format, values...)
 }
+
+func NewErrorWithPreconditionFailed(format string, values ...interface{}) *otodo.Error {
+	return NewError(otodo.ErrorPreconditionFailed, format, values...)
+}

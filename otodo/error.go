@@ -21,6 +21,8 @@ const (
 
 	// Request/Limit
 	ErrorRequestEntityTooLarge ErrorCode = 11000
+	ErrorPreconditionFailed    ErrorCode = 11001
+	ErrorPreconditionRequired  ErrorCode = 11002
 
 	// Resource
 	ErrorDuplicateID ErrorCode = 20000

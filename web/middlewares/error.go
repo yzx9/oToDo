@@ -39,14 +39,20 @@ func getHttpCodeFromError(err otodo.Error) int {
 	case otodo.ErrorRequestEntityTooLarge:
 		return http.StatusRequestEntityTooLarge
 
+	case otodo.ErrorPreconditionFailed:
+		return http.StatusPreconditionFailed
+
+	case otodo.ErrorPreconditionRequired:
+		return http.StatusPreconditionRequired
+
 	// Resource
+	case otodo.ErrorDuplicateID:
+		return http.StatusInternalServerError
+
 	case otodo.ErrorNotFound:
 		return http.StatusNotFound
 
 	// Logic
-	case otodo.ErrorDuplicateID:
-		return http.StatusInternalServerError
-
 	case otodo.ErrorAbort:
 		return http.StatusBadRequest
 

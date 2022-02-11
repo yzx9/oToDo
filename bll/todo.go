@@ -7,13 +7,19 @@ import (
 	"github.com/google/uuid"
 	"github.com/yzx9/otodo/dal"
 	"github.com/yzx9/otodo/entity"
-	"github.com/yzx9/otodo/otodo"
 	"github.com/yzx9/otodo/utils"
 )
 
 func CreateTodo(userID string, todo entity.Todo) (entity.Todo, error) {
 	todo.ID = uuid.NewString()
 	todo.UserID = userID // override user
+
+	plan, err := CreateTodoRepeatPlan(todo.RepeatPlan)
+	if err != nil {
+		return entity.Todo{}, err
+	}
+	todo.RepeatPlanID = plan.ID
+
 	if err := dal.InsertTodo(todo); err != nil {
 		return entity.Todo{}, fmt.Errorf("fails to create todo: %w", err)
 	}
@@ -22,7 +28,18 @@ func CreateTodo(userID string, todo entity.Todo) (entity.Todo, error) {
 }
 
 func GetTodo(userID, todoID string) (entity.Todo, error) {
-	return OwnTodo(userID, todoID)
+	todo, err := OwnTodo(userID, todoID)
+	if err != nil {
+		return entity.Todo{}, fmt.Errorf("fails to get todo: %w", err)
+	}
+
+	plan, err := GetTodoRepeatPlan(todo.RepeatPlanID)
+	if err != nil {
+		return entity.Todo{}, err
+	}
+
+	todo.RepeatPlan = plan
+	return todo, nil
 }
 
 func GetTodos(userID, todoListID string) ([]entity.Todo, error) {
@@ -46,24 +63,23 @@ func UpdateTodo(userID string, todo entity.Todo) (entity.Todo, error) {
 	}
 
 	if oldTodo.UserID != todo.UserID {
-		return entity.Todo{}, fmt.Errorf("unable to update todo owner")
+		return entity.Todo{}, utils.NewErrorWithPreconditionFailed("unable to update todo owner")
 	}
 
-	// Update time
+	if !IsValidTodoRepeatPlan(todo.RepeatPlan) {
+		return entity.Todo{}, utils.NewErrorWithPreconditionFailed("invalid todo repeat plan")
+	}
+
+	// Update values
 	if !oldTodo.Done && todo.Done {
 		todo.DoneAt = time.Now()
 	}
 
-	// Set default value
-	if todo.IsRepeat && todo.Deadline.IsZero() {
-		// TODO: time zone
-		src := time.Now().Format("2006-01-02") + "T23:59:59+00:00"
-		t, err := time.Parse("2006-01-02T15:04:05Z07:00", src)
-		if err != nil {
-			t = time.Now()
-		}
-		todo.Deadline = t
+	plan, err := UpdateTodoRepeatPlan(todo.RepeatPlan, oldTodo.RepeatPlan)
+	if err != nil {
+		return entity.Todo{}, err
 	}
+	todo.RepeatPlanID = plan.ID
 
 	// Save
 	if err = dal.UpdateTodo(todo); err != nil {
@@ -71,12 +87,10 @@ func UpdateTodo(userID string, todo entity.Todo) (entity.Todo, error) {
 	}
 
 	// Update tags
-	if oldTodo.Title != todo.Title {
-		// TODO How to update shared user
-		// TODO Async
-		// TODO Catch following error, but dont throw
-		UpdateTag(userID, todo.ID, todo.Title, oldTodo.Title)
-	}
+	// TODO How to update shared user
+	// TODO Async
+	// TODO Catch following error, but dont throw
+	UpdateTag(userID, todo.ID, todo.Title, oldTodo.Title)
 
 	// Create new todo if repeat
 	if !oldTodo.Done && todo.Done {
@@ -119,24 +133,6 @@ func OwnTodo(userID, todoID string) (entity.Todo, error) {
 	// TODO todo in shared todo list
 	if todo.UserID != userID {
 		return r(utils.NewErrorWithForbidden("unable to handle non-owned todo: %v", todo.ID))
-	}
-
-	return todo, nil
-}
-
-func CreateRepeatTodoIfNeed(todo entity.Todo) (entity.Todo, error) {
-	duration := time.Duration(int64(time.Second) * int64(todo.RepeatInterval))
-	nextDeadline := todo.Deadline.Add(duration)
-	if !todo.IsRepeat || todo.RepeatBefore.Before(nextDeadline) {
-		return entity.Todo{}, utils.NewError(otodo.ErrorAbort, "unable to create repeat todo: %v", todo.ID)
-	}
-
-	todo.RepeatFrom = todo.ID
-	todo.ID = uuid.NewString()
-	todo.Deadline = nextDeadline
-
-	if err := dal.InsertTodo(todo); err != nil {
-		return entity.Todo{}, fmt.Errorf("fails to create todo: %w", err)
 	}
 
 	return todo, nil

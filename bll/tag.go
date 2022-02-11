@@ -13,6 +13,10 @@ import (
 var tagRegex = regexp.MustCompile(`^#(?P<tag>\\S+) `)
 
 func UpdateTag(userID, todoID, todoTitle, oldTodoTitle string) error {
+	if todoTitle != oldTodoTitle {
+		return nil
+	}
+
 	tags := make(map[string]bool)
 	for {
 		matches := tagRegex.FindStringSubmatch(todoTitle)

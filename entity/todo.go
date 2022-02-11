@@ -14,11 +14,6 @@ type Todo struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 
-	IsRepeat       bool      `json:"is_repeat"`
-	RepeatBefore   time.Time `json:"repeat_before"`
-	RepeatInterval int       `json:"repeat_interval"` // 单位：秒
-	RepeatFrom     string    `json:"repeat_from"`     // 上一次Todo ID
-
 	UserID string `json:"user_id"`
 	User   User   `json:"-"`
 
@@ -28,6 +23,10 @@ type Todo struct {
 	Files []TodoFile `json:"files"`
 
 	Steps []TodoStep `json:"steps"`
+
+	RepeatPlanID string         `json:"-"`
+	RepeatPlan   TodoRepeatPlan `json:"repeat_plan"`
+	RepeatFrom   string         `json:"repeat_from"` // last todo id
 }
 
 type TodoFile struct {
@@ -48,4 +47,10 @@ type TodoStep struct {
 
 	TodoID string `json:"todo_id"`
 	Todo   Todo   `json:"-"`
+}
+
+type TodoRepeatPlan struct {
+	ID       string    `json:"-"`
+	Interval int       `json:"interval"` // seconds
+	Before   time.Time `json:"before"`
 }
