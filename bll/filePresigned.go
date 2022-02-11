@@ -4,12 +4,11 @@ import (
 	"encoding/base64"
 	"time"
 
-	"github.com/yzx9/otodo/otodo"
 	"github.com/yzx9/otodo/utils"
 )
 
 // Configurable
-var fileSignedExpress = 6 * time.Hour
+const fileSignedMaxExpiresIn = 6 * time.Hour
 
 type filePresignedPayload struct {
 	TokenClaims
@@ -18,23 +17,32 @@ type filePresignedPayload struct {
 }
 
 func CreateFilePresignedID(userID, fileID string) (string, error) {
+	const max = int(fileSignedMaxExpiresIn / time.Second)
+	return CreateFilePresignedIDWithExp(userID, fileID, max)
+}
+
+func CreateFilePresignedIDWithExp(userID, fileID string, exp int) (string, error) {
+	expiresIn := time.Duration(exp * int(time.Second))
+	if expiresIn > fileSignedMaxExpiresIn {
+		return "", utils.NewErrorWithPreconditionFailed("expires is too long")
+	}
+
 	_, err := OwnFile(userID, fileID)
 	if err != nil {
 		return "", err
 	}
 
-	payload := filePresignedPayload{
-		TokenClaims: NewClaims(userID, fileSignedExpress),
+	token := NewToken(filePresignedPayload{
+		TokenClaims: NewClaims(userID, expiresIn),
 		UserID:      userID,
 		FileID:      fileID,
-	}
-	token := NewToken(payload)
+	})
 	return base64.StdEncoding.EncodeToString([]byte(token)), nil
 }
 
 func ParseFileSignedID(filePresignedID string) (string, error) {
 	write := func() (string, error) {
-		return "", utils.NewError(otodo.ErrAbort, "invalid presigned file id")
+		return "", utils.NewErrorWithPreconditionFailed("invalid presigned file id")
 	}
 
 	payload, err := base64.StdEncoding.DecodeString(filePresignedID)

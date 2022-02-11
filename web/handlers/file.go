@@ -64,6 +64,14 @@ func PostFilePresignHandler(c *gin.Context) {
 		return
 	}
 
+	payload := struct {
+		ExpiresIn int `json:"expires_in"` // Unix
+	}{}
+	if err := c.ShouldBind(&payload); err != nil {
+		common.AbortWithError(c, utils.NewErrorWithPreconditionRequired("expires_in required"))
+		return
+	}
+
 	userID := common.MustGetAccessUserID(c)
 	presigned, err := bll.CreateFilePresignedID(userID, id)
 	if err != nil {
