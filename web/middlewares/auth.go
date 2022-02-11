@@ -12,7 +12,7 @@ func JwtAuthMiddleware() func(*gin.Context) {
 	return func(c *gin.Context) {
 		token, err := common.GetAccessToken(c)
 		if err != nil {
-			common.AbortWithError(c, utils.NewError(otodo.ErrorUnauthorized, "invalid token"))
+			common.AbortWithError(c, utils.NewError(otodo.ErrUnauthorized, "invalid token"))
 			return
 		}
 

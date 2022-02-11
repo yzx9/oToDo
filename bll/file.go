@@ -42,7 +42,7 @@ func UploadTodoFile(todoID string, file *multipart.FileHeader) (string, error) {
 
 func uploadFile(file *multipart.FileHeader, record entity.File) (string, error) {
 	if file.Size > maxFileSize {
-		return "", utils.NewError(otodo.ErrorRequestEntityTooLarge, "file too large")
+		return "", utils.NewError(otodo.ErrRequestEntityTooLarge, "file too large")
 	}
 
 	record.FilePath = applyTemplate(fileDestTemplate, record)

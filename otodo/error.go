@@ -1,9 +1,9 @@
 package otodo
 
-type ErrorCode int
+type ErrCode int
 
 type Error struct {
-	Code    ErrorCode
+	Code    ErrCode
 	Message string
 }
 
@@ -16,18 +16,18 @@ const (
 	// Request
 
 	// Request/Auth
-	ErrorUnauthorized ErrorCode = 10000
-	ErrorForbidden    ErrorCode = 10001
+	ErrUnauthorized ErrCode = 10000
+	ErrForbidden    ErrCode = 10001
 
 	// Request/Limit
-	ErrorRequestEntityTooLarge ErrorCode = 11000
-	ErrorPreconditionFailed    ErrorCode = 11001
-	ErrorPreconditionRequired  ErrorCode = 11002
+	ErrRequestEntityTooLarge ErrCode = 11000
+	ErrPreconditionFailed    ErrCode = 11001
+	ErrPreconditionRequired  ErrCode = 11002
 
 	// Resource
-	ErrorDuplicateID ErrorCode = 20000
-	ErrorNotFound    ErrorCode = 20001
+	ErrDuplicateID ErrCode = 20000
+	ErrNotFound    ErrCode = 20001
 
 	// Logic
-	ErrorAbort ErrorCode = 30000
+	ErrAbort ErrCode = 30000
 )
