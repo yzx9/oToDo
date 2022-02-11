@@ -5,6 +5,7 @@ import (
 	"mime/multipart"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/yzx9/otodo/dal"
@@ -23,6 +24,7 @@ func UploadTodoFile(todoID string, file *multipart.FileHeader) (string, error) {
 		FileName:   file.Filename,
 		AccessType: string(entity.FileTypeTodo),
 		RelatedID:  todoID,
+		CreatedAt:  time.Now(),
 	})
 	if err != nil {
 		return "", err

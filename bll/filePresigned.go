@@ -14,7 +14,7 @@ var fileSignedExpress = 6 * time.Hour
 type filePresignedPayload struct {
 	TokenClaims
 	UserID string `json:"uid"`
-	FileID string `json:"todo_id"`
+	FileID string `json:"file_id"`
 }
 
 func CreateFilePresignedID(userID, fileID string) (string, error) {
@@ -47,7 +47,7 @@ func ParseFileSignedID(filePresignedID string) (string, error) {
 		return write()
 	}
 
-	claims, ok := token.Claims.(filePresignedPayload)
+	claims, ok := token.Claims.(*filePresignedPayload)
 	if !ok {
 		return write()
 	}
