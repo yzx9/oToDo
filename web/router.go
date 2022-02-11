@@ -18,6 +18,9 @@ func setupRouter(e *gin.Engine) {
 			c.String(http.StatusOK, "pong")
 		})
 
+		// File (Open Access)
+		r.POST("/files/presigned/:id", handlers.GetFilePresignedHandler)
+
 		// Session
 		r.POST("/sessions", handlers.PostSessionHandler)
 
@@ -37,6 +40,7 @@ func setupRouter(e *gin.Engine) {
 		// File
 		// r.MaxMultipartMemory = MaxFileSize // 限制 Gin 上传文件时最大内存 (默认 32 MiB)
 		r.GET("/files/:id", handlers.GetFileHandler)
+		r.POST("/files/:id/presign", handlers.PostFilePresignHandler)
 
 		// User
 		r.GET("/users/current", handlers.GetCurrentUserHandler)

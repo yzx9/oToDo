@@ -45,7 +45,7 @@ func uploadFile(file *multipart.FileHeader, record entity.File) (string, error) 
 		return "", utils.NewError(otodo.ErrRequestEntityTooLarge, "file too large")
 	}
 
-	record.FilePath = applyTemplate(fileDestTemplate, record)
+	record.FilePath = applyFileTemplate(fileDestTemplate, record)
 	err := utils.SaveFile(file, record.FilePath)
 	if err != nil {
 		return "", fmt.Errorf("fails to upload file: %w", err)
@@ -74,11 +74,21 @@ func GetFilePath(userID, fileID string) (string, error) {
 		return "", err
 	}
 
-	path := applyTemplate(fileDestTemplate, file)
+	path := applyFileTemplate(fileDestTemplate, file)
 	return path, nil
 }
 
-func applyTemplate(template string, file entity.File) string {
+func ForceGetFilePath(fileID string) (string, error) {
+	file, err := GetFile(fileID)
+	if err != nil {
+		return "", err
+	}
+
+	path := applyFileTemplate(fileDestTemplate, file)
+	return path, nil
+}
+
+func applyFileTemplate(template string, file entity.File) string {
 	template = strings.ReplaceAll(template, ":id", file.ID)
 	template = strings.ReplaceAll(template, ":ext", filepath.Ext(file.FileName))
 	template = strings.ReplaceAll(template, ":name", file.FileName)
