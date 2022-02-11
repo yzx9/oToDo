@@ -17,14 +17,19 @@ type filePresignedPayload struct {
 	FileID string `json:"todo_id"`
 }
 
-func CreateFilePresignedID(userID, fileID string) string {
+func CreateFilePresignedID(userID, fileID string) (string, error) {
+	_, err := OwnFile(userID, fileID)
+	if err != nil {
+		return "", err
+	}
+
 	payload := filePresignedPayload{
 		TokenClaims: NewClaims(userID, fileSignedExpress),
 		UserID:      userID,
 		FileID:      fileID,
 	}
 	token := NewToken(payload)
-	return base64.StdEncoding.EncodeToString([]byte(token))
+	return base64.StdEncoding.EncodeToString([]byte(token)), nil
 }
 
 func ParseFileSignedID(filePresignedID string) (string, error) {

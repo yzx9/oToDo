@@ -65,7 +65,12 @@ func PostFilePresignHandler(c *gin.Context) {
 	}
 
 	userID := common.MustGetAccessUserID(c)
-	presigned := bll.CreateFilePresignedID(userID, id)
+	presigned, err := bll.CreateFilePresignedID(userID, id)
+	if err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
 	c.JSON(http.StatusOK, struct {
 		PresignedFileID string `json:"presigned_file_id"`
 	}{presigned})
