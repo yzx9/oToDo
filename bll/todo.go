@@ -66,10 +66,6 @@ func UpdateTodo(userID string, todo entity.Todo) (entity.Todo, error) {
 		return entity.Todo{}, utils.NewErrorWithPreconditionFailed("unable to update todo owner")
 	}
 
-	if !IsValidTodoRepeatPlan(todo.RepeatPlan) {
-		return entity.Todo{}, utils.NewErrorWithPreconditionFailed("invalid todo repeat plan")
-	}
-
 	// Update values
 	if !oldTodo.Done && todo.Done {
 		todo.DoneAt = time.Now()

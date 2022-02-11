@@ -1,6 +1,7 @@
 package bll
 
 import (
+	"bytes"
 	"fmt"
 	"time"
 
@@ -10,7 +11,7 @@ import (
 )
 
 func CreateTodoRepeatPlan(plan entity.TodoRepeatPlan) (entity.TodoRepeatPlan, error) {
-	if !IsValidTodoRepeatPlan(plan) {
+	if !isValidTodoRepeatPlan(plan) {
 		return entity.TodoRepeatPlan{
 			ID: "",
 		}, nil
@@ -25,13 +26,13 @@ func CreateTodoRepeatPlan(plan entity.TodoRepeatPlan) (entity.TodoRepeatPlan, er
 }
 
 func UpdateTodoRepeatPlan(plan, oldPlan entity.TodoRepeatPlan) (entity.TodoRepeatPlan, error) {
-	if !IsValidTodoRepeatPlan(plan) {
+	if !isValidTodoRepeatPlan(plan) {
 		return entity.TodoRepeatPlan{
 			ID: "",
 		}, nil
 	}
 
-	if !IsSameTodoRepeatPlan(plan, oldPlan) {
+	if !isSameTodoRepeatPlan(plan, oldPlan) {
 		return oldPlan, nil
 	}
 
@@ -52,18 +53,13 @@ func GetTodoRepeatPlan(id string) (entity.TodoRepeatPlan, error) {
 	return plan, nil
 }
 
-func IsValidTodoRepeatPlan(plan entity.TodoRepeatPlan) bool {
-	return plan.Interval != 0
-}
-
-func IsSameTodoRepeatPlan(plan, oldPlan entity.TodoRepeatPlan) bool {
-	return plan.Before == oldPlan.Before && plan.Interval == oldPlan.Interval
-}
-
 func CreateRepeatTodoIfNeed(todo entity.Todo) (bool, entity.Todo, error) {
-	duration := time.Duration(int64(time.Second) * int64(todo.RepeatPlan.Interval))
-	nextDeadline := todo.Deadline.Add(duration)
-	if todo.RepeatPlanID == "" || todo.RepeatPlan.Before.Before(nextDeadline) {
+	if todo.RepeatPlanID == "" {
+		return false, entity.Todo{}, nil
+	}
+
+	nextDeadline := getTodoNextRepeatTime(todo)
+	if todo.RepeatPlan.Before.Before(nextDeadline) {
 		return false, entity.Todo{}, nil
 	}
 
@@ -74,4 +70,73 @@ func CreateRepeatTodoIfNeed(todo entity.Todo) (bool, entity.Todo, error) {
 	}
 
 	return true, todo, nil
+}
+
+func isValidTodoRepeatPlan(plan entity.TodoRepeatPlan) bool {
+	t := entity.TodoRepeatPlanType(plan.Type)
+	if t != entity.TodoRepeatPlanTypeDay &&
+		t != entity.TodoRepeatPlanTypeMonth &&
+		t != entity.TodoRepeatPlanTypeYear &&
+		t != entity.TodoRepeatPlanTypeWeek {
+		return false
+	}
+
+	if t == entity.TodoRepeatPlanTypeWeek &&
+		bytes.Equal(plan.Weekday[:], []byte{0, 0, 0, 0, 0, 0, 0}) {
+		return false
+	}
+
+	return plan.Interval > 0
+}
+
+func isSameTodoRepeatPlan(plan, oldPlan entity.TodoRepeatPlan) bool {
+	if plan.Type != oldPlan.Type ||
+		plan.Interval != oldPlan.Interval ||
+		plan.Before != oldPlan.Before {
+		return false
+	}
+
+	if plan.Type == string(entity.TodoRepeatPlanTypeWeek) {
+		for i := range plan.Weekday {
+			if plan.Weekday[i] != oldPlan.Weekday[i] {
+				return false
+			}
+		}
+	}
+
+	return true
+}
+
+func getTodoNextRepeatTime(todo entity.Todo) time.Time {
+	deadline := todo.Deadline
+	interval := todo.RepeatPlan.Interval
+
+	weekend := time.Sunday // TODO 此处默认周一为一周开始
+
+	switch entity.TodoRepeatPlanType(todo.RepeatPlan.Type) {
+	case entity.TodoRepeatPlanTypeDay:
+		return deadline.AddDate(0, 0, interval)
+
+	case entity.TodoRepeatPlanTypeMonth:
+		return deadline.AddDate(0, interval, 0)
+
+	case entity.TodoRepeatPlanTypeYear:
+		return deadline.AddDate(interval, 0, 0)
+
+	case entity.TodoRepeatPlanTypeWeek:
+		if deadline.Weekday() == weekend {
+			deadline = deadline.AddDate(0, 0, (interval-1)*7)
+		}
+		deadline = deadline.AddDate(0, 0, 1)
+		for i := 0; i < 7-1; i++ {
+			if todo.RepeatPlan.Weekday[deadline.Weekday()] == 1 {
+				return deadline
+			}
+			deadline = deadline.AddDate(0, 0, 1)
+		}
+		return time.Time{}
+
+	default:
+		return time.Time{}
+	}
 }

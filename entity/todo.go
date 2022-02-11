@@ -49,8 +49,19 @@ type TodoStep struct {
 	Todo   Todo   `json:"-"`
 }
 
+type TodoRepeatPlanType string
+
+const (
+	TodoRepeatPlanTypeDay   TodoRepeatPlanType = "day"
+	TodoRepeatPlanTypeWeek  TodoRepeatPlanType = "week"
+	TodoRepeatPlanTypeMonth TodoRepeatPlanType = "month"
+	TodoRepeatPlanTypeYear  TodoRepeatPlanType = "year"
+)
+
 type TodoRepeatPlan struct {
 	ID       string    `json:"-"`
-	Interval int       `json:"interval"` // seconds
+	Type     string    `json:"type"`
+	Interval int       `json:"interval"`
 	Before   time.Time `json:"before"`
+	Weekday  [7]byte   `json:"weekday"` // Follow time.Weekend: Sunday Monday Tuesday Wednesday Thursday Friday Saturday
 }
