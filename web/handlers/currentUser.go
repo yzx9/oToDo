@@ -44,6 +44,28 @@ func GetCurrentUserBasicTodoListHandler(c *gin.Context) {
 	common.HandleGetTodoList(c, user.BasicTodoListID)
 }
 
+// Get daily todos for current user
+func GetCurrentUserDailyTodosHandler(c *gin.Context) {
+	c.Status(http.StatusNotImplemented)
+}
+
+// Get planned todos for current user
+func GetCurrentUserPlannedTodosHandler(c *gin.Context) {
+	userID := common.MustGetAccessUserID(c)
+	todos, err := bll.GetPlannedTodos(userID)
+	if err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, todos)
+}
+
+// Get important todos for current user
+func GetCurrentUserImportantTodosHandler(c *gin.Context) {
+	c.Status(http.StatusNotImplemented)
+}
+
 // Get todo list folders for current user
 func GetCurrentUserTodoListFoldersHandler(c *gin.Context) {
 	userID := common.MustGetAccessUserID(c)
@@ -54,14 +76,4 @@ func GetCurrentUserTodoListFoldersHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, folders)
-}
-
-// Get my day todo list for current user
-func GetCurrentUserMyDayTodoListHandler(c *gin.Context) {
-	c.Status(http.StatusNotImplemented)
-}
-
-// Get planed todo list for current user
-func GetCurrentUserPlanedTodoListHandler(c *gin.Context) {
-	c.Status(http.StatusNotImplemented)
 }
