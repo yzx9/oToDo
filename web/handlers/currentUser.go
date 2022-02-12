@@ -66,6 +66,18 @@ func GetCurrentUserImportantTodosHandler(c *gin.Context) {
 	c.Status(http.StatusNotImplemented)
 }
 
+// Get not-notified todos for current user
+func GetCurrentUserNotNotifiedTodosHandler(c *gin.Context) {
+	userID := common.MustGetAccessUserID(c)
+	todos, err := bll.GetNotNotifiedTodos(userID)
+	if err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, todos)
+}
+
 // Get todo list folders for current user
 func GetCurrentUserTodoListFoldersHandler(c *gin.Context) {
 	userID := common.MustGetAccessUserID(c)

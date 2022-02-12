@@ -8,11 +8,14 @@ type Todo struct {
 	ID        string    `json:"id"`
 	Title     string    `json:"title"`
 	Content   string    `json:"content"`
+	Deadline  time.Time `json:"deadline"`
+	Notified  bool      `json:"notified"`
+	NotifyAt  time.Time `json:"notify_at"`
 	Done      bool      `json:"done"`
 	DoneAt    time.Time `json:"done_at"`
-	Deadline  time.Time `json:"deadline"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
+	DeletedAt time.Time `json:"deleted_at"`
 
 	UserID string `json:"user_id"`
 	User   User   `json:"-"`

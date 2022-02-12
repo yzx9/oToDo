@@ -42,7 +42,7 @@ func setupRouter(e *gin.Engine) {
 		// File
 		r.POST("/files/:id/presign", handlers.PostFilePresignHandler)
 
-		// User
+		// Current User
 		r.GET("/users/current", handlers.GetCurrentUserHandler)
 
 		r.GET("/users/current/todo-lists", handlers.GetCurrentUserTodoListsHandler)
@@ -51,6 +51,7 @@ func setupRouter(e *gin.Engine) {
 		r.GET("/users/current/todos/daily", handlers.GetCurrentUserDailyTodosHandler)
 		r.GET("/users/current/todos/planned", handlers.GetCurrentUserPlannedTodosHandler)
 		r.GET("/users/current/todos/important", handlers.GetCurrentUserImportantTodosHandler)
+		r.GET("/users/current/todos/not-notified", handlers.GetCurrentUserNotNotifiedTodosHandler)
 
 		r.GET("/users/current/todo-list-folders", handlers.GetCurrentUserTodoListFoldersHandler)
 

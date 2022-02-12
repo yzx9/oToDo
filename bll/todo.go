@@ -64,6 +64,15 @@ func GetPlannedTodos(userID string) ([]entity.Todo, error) {
 	return todos, nil
 }
 
+func GetNotNotifiedTodos(userID string) ([]entity.Todo, error) {
+	todos, err := dal.GetNotNotifiedTodos(userID)
+	if err != nil {
+		return nil, fmt.Errorf("fails to get not-notified todos: %w", err)
+	}
+
+	return todos, nil
+}
+
 func UpdateTodo(userID string, todo entity.Todo) (entity.Todo, error) {
 	// Limits
 	oldTodo, err := OwnTodo(userID, todo.ID)

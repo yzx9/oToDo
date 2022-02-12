@@ -24,41 +24,27 @@ func GetTodo(id string) (entity.Todo, error) {
 }
 
 func GetTodos(todoListID string) ([]entity.Todo, error) {
-	vec := make([]entity.Todo, 0, len(todos))
-	for _, v := range todos {
-		if v.TodoListID == todoListID {
-			files, _ := GetTodoFiles(v.ID)
-			v.Files = files
-
-			steps, _ := GetTodoSteps(v.ID)
-			v.Steps = steps
-
-			vec = append(vec, v)
-		}
-	}
-
-	return vec, nil
+	return filterTodos(func(t *entity.Todo) bool {
+		return t.TodoListID == todoListID
+	}), nil
 }
 
 func GetPlanedTodos(userID string) ([]entity.Todo, error) {
-	vec := make([]entity.Todo, 0, len(todos))
-	for _, v := range todos {
-		if v.UserID == userID && !v.Deadline.IsZero() {
-			files, _ := GetTodoFiles(v.ID)
-			v.Files = files
-
-			steps, _ := GetTodoSteps(v.ID)
-			v.Steps = steps
-
-			vec = append(vec, v)
-		}
-	}
+	vec := filterTodos(func(t *entity.Todo) bool {
+		return t.UserID == userID && !t.Deadline.IsZero()
+	})
 
 	sort.Slice(vec, func(i, j int) bool {
 		return vec[i].Deadline.After(vec[j].Deadline)
 	})
 
 	return vec, nil
+}
+
+func GetNotNotifiedTodos(userID string) ([]entity.Todo, error) {
+	return filterTodos(func(t *entity.Todo) bool {
+		return t.UserID == userID && !t.Done && !t.Notified
+	}), nil
 }
 
 func UpdateTodo(todo entity.Todo) error {
@@ -79,4 +65,21 @@ func DeleteTodo(id string) error {
 
 	delete(todos, id)
 	return nil
+}
+
+func filterTodos(filter func(*entity.Todo) bool) []entity.Todo {
+	vec := make([]entity.Todo, 0)
+	for _, v := range todos {
+		if filter(&v) {
+			files, _ := GetTodoFiles(v.ID)
+			v.Files = files
+
+			steps, _ := GetTodoSteps(v.ID)
+			v.Steps = steps
+
+			vec = append(vec, v)
+		}
+	}
+
+	return vec
 }
