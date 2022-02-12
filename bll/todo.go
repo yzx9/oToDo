@@ -100,17 +100,17 @@ func UpdateTodo(userID string, todo entity.Todo) (entity.Todo, error) {
 		return entity.Todo{}, err
 	}
 
-	// Update tags
-	// TODO How to update shared user
-	// TODO Async
-	// TODO Catch following error, but dont throw
-	UpdateTag(userID, todo.ID, todo.Title, oldTodo.Title)
+	// Events
+	// TODO[perf] Following events can be async
+	if err = UpdateTag(todo, oldTodo.Title); err != nil {
+		return entity.Todo{}, err
+	}
 
-	// Create new todo if repeat
 	if !oldTodo.Done && todo.Done {
-		// TODO Async
-		// TODO Catch following error, but dont throw
-		CreateRepeatTodoIfNeed(todo)
+		// TODO[feat] Notify new todo
+		if _, _, err = CreateRepeatTodoIfNeed(todo); err != nil {
+			return entity.Todo{}, err
+		}
 	}
 
 	return todo, nil
@@ -122,14 +122,13 @@ func DeleteTodo(userID, todoID string) (entity.Todo, error) {
 		return entity.Todo{}, err
 	}
 
-	err = dal.DeleteTodo(todoID)
-	if err != nil {
+	if err = dal.DeleteTodo(todoID); err != nil {
 		return entity.Todo{}, fmt.Errorf("fails to delete todo: %v", todoID)
 	}
 
-	// TODO How to update shared user
-	// TODO record following error, but dont throw
-	UpdateTag(userID, todo.ID, todo.Title, "")
+	if err = UpdateTag(todo, ""); err != nil {
+		return entity.Todo{}, err
+	}
 
 	return todo, nil
 }
@@ -144,7 +143,7 @@ func OwnTodo(userID, todoID string) (entity.Todo, error) {
 		return r(fmt.Errorf("fails to get todo: %v", todoID))
 	}
 
-	// TODO todo in shared todo list
+	// TODO[feat] todo in shared todo list
 	if todo.UserID != userID {
 		return r(utils.NewErrorWithForbidden("unable to handle non-owned todo: %v", todo.ID))
 	}
