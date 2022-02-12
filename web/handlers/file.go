@@ -5,25 +5,26 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/bll"
+	"github.com/yzx9/otodo/otodo"
 	"github.com/yzx9/otodo/utils"
 	"github.com/yzx9/otodo/web/common"
 )
 
 // Upload todo file, only support single file now
 func PostTodoFileHandler(c *gin.Context) {
-	todoID, ok := c.Params.Get("id")
-	if !ok {
-		common.AbortWithError(c, utils.NewErrorWithPreconditionRequired("id required"))
+	fileID, err := common.GetRequiredParam(c, "id")
+	if err != nil {
+		common.AbortWithError(c, err)
 		return
 	}
 
 	file, err := c.FormFile("file")
 	if err != nil {
-		common.AbortWithError(c, utils.NewErrorWithPreconditionRequired("file required"))
+		common.AbortWithError(c, utils.NewError(otodo.ErrPreconditionRequired, "file required"))
 		return
 	}
 
-	fileID, err := bll.UploadTodoFile(todoID, file)
+	fileID, err = bll.UploadTodoFile(fileID, file)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -36,9 +37,9 @@ func PostTodoFileHandler(c *gin.Context) {
 
 // Upload file, only support single file now
 func GetFileHandler(c *gin.Context) {
-	id, ok := c.Params.Get("id")
-	if !ok {
-		common.AbortWithError(c, utils.NewErrorWithPreconditionRequired("id required"))
+	id, err := common.GetRequiredParam(c, "id")
+	if err != nil {
+		common.AbortWithError(c, err)
 		return
 	}
 
@@ -58,9 +59,9 @@ func GetFileHandler(c *gin.Context) {
 
 // Create presigned file id for open access
 func PostFilePresignHandler(c *gin.Context) {
-	id, ok := c.Params.Get("id")
-	if !ok {
-		common.AbortWithError(c, utils.NewErrorWithPreconditionRequired("id required"))
+	id, err := common.GetRequiredParam(c, "id")
+	if err != nil {
+		common.AbortWithError(c, err)
 		return
 	}
 
@@ -68,7 +69,7 @@ func PostFilePresignHandler(c *gin.Context) {
 		ExpiresIn int `json:"expires_in"` // Unix
 	}{}
 	if err := c.ShouldBind(&payload); err != nil {
-		common.AbortWithError(c, utils.NewErrorWithPreconditionRequired("expires_in required"))
+		common.AbortWithError(c, utils.NewError(otodo.ErrPreconditionRequired, "expires_in required"))
 		return
 	}
 
@@ -86,9 +87,9 @@ func PostFilePresignHandler(c *gin.Context) {
 
 // Get file from presigned id
 func GetFilePresignedHandler(c *gin.Context) {
-	presignedID, ok := c.Params.Get("id")
-	if !ok {
-		common.AbortWithError(c, utils.NewErrorWithPreconditionRequired("id required"))
+	presignedID, err := common.GetRequiredParam(c, "id")
+	if err != nil {
+		common.AbortWithError(c, err)
 		return
 	}
 

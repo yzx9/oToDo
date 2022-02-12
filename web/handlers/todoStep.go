@@ -7,14 +7,16 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/bll"
 	"github.com/yzx9/otodo/entity"
+	"github.com/yzx9/otodo/otodo"
+	"github.com/yzx9/otodo/utils"
 	"github.com/yzx9/otodo/web/common"
 )
 
 // Create todo step
 func PostTodoStepHandler(c *gin.Context) {
-	todoID, ok := c.Params.Get("id")
-	if !ok {
-		common.AbortWithError(c, fmt.Errorf("todo-id required"))
+	todoID, err := common.GetRequiredParam(c, "id")
+	if err != nil {
+		common.AbortWithError(c, err)
 		return
 	}
 
@@ -22,7 +24,7 @@ func PostTodoStepHandler(c *gin.Context) {
 		Name string `json:"name"`
 	}{}
 	if c.ShouldBind(&payload) != nil {
-		common.AbortWithError(c, fmt.Errorf("name required"))
+		common.AbortWithError(c, utils.NewError(otodo.ErrPreconditionRequired, "name required"))
 		return
 	}
 
@@ -57,9 +59,9 @@ func PutTodoStepHandler(c *gin.Context) {
 
 // Delete todo step
 func DeleteTodoStepHandler(c *gin.Context) {
-	todoID, ok := c.Params.Get("id")
-	if !ok {
-		common.AbortWithError(c, fmt.Errorf("todo-id required"))
+	todoID, err := common.GetRequiredParam(c, "id")
+	if err != nil {
+		common.AbortWithError(c, err)
 		return
 	}
 

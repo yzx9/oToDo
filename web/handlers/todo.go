@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -31,9 +30,9 @@ func PostTodoHandler(c *gin.Context) {
 
 // Get todo
 func GetTodoHandler(c *gin.Context) {
-	todoID, ok := c.Params.Get("id")
-	if !ok {
-		common.AbortWithError(c, fmt.Errorf("id required"))
+	todoID, err := common.GetRequiredParam(c, "id")
+	if err != nil {
+		common.AbortWithError(c, err)
 		return
 	}
 
@@ -75,9 +74,9 @@ func PatchTodoHandler(c *gin.Context) {
 
 // Delete Todo
 func DeleteTodoHandler(c *gin.Context) {
-	todoID, ok := c.Params.Get("id")
-	if !ok {
-		common.AbortWithError(c, fmt.Errorf("id required"))
+	todoID, err := common.GetRequiredParam(c, "id")
+	if err != nil {
+		common.AbortWithError(c, err)
 		return
 	}
 

@@ -11,9 +11,9 @@ import (
 
 // Get todo list
 func GetTodoListHandler(c *gin.Context) {
-	id, ok := c.Params.Get("id")
-	if !ok {
-		common.AbortWithError(c, fmt.Errorf("id required"))
+	id, err := common.GetRequiredParam(c, "id")
+	if err != nil {
+		common.AbortWithError(c, err)
 		return
 	}
 
@@ -22,9 +22,9 @@ func GetTodoListHandler(c *gin.Context) {
 
 // Get todos in todo list
 func GetTodoListTodosHandler(c *gin.Context) {
-	todoListID, ok := c.Params.Get("id")
-	if !ok {
-		common.AbortWithError(c, fmt.Errorf("id required"))
+	todoListID, err := common.GetRequiredParam(c, "id")
+	if err != nil {
+		common.AbortWithError(c, err)
 		return
 	}
 
