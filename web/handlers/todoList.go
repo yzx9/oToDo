@@ -17,7 +17,7 @@ func GetTodoListHandler(c *gin.Context) {
 		return
 	}
 
-	common.HandleGetTodoList(c, id)
+	common.HandleGetCurrentUserTodoList(c, id)
 }
 
 // Get todos in todo list

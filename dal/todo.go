@@ -29,6 +29,14 @@ func GetTodos(todoListID string) ([]entity.Todo, error) {
 	}), nil
 }
 
+func GetImportantTodos(userID string) ([]entity.Todo, error) {
+	vec := filterTodos(func(t *entity.Todo) bool {
+		return t.UserID == userID && t.Importance
+	})
+
+	return vec, nil
+}
+
 func GetPlanedTodos(userID string) ([]entity.Todo, error) {
 	vec := filterTodos(func(t *entity.Todo) bool {
 		return t.UserID == userID && !t.Deadline.IsZero()

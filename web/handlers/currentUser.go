@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/bll"
+	"github.com/yzx9/otodo/entity"
 	"github.com/yzx9/otodo/web/common"
 )
 
@@ -41,7 +42,7 @@ func GetCurrentUserBasicTodoListHandler(c *gin.Context) {
 		return
 	}
 
-	common.HandleGetTodoList(c, user.BasicTodoListID)
+	common.HandleGetCurrentUserTodoList(c, user.BasicTodoListID)
 }
 
 // Get daily todos for current user
@@ -51,25 +52,22 @@ func GetCurrentUserDailyTodosHandler(c *gin.Context) {
 
 // Get planned todos for current user
 func GetCurrentUserPlannedTodosHandler(c *gin.Context) {
-	userID := common.MustGetAccessUserID(c)
-	todos, err := bll.GetPlannedTodos(userID)
-	if err != nil {
-		common.AbortWithError(c, err)
-		return
-	}
-
-	c.JSON(http.StatusOK, todos)
+	handleGetCurrentUserTodos(c, bll.GetPlannedTodos)
 }
 
 // Get important todos for current user
 func GetCurrentUserImportantTodosHandler(c *gin.Context) {
-	c.Status(http.StatusNotImplemented)
+	handleGetCurrentUserTodos(c, bll.GetImportantTodos)
 }
 
 // Get not-notified todos for current user
 func GetCurrentUserNotNotifiedTodosHandler(c *gin.Context) {
+	handleGetCurrentUserTodos(c, bll.GetNotNotifiedTodos)
+}
+
+func handleGetCurrentUserTodos(c *gin.Context, getTodos func(string) ([]entity.Todo, error)) {
 	userID := common.MustGetAccessUserID(c)
-	todos, err := bll.GetNotNotifiedTodos(userID)
+	todos, err := getTodos(userID)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return

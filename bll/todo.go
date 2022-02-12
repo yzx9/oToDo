@@ -55,6 +55,15 @@ func GetTodos(userID, todoListID string) ([]entity.Todo, error) {
 	return todos, nil
 }
 
+func GetImportantTodos(userID string) ([]entity.Todo, error) {
+	todos, err := dal.GetImportantTodos(userID)
+	if err != nil {
+		return nil, fmt.Errorf("fails to get important todos: %w", err)
+	}
+
+	return todos, nil
+}
+
 func GetPlannedTodos(userID string) ([]entity.Todo, error) {
 	todos, err := dal.GetPlanedTodos(userID)
 	if err != nil {
@@ -85,7 +94,7 @@ func UpdateTodo(userID string, todo entity.Todo) (entity.Todo, error) {
 	}
 
 	// Update values
-	if !oldTodo.Done && todo.Done {
+	if todo.Done && todo.DoneAt.IsZero() {
 		todo.DoneAt = time.Now()
 	}
 
