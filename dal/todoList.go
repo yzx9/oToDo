@@ -47,3 +47,13 @@ func ExistTodoList(id string) bool {
 	_, exist := todoLists[id]
 	return exist
 }
+
+func DeleteTodoListsFromFolder(todoListFolderID string) error {
+	for i, v := range todoLists {
+		if v.TodoListFolderID == todoListFolderID {
+			v.TodoListFolderID = ""
+			todoLists[i] = v
+		}
+	}
+	return nil
+}

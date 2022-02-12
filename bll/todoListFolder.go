@@ -36,13 +36,23 @@ func GetTodoListFolders(userID string) ([]entity.TodoListFolder, error) {
 }
 
 func DeleteTodoListFolder(userID, todoListFolderID string) (entity.TodoListFolder, error) {
-	folder, err := OwnTodoListFolder(userID, todoListFolderID)
-	if err != nil {
+	write := func(err error) (entity.TodoListFolder, error) {
 		return entity.TodoListFolder{}, err
 	}
 
+	folder, err := OwnTodoListFolder(userID, todoListFolderID)
+	if err != nil {
+		return write(err)
+	}
+
+	// TODO[feat] Whether to cascade delete todo lists
+	// Cascade delete todo lists
+	if err = dal.DeleteTodoListsFromFolder(todoListFolderID); err != nil {
+		return write(fmt.Errorf("fails to cascade delete todo lists: %w", err))
+	}
+
 	if err = dal.DeleteTodoListFolder(todoListFolderID); err != nil {
-		return entity.TodoListFolder{}, fmt.Errorf("fails to delete todo list folder: %w", err)
+		return write(fmt.Errorf("fails to delete todo list folder: %w", err))
 	}
 
 	return folder, nil
