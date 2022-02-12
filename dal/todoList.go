@@ -40,14 +40,6 @@ func DeleteTodoList(todoListID string) error {
 	}
 
 	delete(todoLists, todoListID)
-
-	// cascade delete todos
-	for _, v := range todos {
-		if v.TodoListID == todoListID {
-			delete(todos, v.ID)
-		}
-	}
-
 	return nil
 }
 

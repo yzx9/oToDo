@@ -33,7 +33,7 @@ func GetTodoLists(userID string) ([]entity.TodoList, error) {
 		return nil, fmt.Errorf("fails to get user: %w", err)
 	}
 
-	// TODO: shared todo list
+	// TODO[feat] shared todo list
 
 	return vec, nil
 }
@@ -44,12 +44,18 @@ func DeleteTodoList(userID, todoListID string) (entity.TodoList, error) {
 		return entity.TodoList{}, err
 	}
 
+	// TODO[feat] only allow delete by owner, not shared users
 	if !todoList.Deletable {
-		return entity.TodoList{}, fmt.Errorf("todo list not deletable: %v", todoListID)
+		return entity.TodoList{}, utils.NewErrorWithPreconditionFailed("todo list not deletable: %v", todoListID)
+	}
+
+	// cascade delete todos
+	if err = dal.DeleteTodos(todoListID); err != nil {
+		return entity.TodoList{}, fmt.Errorf("fails to cascade delete todos: %w", err)
 	}
 
 	if err = dal.DeleteTodoList(todoListID); err != nil {
-		return entity.TodoList{}, err
+		return entity.TodoList{}, fmt.Errorf("fails to delete todo list: %w", err)
 	}
 
 	return todoList, nil

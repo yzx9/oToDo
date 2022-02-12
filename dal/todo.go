@@ -75,6 +75,15 @@ func DeleteTodo(id string) error {
 	return nil
 }
 
+func DeleteTodos(todoListID string) error {
+	for _, v := range todos {
+		if v.TodoListID == todoListID {
+			delete(todos, v.ID)
+		}
+	}
+	return nil
+}
+
 func filterTodos(filter func(*entity.Todo) bool) []entity.Todo {
 	vec := make([]entity.Todo, 0)
 	for _, v := range todos {
