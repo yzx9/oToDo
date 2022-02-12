@@ -40,6 +40,16 @@ func DeleteTodoListFolder(todoListFolderID string) error {
 	}
 
 	delete(todoListFolders, todoListFolderID)
+
+	// TODO[feat] Whether to cascade delete todo lists
+	// Remove from todo list
+	for i, v := range todoLists {
+		if v.TodoListFolderID == todoListFolderID {
+			v.TodoListFolderID = ""
+			todoLists[i] = v
+		}
+	}
+
 	return nil
 }
 

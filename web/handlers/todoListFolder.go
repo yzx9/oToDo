@@ -35,7 +35,7 @@ func DeleteTodoListFolderHandler(c *gin.Context) {
 	}
 
 	userID := common.MustGetAccessUserID(c)
-	todo, err := bll.DeleteTodoList(userID, id)
+	todo, err := bll.DeleteTodoListFolder(userID, id)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
