@@ -145,8 +145,7 @@ func OwnTodo(userID, todoID string) (entity.Todo, error) {
 		return r(fmt.Errorf("fails to get todo: %v", todoID))
 	}
 
-	// TODO[feat] todo in shared todo list
-	if todo.UserID != userID {
+	if _, err = OwnTodoList(userID, todo.TodoListID); err != nil {
 		return r(utils.NewErrorWithForbidden("unable to handle non-owned todo: %v", todo.ID))
 	}
 
