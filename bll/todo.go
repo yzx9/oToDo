@@ -14,11 +14,11 @@ func CreateTodo(userID string, todo entity.Todo) (entity.Todo, error) {
 	todo.ID = uuid.NewString()
 	todo.UserID = userID // override user
 
-	plan, err := CreateTodoRepeatPlan(todo.RepeatPlan)
+	plan, err := CreateTodoRepeatPlan(todo.TodoRepeatPlan)
 	if err != nil {
 		return entity.Todo{}, err
 	}
-	todo.RepeatPlanID = plan.ID
+	todo.TodoRepeatPlanID = plan.ID
 
 	if err := dal.InsertTodo(todo); err != nil {
 		return entity.Todo{}, fmt.Errorf("fails to create todo: %w", err)
@@ -33,12 +33,12 @@ func GetTodo(userID, todoID string) (entity.Todo, error) {
 		return entity.Todo{}, fmt.Errorf("fails to get todo: %w", err)
 	}
 
-	plan, err := GetTodoRepeatPlan(todo.RepeatPlanID)
+	plan, err := GetTodoRepeatPlan(todo.TodoRepeatPlanID)
 	if err != nil {
 		return entity.Todo{}, err
 	}
 
-	todo.RepeatPlan = plan
+	todo.TodoRepeatPlan = plan
 	return todo, nil
 }
 
@@ -98,11 +98,11 @@ func UpdateTodo(userID string, todo entity.Todo) (entity.Todo, error) {
 		todo.DoneAt = time.Now()
 	}
 
-	plan, err := UpdateTodoRepeatPlan(todo.RepeatPlan, oldTodo.RepeatPlan)
+	plan, err := UpdateTodoRepeatPlan(todo.TodoRepeatPlan, oldTodo.TodoRepeatPlan)
 	if err != nil {
 		return entity.Todo{}, err
 	}
-	todo.RepeatPlanID = plan.ID
+	todo.TodoRepeatPlanID = plan.ID
 
 	// Save
 	if err = dal.UpdateTodo(todo); err != nil {

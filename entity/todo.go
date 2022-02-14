@@ -28,7 +28,7 @@ type Todo struct {
 
 	Steps []TodoStep `json:"steps"`
 
-	RepeatPlanID string         `json:"-"`
-	RepeatPlan   TodoRepeatPlan `json:"repeat_plan"`
-	RepeatFrom   string         `json:"repeat_from"` // last todo id
+	TodoRepeatPlanID string         `json:"-"`
+	TodoRepeatPlan   TodoRepeatPlan `json:"todo_repeat_plan"`
+	TodoRepeatFrom   string         `json:"todo_repeat_from"` // last todo id
 }

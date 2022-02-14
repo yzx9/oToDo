@@ -54,12 +54,12 @@ func GetTodoRepeatPlan(id string) (entity.TodoRepeatPlan, error) {
 }
 
 func CreateRepeatTodoIfNeed(todo entity.Todo) (bool, entity.Todo, error) {
-	if todo.RepeatPlanID == "" {
+	if todo.TodoRepeatPlanID == "" {
 		return false, entity.Todo{}, nil
 	}
 
 	nextDeadline := getTodoNextRepeatTime(todo)
-	if todo.RepeatPlan.Before.Before(nextDeadline) {
+	if todo.TodoRepeatPlan.Before.Before(nextDeadline) {
 		return false, entity.Todo{}, nil
 	}
 
@@ -109,11 +109,11 @@ func isSameTodoRepeatPlan(plan, oldPlan entity.TodoRepeatPlan) bool {
 
 func getTodoNextRepeatTime(todo entity.Todo) time.Time {
 	deadline := todo.Deadline
-	interval := todo.RepeatPlan.Interval
+	interval := todo.TodoRepeatPlan.Interval
 
 	weekend := time.Sunday // TODO 此处默认周一为一周开始
 
-	switch entity.TodoRepeatPlanType(todo.RepeatPlan.Type) {
+	switch entity.TodoRepeatPlanType(todo.TodoRepeatPlan.Type) {
 	case entity.TodoRepeatPlanTypeDay:
 		return deadline.AddDate(0, 0, interval)
 
@@ -129,7 +129,7 @@ func getTodoNextRepeatTime(todo entity.Todo) time.Time {
 		}
 		deadline = deadline.AddDate(0, 0, 1)
 		for i := 0; i < 7-1; i++ {
-			if todo.RepeatPlan.Weekday[deadline.Weekday()] == 1 {
+			if todo.TodoRepeatPlan.Weekday[deadline.Weekday()] == 1 {
 				return deadline
 			}
 			deadline = deadline.AddDate(0, 0, 1)

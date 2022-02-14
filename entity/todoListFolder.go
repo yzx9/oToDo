@@ -13,4 +13,6 @@ type TodoListFolder struct {
 
 	UserID string `json:"user_id"`
 	User   User   `json:"-"`
+
+	TodoLists []TodoList `json:"-"`
 }
