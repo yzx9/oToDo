@@ -3,6 +3,7 @@ package dal
 import (
 	"github.com/yzx9/otodo/entity"
 	"github.com/yzx9/otodo/utils"
+	"gorm.io/gorm"
 )
 
 func InsertTodo(todo *entity.Todo) error {
@@ -12,32 +13,36 @@ func InsertTodo(todo *entity.Todo) error {
 
 func SelectTodo(id string) (entity.Todo, error) {
 	var todo entity.Todo
-	re := db.Where("ID = ?", id).First(&todo)
+	re := getTodosWithPreload().Where("ID = ?", id).First(&todo)
 	return todo, utils.WrapGormErr(re.Error, "todo")
 }
 
 func SelectTodos(todoListID string) ([]entity.Todo, error) {
 	var todos []entity.Todo
-	re := db.Where("TodoListID = ?", todoListID).Find(&todos)
+	re := getTodosWithPreload().Where("TodoListID = ?", todoListID).Find(&todos)
 	return todos, utils.WrapGormErr(re.Error, "todos")
 }
 
 func SelectImportantTodos(userID string) ([]entity.Todo, error) {
 	var todos []entity.Todo
-	re := db.Where("UserID = ?", userID).Where("Importance", true).Find(&todos)
+	re := getTodosWithPreload().Where("UserID = ?", userID).Where("Importance", true).Find(&todos)
 	return todos, utils.WrapGormErr(re.Error, "important todos")
 }
 
 func SelectPlanedTodos(userID string) ([]entity.Todo, error) {
 	var todos []entity.Todo
-	re := db.Where("UserID = ?", userID).Not("Deadline", nil).Order("Deadline").Find(&todos)
+	re := getTodosWithPreload().Where("UserID = ?", userID).Not("Deadline", nil).Order("Deadline").Find(&todos)
 	return todos, utils.WrapGormErr(re.Error, "planed todos")
 }
 
 func SelectNotNotifiedTodos(userID string) ([]entity.Todo, error) {
 	var todos []entity.Todo
-	re := db.Where("UserID = ?", userID).Not("Notified", false).Order("Deadline").Find(&todos)
+	re := getTodosWithPreload().Where("UserID = ?", userID).Not("Notified", false).Order("Deadline").Find(&todos)
 	return todos, utils.WrapGormErr(re.Error, "not notified todos")
+}
+
+func getTodosWithPreload() *gorm.DB {
+	return db.Preload("Files").Preload("Steps").Preload("TodoRepeatPlan")
 }
 
 func SaveTodo(todo *entity.Todo) error {

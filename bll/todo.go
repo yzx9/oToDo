@@ -21,7 +21,7 @@ func CreateTodo(userID string, todo entity.Todo) (entity.Todo, error) {
 
 	plan, err := CreateTodoRepeatPlan(todo.TodoRepeatPlan)
 	if err != nil {
-		return entity.Todo{}, err
+		return entity.Todo{}, fmt.Errorf("fails to create todo repeat plan: %w", err)
 	}
 	todo.TodoRepeatPlanID = plan.ID
 
@@ -34,17 +34,7 @@ func CreateTodo(userID string, todo entity.Todo) (entity.Todo, error) {
 
 func GetTodo(userID, todoID string) (entity.Todo, error) {
 	todo, err := OwnTodo(userID, todoID)
-	if err != nil {
-		return entity.Todo{}, fmt.Errorf("fails to get todo: %w", err)
-	}
-
-	plan, err := GetTodoRepeatPlan(todo.TodoRepeatPlanID)
-	if err != nil {
-		return entity.Todo{}, err
-	}
-
-	todo.TodoRepeatPlan = plan
-	return todo, nil
+	return todo, fmt.Errorf("fails to get todo: %w", err)
 }
 
 func GetTodos(userID, todoListID string) ([]entity.Todo, error) {
