@@ -16,10 +16,3 @@ type User struct {
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
 }
-
-type UserRefreshToken struct {
-	ID        string    `json:"id"`
-	UserID    string    `json:"user_id"`
-	TokenID   string    `json:"token_id"`
-	CreatedAt time.Time `json:"created_at"`
-}
