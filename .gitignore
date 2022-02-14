@@ -13,3 +13,6 @@
 
 # Temp files
 tmp/
+
+# Secret
+secret.yaml

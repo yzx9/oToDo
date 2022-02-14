@@ -1,0 +1,8 @@
+server:
+  id: dev
+  file_path_template: tmp/files/:date/:id:ext
+
+session:
+  access_token_exp: 900 # 15 min
+  refresh_token_exp: 12969000 # 15 day
+  access_token_refresh_threshold: 300 #  5 min

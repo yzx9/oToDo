@@ -8,11 +8,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/yzx9/otodo/dal"
 	"github.com/yzx9/otodo/entity"
+	"github.com/yzx9/otodo/otodo"
 )
-
-// Config
-// TODO configurable
-var passwordNonce = []byte("test_nonce")
 
 // User
 type CreateUserPayload struct {
@@ -85,6 +82,6 @@ func IsValidRefreshToken(userID, tokenID string) bool {
 
 // Password
 func GetCryptoPassword(password string) [32]byte {
-	pwd := sha256.Sum256(append([]byte(password), passwordNonce...))
+	pwd := sha256.Sum256(append([]byte(password), otodo.Conf.Secret.PasswordNonce...))
 	return pwd
 }

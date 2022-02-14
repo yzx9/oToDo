@@ -10,16 +10,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/yzx9/otodo/dal"
 	"github.com/yzx9/otodo/entity"
+	"github.com/yzx9/otodo/otodo"
 )
 
-// Config
-// TODO configurable
-var accessTokenExpiresIn = 15 * time.Minute
-var refreshTokenExpiresIn = 15 * 24 * time.Hour
-var accessTokenRefreshThreshold = 5 * time.Minute
-
 // Constans
-var accessTokenExpiresInSeconds = int64(accessTokenExpiresIn.Seconds())
 var tokenType = "Bearer"
 var authorizationRegexString = "^[Bb]earer (?P<token>[\\w-]+.[\\w-]+.[\\w-]+)$"
 var authorizationRegex = regexp.MustCompile(authorizationRegexString)
@@ -47,13 +41,10 @@ func Login(userName, password string) (AuthTokenResult, error) {
 		return AuthTokenResult{}, fmt.Errorf("invalid credential")
 	}
 
-	refreshToken, refreshTokenID := newRefreshToken(user, refreshTokenExpiresIn)
-	return AuthTokenResult{
-		AccessToken:  newAccessToken(user, refreshTokenID, accessTokenExpiresIn),
-		TokenType:    tokenType,
-		ExpiresIn:    accessTokenExpiresInSeconds,
-		RefreshToken: refreshToken,
-	}, nil
+	refreshToken, refreshTokenID := newRefreshToken(user)
+	re := newAccessTokenWithResult(user, refreshTokenID)
+	re.RefreshToken = refreshToken
+	return re, nil
 }
 
 func Logout(userID, refreshTokenID string) error {
@@ -67,11 +58,7 @@ func NewAccessToken(userID, refreshTokenID string) (AuthTokenResult, error) {
 		return AuthTokenResult{}, fmt.Errorf("fails to get user, %w", err)
 	}
 
-	return AuthTokenResult{
-		AccessToken: newAccessToken(user, refreshTokenID, accessTokenExpiresIn),
-		TokenType:   tokenType,
-		ExpiresIn:   accessTokenExpiresInSeconds,
-	}, nil
+	return newAccessTokenWithResult(user, refreshTokenID), nil
 }
 
 func ParseSessionToken(token string) (*jwt.Token, error) {
@@ -108,7 +95,19 @@ func ShouldRefreshAccessToken(oldAccessToken *jwt.Token) bool {
 		return false
 	}
 
-	return time.Now().Add(accessTokenRefreshThreshold).Unix() > claims.ExpiresAt
+	thd := otodo.Conf.Session.AccessTokenRefreshThreshold
+	dur := time.Duration(thd * int(time.Second))
+	return time.Now().Add(dur).Unix() > claims.ExpiresAt
+}
+
+func newAccessTokenWithResult(user entity.User, refreshTokenID string) AuthTokenResult {
+	exp := otodo.Conf.Session.AccessTokenExpiresIn
+	dur := time.Duration(exp * int(time.Second))
+	return AuthTokenResult{
+		AccessToken: newAccessToken(user, refreshTokenID, dur),
+		TokenType:   tokenType,
+		ExpiresIn:   int64(exp),
+	}
 }
 
 func newAccessToken(user entity.User, refreshTokenID string, exp time.Duration) string {
@@ -120,9 +119,11 @@ func newAccessToken(user entity.User, refreshTokenID string, exp time.Duration) 
 	return NewToken(claims)
 }
 
-func newRefreshToken(user entity.User, exp time.Duration) (string, string) {
-	id := uuid.NewString()
-	claims := SessionTokenClaims{TokenClaims: NewClaims(user.ID, exp)}
-	claims.Id = id
-	return NewToken(claims), id
+func newRefreshToken(user entity.User) (string, string) {
+	exp := otodo.Conf.Session.RefreshTokenExpiresIn
+	dur := time.Duration(exp * int(time.Second))
+
+	claims := SessionTokenClaims{TokenClaims: NewClaims(user.ID, dur)}
+	claims.Id = uuid.NewString()
+	return NewToken(claims), claims.Id
 }
