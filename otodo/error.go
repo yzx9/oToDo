@@ -25,8 +25,9 @@ const (
 	ErrPreconditionRequired  ErrCode = 11002
 
 	// Resource
-	ErrDuplicateID ErrCode = 20000
-	ErrNotFound    ErrCode = 20001
+	ErrDatabaseConnectFailed ErrCode = 20000
+	ErrDuplicateID           ErrCode = 20001
+	ErrNotFound              ErrCode = 20002
 
 	// Logic
 	ErrAbort ErrCode = 30000
