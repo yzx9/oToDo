@@ -55,7 +55,7 @@ func DeleteTagTodo(userID, todoID, tagName string) error {
 
 func ExistTag(userID, tagName string) (bool, error) {
 	var count int64
-	re := db.Where(&entity.Tag{
+	re := db.Model(&entity.Tag{}).Where(&entity.Tag{
 		UserID: userID,
 		Name:   tagName,
 	}).Count(&count)
