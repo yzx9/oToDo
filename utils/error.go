@@ -22,3 +22,7 @@ func NewErrorWithNotFound(format string, values ...interface{}) *otodo.Error {
 func NewErrorWithPreconditionFailed(format string, values ...interface{}) *otodo.Error {
 	return NewError(otodo.ErrPreconditionFailed, format, values...)
 }
+
+func NewErrorWithUnknown(format string, values ...interface{}) *otodo.Error {
+	return NewError(otodo.ErrUnknown, format, values...)
+}

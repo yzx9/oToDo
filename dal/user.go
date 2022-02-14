@@ -6,7 +6,6 @@ import (
 )
 
 var users = make(map[string]entity.User)
-var invalidRefreshTokens = make(map[string]entity.UserRefreshToken)
 
 func InsertUser(user entity.User) error {
 	users[user.ID] = user
@@ -45,19 +44,4 @@ func GetUserByTodo(todoID string) (entity.User, error) {
 	}
 
 	return entity.User{}, utils.NewErrorWithNotFound("user not found, todo id: %v", todoID)
-}
-
-func InsertInvalidUserRefreshToken(entity entity.UserRefreshToken) error {
-	invalidRefreshTokens[entity.ID] = entity
-	return nil
-}
-
-func ExistInvalidUserRefreshToken(userID, tokenID string) bool {
-	for _, token := range invalidRefreshTokens {
-		if token.UserID == userID && token.TokenID == tokenID {
-			return true
-		}
-	}
-
-	return false
 }

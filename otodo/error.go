@@ -30,5 +30,6 @@ const (
 	ErrNotFound              ErrCode = 20002
 
 	// Logic
-	ErrAbort ErrCode = 30000
+	ErrUnknown ErrCode = 30000
+	ErrAbort   ErrCode = 30001
 )

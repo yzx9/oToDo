@@ -58,8 +58,8 @@ func GetUser(userID string) (entity.User, error) {
 
 // Invalid User Refresh Token
 
-func CreateInvalidUserRefreshToken(userID, tokenID string) (entity.UserRefreshToken, error) {
-	model := entity.UserRefreshToken{
+func CreateUserInvalidRefreshToken(userID, tokenID string) (entity.UserInvalidRefreshToken, error) {
+	model := entity.UserInvalidRefreshToken{
 		Entity: entity.Entity{
 			ID:        uuid.NewString(),
 			CreatedAt: time.Now(),
@@ -67,8 +67,8 @@ func CreateInvalidUserRefreshToken(userID, tokenID string) (entity.UserRefreshTo
 		UserID:  userID,
 		TokenID: tokenID,
 	}
-	if err := dal.InsertInvalidUserRefreshToken(model); err != nil {
-		return entity.UserRefreshToken{}, fmt.Errorf("fails to make user refresh token invalid: %w", err)
+	if err := dal.InsertUserInvalidRefreshToken(model); err != nil {
+		return entity.UserInvalidRefreshToken{}, fmt.Errorf("fails to make user refresh token invalid: %w", err)
 	}
 
 	return model, nil
@@ -76,8 +76,13 @@ func CreateInvalidUserRefreshToken(userID, tokenID string) (entity.UserRefreshTo
 
 // Verify is it an valid token.
 // Note: This func don't check token expire time
-func IsValidRefreshToken(userID, tokenID string) bool {
-	return !dal.ExistInvalidUserRefreshToken(userID, tokenID)
+func IsValidRefreshToken(userID, tokenID string) (bool, error) {
+	valid, err := dal.ExistUserInvalidRefreshToken(userID, tokenID)
+	if err != nil {
+		return false, fmt.Errorf("fails to get user refresh token: %w", err)
+	}
+
+	return valid, nil
 }
 
 // Password

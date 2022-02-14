@@ -48,7 +48,7 @@ func Login(userName, password string) (AuthTokenResult, error) {
 }
 
 func Logout(userID, refreshTokenID string) error {
-	_, err := CreateInvalidUserRefreshToken(userID, refreshTokenID)
+	_, err := CreateUserInvalidRefreshToken(userID, refreshTokenID)
 	return err
 }
 

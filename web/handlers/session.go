@@ -60,8 +60,14 @@ func PostSessionTokenHandler(c *gin.Context) {
 		return
 	}
 
-	if !bll.IsValidRefreshToken(userID, refreshTokenID) {
+	valid, err := bll.IsValidRefreshToken(userID, refreshTokenID)
+	if err != nil {
 		common.AbortWithError(c, err)
+		return
+	}
+
+	if !valid {
+		common.AbortWithError(c, fmt.Errorf("refresh token has been invalid"))
 		return
 	}
 

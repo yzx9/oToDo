@@ -1,6 +1,6 @@
 package entity
 
-type UserRefreshToken struct {
+type UserInvalidRefreshToken struct {
 	Entity
 
 	UserID  string `json:"user_id" gorm:"size:36"`
