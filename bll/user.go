@@ -27,29 +27,31 @@ func CreateUser(payload CreateUserPayload) (entity.User, error) {
 		return entity.User{}, fmt.Errorf("password too short")
 	}
 
-	basicTodoListID := uuid.NewString()
 	user := entity.User{
-		Entity: entity.Entity{
-			ID: uuid.NewString(),
-		},
-		Name:            payload.UserName,
-		Nickname:        payload.Nickname,
-		Password:        GetCryptoPassword(payload.Password),
-		BasicTodoListID: basicTodoListID,
+		Name:     payload.UserName,
+		Nickname: payload.Nickname,
+		Password: GetCryptoPassword(payload.Password),
 	}
-	err := dal.InsertUser(&user)
+	if err := dal.InsertUser(&user); err != nil {
+		return entity.User{}, fmt.Errorf("fails to create user: %w", err)
+	}
 
-	// TODO handle error
-	dal.InsertTodoList(&entity.TodoList{
-		Entity: entity.Entity{
-			ID: basicTodoListID,
-		},
+	// create base todo list
+	basicTodoList := entity.TodoList{
 		Name:      "Todos", // TODO i18n
 		Deletable: false,
-		UserID:    user.ID,
-	})
+		User:      user,
+	}
+	if err := dal.InsertTodoList(&basicTodoList); err != nil {
+		return entity.User{}, fmt.Errorf("fails to create user basic todo list: %w", err)
+	}
 
-	return user, err
+	user.BasicTodoList = &basicTodoList
+	if err := dal.SaveUser(&user); err != nil {
+		return entity.User{}, fmt.Errorf("fails to save user basic todo list: %w", err)
+	}
+
+	return user, nil
 }
 
 func GetUser(userID string) (entity.User, error) {

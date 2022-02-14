@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/yzx9/otodo/dal"
 	"github.com/yzx9/otodo/entity"
 )
@@ -18,7 +17,6 @@ func CreateTodoRepeatPlan(plan entity.TodoRepeatPlan) (entity.TodoRepeatPlan, er
 		}, nil
 	}
 
-	plan.ID = uuid.NewString()
 	if err := dal.InsertTodoRepeatPlan(&plan); err != nil {
 		return entity.TodoRepeatPlan{}, fmt.Errorf("fails to create todo repeat plan: %w", err)
 	}
@@ -39,7 +37,6 @@ func UpdateTodoRepeatPlan(plan, oldPlan entity.TodoRepeatPlan) (entity.TodoRepea
 		return oldPlan, nil
 	}
 
-	plan.ID = uuid.NewString()
 	if err := dal.InsertTodoRepeatPlan(&plan); err != nil {
 		return entity.TodoRepeatPlan{}, fmt.Errorf("fails to create todo repeat plan: %w", err)
 	}
@@ -66,7 +63,6 @@ func CreateRepeatTodoIfNeed(todo entity.Todo) (bool, entity.Todo, error) {
 		return false, entity.Todo{}, nil
 	}
 
-	todo.ID = uuid.NewString()
 	todo.Deadline = nextDeadline
 	if err := dal.InsertTodo(&todo); err != nil {
 		return false, entity.Todo{}, fmt.Errorf("fails to create todo: %w", err)

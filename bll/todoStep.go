@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/yzx9/otodo/dal"
 	"github.com/yzx9/otodo/entity"
 	"github.com/yzx9/otodo/utils"
@@ -17,9 +16,6 @@ func CreateTodoStep(userID, todoID string, name string) (entity.TodoStep, error)
 	}
 
 	step := entity.TodoStep{
-		Entity: entity.Entity{
-			ID: uuid.NewString(),
-		},
 		Name:   name,
 		TodoID: todoID,
 	}

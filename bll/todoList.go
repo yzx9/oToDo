@@ -3,7 +3,6 @@ package bll
 import (
 	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/yzx9/otodo/dal"
 	"github.com/yzx9/otodo/entity"
 	"github.com/yzx9/otodo/utils"
@@ -11,9 +10,6 @@ import (
 
 func CreateTodoList(userID string, todoListName string) (entity.TodoList, error) {
 	list := entity.TodoList{
-		Entity: entity.Entity{
-			ID: uuid.NewString(),
-		},
 		Name:      todoListName,
 		Deletable: true,
 		UserID:    userID,

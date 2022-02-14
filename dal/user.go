@@ -31,3 +31,8 @@ func SelectUserByTodo(todoID string) (entity.User, error) {
 
 	return SelectUser(todo.UserID)
 }
+
+func SaveUser(user *entity.User) error {
+	re := db.Save(&user)
+	return utils.WrapGormErr(re.Error, "user")
+}

@@ -5,7 +5,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/google/uuid"
 	"github.com/yzx9/otodo/dal"
 	"github.com/yzx9/otodo/entity"
 	"github.com/yzx9/otodo/utils"
@@ -41,9 +40,6 @@ func UpdateTag(todo entity.Todo, oldTodoTitle string) error {
 
 			if !exist {
 				tag := entity.Tag{
-					Entity: entity.Entity{
-						ID: uuid.NewString(),
-					},
 					Name:   tagName,
 					UserID: userID,
 					Todos:  make([]entity.Todo, 0),

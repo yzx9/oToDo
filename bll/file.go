@@ -5,9 +5,7 @@ import (
 	"mime/multipart"
 	"path/filepath"
 	"strings"
-	"time"
 
-	"github.com/google/uuid"
 	"github.com/yzx9/otodo/dal"
 	"github.com/yzx9/otodo/entity"
 	"github.com/yzx9/otodo/otodo"
@@ -17,52 +15,45 @@ import (
 const maxFileSize = 8 << 20 // 8MiB
 
 func UploadTodoFile(todoID string, file *multipart.FileHeader) (string, error) {
-	fileID := uuid.NewString()
-	path, err := uploadFile(file, entity.File{
-		Entity: entity.Entity{
-			ID:        fileID,
-			CreatedAt: time.Now(),
-		},
+	record := entity.File{
 		FileName:   file.Filename,
 		AccessType: string(entity.FileTypeTodo),
 		RelatedID:  todoID,
-	})
+	}
+	err := uploadFile(file, &record)
 	if err != nil {
 		return "", err
 	}
 
 	err = dal.InsertTodoFile(&entity.TodoFile{
-		Entity: entity.Entity{
-			ID: uuid.NewString(),
-		},
-		FileID: fileID,
-		TodoID: todoID,
+		File: record,
+		Todo: entity.Todo{Entity: entity.Entity{ID: record.ID}},
 	})
 	if err != nil {
 		return "", fmt.Errorf("fails to upload todo file: %w", err)
 	}
 
-	return path, err
+	return record.ID, err
 }
 
-func uploadFile(file *multipart.FileHeader, record entity.File) (string, error) {
+func uploadFile(file *multipart.FileHeader, record *entity.File) error {
 	if file.Size > maxFileSize {
-		return "", utils.NewError(otodo.ErrRequestEntityTooLarge, "file too large")
+		return utils.NewError(otodo.ErrRequestEntityTooLarge, "file too large")
 	}
 
 	record.FileServerID = otodo.Conf.Server.ID
 	record.FilePath = applyFilePathTemplate(record)
 	err := utils.SaveFile(file, record.FilePath)
 	if err != nil {
-		return "", fmt.Errorf("fails to upload file: %w", err)
+		return fmt.Errorf("fails to upload file: %w", err)
 	}
 
-	err = dal.InsertFile(&record)
+	err = dal.InsertFile(record)
 	if err != nil {
-		return "", fmt.Errorf("fails to upload file: %w", err)
+		return fmt.Errorf("fails to upload file: %w", err)
 	}
 
-	return record.ID, nil
+	return nil
 }
 
 func GetFile(fileID string) (entity.File, error) {
@@ -80,7 +71,7 @@ func GetFilePath(userID, fileID string) (string, error) {
 		return "", err
 	}
 
-	path := applyFilePathTemplate(file)
+	path := applyFilePathTemplate(&file)
 	return path, nil
 }
 
@@ -90,11 +81,11 @@ func ForceGetFilePath(fileID string) (string, error) {
 		return "", err
 	}
 
-	path := applyFilePathTemplate(file)
+	path := applyFilePathTemplate(&file)
 	return path, nil
 }
 
-func applyFilePathTemplate(file entity.File) string {
+func applyFilePathTemplate(file *entity.File) string {
 	template := otodo.Conf.Server.FilePathTemplate
 	template = strings.ReplaceAll(template, ":id", file.ID)
 	template = strings.ReplaceAll(template, ":ext", filepath.Ext(file.FileName))

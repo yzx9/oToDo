@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/yzx9/otodo/dal"
 	"github.com/yzx9/otodo/entity"
 	"github.com/yzx9/otodo/utils"
@@ -16,7 +15,6 @@ func CreateTodo(userID string, todo entity.Todo) (entity.Todo, error) {
 		return entity.Todo{}, fmt.Errorf("fails to get todo list: %w", err)
 	}
 
-	todo.ID = uuid.NewString()
 	todo.UserID = userID // override user
 
 	plan, err := CreateTodoRepeatPlan(todo.TodoRepeatPlan)
