@@ -33,7 +33,7 @@ func init() {
 	})
 
 	// Todo
-	InsertTodo(entity.Todo{
+	InsertTodo(&entity.Todo{
 		Entity: entity.Entity{
 			ID: "32acb375-e9dc-473e-8f5f-8826f7783c1d",
 		},
@@ -42,7 +42,7 @@ func init() {
 		TodoListID: todoListID,
 	})
 
-	InsertTodo(entity.Todo{
+	InsertTodo(&entity.Todo{
 		Entity: entity.Entity{
 			ID: "343dc2ce-1fbc-43ad-98d6-9cac1c67f2a6",
 		},

@@ -32,7 +32,7 @@ func GetUserByUserName(username string) (entity.User, error) {
 }
 
 func GetUserByTodo(todoID string) (entity.User, error) {
-	todo, err := GetTodo(todoID)
+	todo, err := SelectTodo(todoID)
 	if err != nil {
 		return entity.User{}, nil
 	}

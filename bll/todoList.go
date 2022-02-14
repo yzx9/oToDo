@@ -52,7 +52,7 @@ func DeleteTodoList(userID, todoListID string) (entity.TodoList, error) {
 	}
 
 	// cascade delete todos
-	if err = dal.DeleteTodos(todoListID); err != nil {
+	if _, err = dal.DeleteTodos(todoListID); err != nil {
 		return entity.TodoList{}, fmt.Errorf("fails to cascade delete todos: %w", err)
 	}
 

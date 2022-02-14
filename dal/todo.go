@@ -1,102 +1,60 @@
 package dal
 
 import (
-	"sort"
-
 	"github.com/yzx9/otodo/entity"
 	"github.com/yzx9/otodo/utils"
 )
 
-var todos = make(map[string]entity.Todo)
-
-func InsertTodo(todo entity.Todo) error {
-	todos[todo.ID] = todo
-	return nil
+func InsertTodo(todo *entity.Todo) error {
+	re := db.Create(todo)
+	return utils.WrapGormErr(re.Error, "todo")
 }
 
-func GetTodo(id string) (entity.Todo, error) {
-	todo, ok := todos[id]
-	if !ok {
-		return entity.Todo{}, utils.NewErrorWithNotFound("todo not found: %v", id)
-	}
-
-	return todo, nil
+func SelectTodo(id string) (entity.Todo, error) {
+	var todo entity.Todo
+	re := db.Where("ID = ?", id).First(&todo)
+	return todo, utils.WrapGormErr(re.Error, "todo")
 }
 
-func GetTodos(todoListID string) ([]entity.Todo, error) {
-	return filterTodos(func(t *entity.Todo) bool {
-		return t.TodoListID == todoListID
-	}), nil
+func SelectTodos(todoListID string) ([]entity.Todo, error) {
+	var todos []entity.Todo
+	re := db.Where("TodoListID = ?", todoListID).Find(&todos)
+	return todos, utils.WrapGormErr(re.Error, "todos")
 }
 
-func GetImportantTodos(userID string) ([]entity.Todo, error) {
-	vec := filterTodos(func(t *entity.Todo) bool {
-		return t.UserID == userID && t.Importance
-	})
-
-	return vec, nil
+func SelectImportantTodos(userID string) ([]entity.Todo, error) {
+	var todos []entity.Todo
+	re := db.Where("UserID = ?", userID).Where("Importance", true).Find(&todos)
+	return todos, utils.WrapGormErr(re.Error, "important todos")
 }
 
-func GetPlanedTodos(userID string) ([]entity.Todo, error) {
-	vec := filterTodos(func(t *entity.Todo) bool {
-		return t.UserID == userID && !t.Deadline.IsZero()
-	})
-
-	sort.Slice(vec, func(i, j int) bool {
-		return vec[i].Deadline.After(vec[j].Deadline)
-	})
-
-	return vec, nil
+func SelectPlanedTodos(userID string) ([]entity.Todo, error) {
+	var todos []entity.Todo
+	re := db.Where("UserID = ?", userID).Not("Deadline", nil).Order("Deadline").Find(&todos)
+	return todos, utils.WrapGormErr(re.Error, "planed todos")
 }
 
-func GetNotNotifiedTodos(userID string) ([]entity.Todo, error) {
-	return filterTodos(func(t *entity.Todo) bool {
-		return t.UserID == userID && !t.Done && !t.Notified
-	}), nil
+func SelectNotNotifiedTodos(userID string) ([]entity.Todo, error) {
+	var todos []entity.Todo
+	re := db.Where("UserID = ?", userID).Not("Notified", false).Order("Deadline").Find(&todos)
+	return todos, utils.WrapGormErr(re.Error, "not notified todos")
 }
 
-func UpdateTodo(todo entity.Todo) error {
-	_, exists := todos[todo.ID]
-	if !exists {
-		return utils.NewErrorWithNotFound("todo not found: %v", todo.ID)
-	}
-
-	todos[todo.ID] = todo
-	return nil
+func UpdateTodo(todo *entity.Todo) error {
+	re := db.Save(&todo)
+	return utils.WrapGormErr(re.Error, "todo")
 }
 
 func DeleteTodo(id string) error {
-	_, ok := todos[id]
-	if !ok {
-		return utils.NewErrorWithNotFound("todo not found: %v", id)
-	}
-
-	delete(todos, id)
-	return nil
+	re := db.Delete(&entity.Todo{
+		Entity: entity.Entity{
+			ID: id,
+		},
+	})
+	return utils.WrapGormErr(re.Error, "todo")
 }
 
-func DeleteTodos(todoListID string) error {
-	for _, v := range todos {
-		if v.TodoListID == todoListID {
-			delete(todos, v.ID)
-		}
-	}
-	return nil
-}
-
-func filterTodos(filter func(*entity.Todo) bool) []entity.Todo {
-	vec := make([]entity.Todo, 0)
-	for _, v := range todos {
-		if filter(&v) {
-			files, _ := GetTodoFiles(v.ID)
-			v.Files = files
-
-			steps, _ := GetTodoSteps(v.ID)
-			v.Steps = steps
-
-			vec = append(vec, v)
-		}
-	}
-
-	return vec
+func DeleteTodos(todoListID string) (int64, error) {
+	re := db.Delete(entity.Todo{}, "TodoListID = ?", todoListID)
+	return re.RowsAffected, utils.WrapGormErr(re.Error, "todo")
 }

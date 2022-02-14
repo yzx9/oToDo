@@ -68,7 +68,7 @@ func CreateRepeatTodoIfNeed(todo entity.Todo) (bool, entity.Todo, error) {
 
 	todo.ID = uuid.NewString()
 	todo.Deadline = nextDeadline
-	if err := dal.InsertTodo(todo); err != nil {
+	if err := dal.InsertTodo(&todo); err != nil {
 		return false, entity.Todo{}, fmt.Errorf("fails to create todo: %w", err)
 	}
 

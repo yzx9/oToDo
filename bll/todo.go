@@ -20,7 +20,7 @@ func CreateTodo(userID string, todo entity.Todo) (entity.Todo, error) {
 	}
 	todo.TodoRepeatPlanID = plan.ID
 
-	if err := dal.InsertTodo(todo); err != nil {
+	if err := dal.InsertTodo(&todo); err != nil {
 		return entity.Todo{}, fmt.Errorf("fails to create todo: %w", err)
 	}
 
@@ -47,7 +47,7 @@ func GetTodos(userID, todoListID string) ([]entity.Todo, error) {
 		return nil, err
 	}
 
-	todos, err := dal.GetTodos(todoListID)
+	todos, err := dal.SelectTodos(todoListID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get todos: %w", err)
 	}
@@ -56,7 +56,7 @@ func GetTodos(userID, todoListID string) ([]entity.Todo, error) {
 }
 
 func GetImportantTodos(userID string) ([]entity.Todo, error) {
-	todos, err := dal.GetImportantTodos(userID)
+	todos, err := dal.SelectImportantTodos(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get important todos: %w", err)
 	}
@@ -65,7 +65,7 @@ func GetImportantTodos(userID string) ([]entity.Todo, error) {
 }
 
 func GetPlannedTodos(userID string) ([]entity.Todo, error) {
-	todos, err := dal.GetPlanedTodos(userID)
+	todos, err := dal.SelectPlanedTodos(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get planed todos: %w", err)
 	}
@@ -74,7 +74,7 @@ func GetPlannedTodos(userID string) ([]entity.Todo, error) {
 }
 
 func GetNotNotifiedTodos(userID string) ([]entity.Todo, error) {
-	todos, err := dal.GetNotNotifiedTodos(userID)
+	todos, err := dal.SelectNotNotifiedTodos(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get not-notified todos: %w", err)
 	}
@@ -105,7 +105,7 @@ func UpdateTodo(userID string, todo entity.Todo) (entity.Todo, error) {
 	todo.TodoRepeatPlanID = plan.ID
 
 	// Save
-	if err = dal.UpdateTodo(todo); err != nil {
+	if err = dal.UpdateTodo(&todo); err != nil {
 		return entity.Todo{}, err
 	}
 
@@ -147,7 +147,7 @@ func OwnTodo(userID, todoID string) (entity.Todo, error) {
 		return entity.Todo{}, err
 	}
 
-	todo, err := dal.GetTodo(todoID)
+	todo, err := dal.SelectTodo(todoID)
 	if err != nil {
 		return r(fmt.Errorf("fails to get todo: %v", todoID))
 	}
