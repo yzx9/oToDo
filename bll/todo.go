@@ -110,7 +110,7 @@ func UpdateTodo(userID string, todo entity.Todo) (entity.Todo, error) {
 	todo.TodoRepeatPlanID = plan.ID
 
 	// Save
-	if err = dal.UpdateTodo(&todo); err != nil {
+	if err = dal.SaveTodo(&todo); err != nil {
 		return entity.Todo{}, err
 	}
 

@@ -5,49 +5,33 @@ import (
 	"github.com/yzx9/otodo/utils"
 )
 
-var todoSteps = make(map[string]entity.TodoStep)
-
-func InsertTodoStep(step entity.TodoStep) error {
-	todoSteps[step.ID] = step
-	return nil
+func InsertTodoStep(step *entity.TodoStep) error {
+	re := db.Create(step)
+	return utils.WrapGormErr(re.Error, "todo step")
 }
 
-func GetTodoStep(id string) (entity.TodoStep, error) {
-	step, ok := todoSteps[id]
-	if !ok {
-		return entity.TodoStep{}, utils.NewErrorWithNotFound("todo step not found: %v", id)
-	}
-
-	return step, nil
+func SelectTodoStep(id string) (entity.TodoStep, error) {
+	var step entity.TodoStep
+	re := db.Where("ID = ?", id).First(&step)
+	return step, utils.WrapGormErr(re.Error, "todo step")
 }
 
-func GetTodoSteps(todoID string) ([]entity.TodoStep, error) {
-	vec := make([]entity.TodoStep, 0)
-	for _, v := range todoSteps {
-		if v.TodoID == todoID {
-			vec = append(vec, v)
-		}
-	}
-
-	return vec, nil
+func SelectTodoSteps(todoID string) ([]entity.TodoStep, error) {
+	var steps []entity.TodoStep
+	re := db.Where("TodoID = ?", todoID).Find(&steps)
+	return steps, utils.WrapGormErr(re.Error, "todo step")
 }
 
-func UpdateTodoStep(todoStep entity.TodoStep) error {
-	_, exists := todoSteps[todoStep.ID]
-	if !exists {
-		return utils.NewErrorWithNotFound("todo step not found: %v", todoStep.ID)
-	}
-
-	todoSteps[todoStep.ID] = todoStep
-	return nil
+func SaveTodoStep(todoStep *entity.TodoStep) error {
+	re := db.Save(&todoStep)
+	return utils.WrapGormErr(re.Error, "todo step")
 }
 
 func DeleteTodoStep(id string) error {
-	_, exists := todoSteps[id]
-	if !exists {
-		return utils.NewErrorWithNotFound("todo step not found: %v", id)
-	}
-
-	delete(todoSteps, id)
-	return nil
+	re := db.Delete(&entity.TodoStep{
+		Entity: entity.Entity{
+			ID: id,
+		},
+	})
+	return utils.WrapGormErr(re.Error, "todo step")
 }

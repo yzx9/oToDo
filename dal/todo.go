@@ -40,7 +40,7 @@ func SelectNotNotifiedTodos(userID string) ([]entity.Todo, error) {
 	return todos, utils.WrapGormErr(re.Error, "not notified todos")
 }
 
-func UpdateTodo(todo *entity.Todo) error {
+func SaveTodo(todo *entity.Todo) error {
 	re := db.Save(&todo)
 	return utils.WrapGormErr(re.Error, "todo")
 }

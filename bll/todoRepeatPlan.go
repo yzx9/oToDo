@@ -19,7 +19,7 @@ func CreateTodoRepeatPlan(plan entity.TodoRepeatPlan) (entity.TodoRepeatPlan, er
 	}
 
 	plan.ID = uuid.NewString()
-	if err := dal.InsertTodoRepeatPlan(plan); err != nil {
+	if err := dal.InsertTodoRepeatPlan(&plan); err != nil {
 		return entity.TodoRepeatPlan{}, fmt.Errorf("fails to create todo repeat plan: %w", err)
 	}
 
@@ -40,7 +40,7 @@ func UpdateTodoRepeatPlan(plan, oldPlan entity.TodoRepeatPlan) (entity.TodoRepea
 	}
 
 	plan.ID = uuid.NewString()
-	if err := dal.InsertTodoRepeatPlan(plan); err != nil {
+	if err := dal.InsertTodoRepeatPlan(&plan); err != nil {
 		return entity.TodoRepeatPlan{}, fmt.Errorf("fails to create todo repeat plan: %w", err)
 	}
 
@@ -48,7 +48,7 @@ func UpdateTodoRepeatPlan(plan, oldPlan entity.TodoRepeatPlan) (entity.TodoRepea
 }
 
 func GetTodoRepeatPlan(id string) (entity.TodoRepeatPlan, error) {
-	plan, err := dal.GetTodoRepeatPlan(id)
+	plan, err := dal.SelectTodoRepeatPlan(id)
 	if err != nil {
 		return entity.TodoRepeatPlan{}, fmt.Errorf("fails to get todo repeat plan: %v", err)
 	}

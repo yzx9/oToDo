@@ -31,7 +31,7 @@ func UploadTodoFile(todoID string, file *multipart.FileHeader) (string, error) {
 		return "", err
 	}
 
-	err = dal.InsertTodoFile(entity.TodoFile{
+	err = dal.InsertTodoFile(&entity.TodoFile{
 		Entity: entity.Entity{
 			ID: uuid.NewString(),
 		},

@@ -2,22 +2,16 @@ package dal
 
 import (
 	"github.com/yzx9/otodo/entity"
+	"github.com/yzx9/otodo/utils"
 )
 
-var todoFiles = make(map[string]entity.TodoFile)
-
-func InsertTodoFile(file entity.TodoFile) error {
-	todoFiles[file.ID] = file
-	return nil
+func InsertTodoFile(file *entity.TodoFile) error {
+	re := db.Create(file)
+	return utils.WrapGormErr(re.Error, "todo file")
 }
 
-func GetTodoFiles(todoID string) ([]entity.TodoFile, error) {
-	vec := make([]entity.TodoFile, 0)
-	for _, v := range todoFiles {
-		if v.TodoID == todoID {
-			vec = append(vec, v)
-		}
-	}
-
-	return vec, nil
+func SelectTodoFiles(todoID string) ([]entity.TodoFile, error) {
+	var files []entity.TodoFile
+	re := db.Where("TodoID = ?", todoID).Find(&files)
+	return files, utils.WrapGormErr(re.Error, "file")
 }
