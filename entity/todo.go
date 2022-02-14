@@ -28,5 +28,7 @@ type Todo struct {
 
 	TodoRepeatPlanID string         `json:"-" gorm:"size:36"`
 	TodoRepeatPlan   TodoRepeatPlan `json:"todo_repeat_plan"`
-	TodoRepeatFrom   string         `json:"todo_repeat_from"` // last todo id
+
+	TodoRepeatFromID *string `json:"todo_repeat_from_id" gorm:"size:36"` // last todo id
+	TodoRepeatFrom   *Todo   `json:"-"`
 }

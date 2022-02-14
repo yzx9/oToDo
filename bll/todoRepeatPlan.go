@@ -1,7 +1,6 @@
 package bll
 
 import (
-	"bytes"
 	"fmt"
 	"time"
 
@@ -85,8 +84,8 @@ func isValidTodoRepeatPlan(plan entity.TodoRepeatPlan) bool {
 		return false
 	}
 
-	if t == entity.TodoRepeatPlanTypeWeek &&
-		bytes.Equal(plan.Weekday[:], []byte{0, 0, 0, 0, 0, 0, 0}) {
+	// Do not allow set all weekday to false
+	if t == entity.TodoRepeatPlanTypeWeek && plan.Weekday == 0 {
 		return false
 	}
 
@@ -101,10 +100,8 @@ func isSameTodoRepeatPlan(plan, oldPlan entity.TodoRepeatPlan) bool {
 	}
 
 	if plan.Type == string(entity.TodoRepeatPlanTypeWeek) {
-		for i := range plan.Weekday {
-			if plan.Weekday[i] != oldPlan.Weekday[i] {
-				return false
-			}
+		if plan.Weekday != oldPlan.Weekday {
+			return false
 		}
 	}
 
@@ -133,7 +130,8 @@ func getTodoNextRepeatTime(todo entity.Todo) time.Time {
 		}
 		deadline = deadline.AddDate(0, 0, 1)
 		for i := 0; i < 7-1; i++ {
-			if todo.TodoRepeatPlan.Weekday[deadline.Weekday()] == 1 {
+			mask := int8(0x01 << deadline.Weekday())
+			if todo.TodoRepeatPlan.Weekday&mask != 0 {
 				return deadline
 			}
 			deadline = deadline.AddDate(0, 0, 1)

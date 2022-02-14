@@ -1,6 +1,8 @@
 package entity
 
-import "time"
+import (
+	"time"
+)
 
 type TodoRepeatPlanType string
 
@@ -17,5 +19,5 @@ type TodoRepeatPlan struct {
 	Type     string    `json:"type"`
 	Interval int       `json:"interval"`
 	Before   time.Time `json:"before"`
-	Weekday  [7]byte   `json:"weekday"` // Follow time.Weekend: Sunday Monday Tuesday Wednesday Thursday Friday Saturday
+	Weekday  int8      `json:"weekday"` // BitBools, [0..6]=[Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday]
 }
