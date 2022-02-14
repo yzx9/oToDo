@@ -11,6 +11,11 @@ import (
 )
 
 func CreateTodo(userID string, todo entity.Todo) (entity.Todo, error) {
+	_, err := OwnTodoList(userID, todo.TodoListID)
+	if err != nil {
+		return entity.Todo{}, fmt.Errorf("fails to get todo list: %w", err)
+	}
+
 	todo.ID = uuid.NewString()
 	todo.UserID = userID // override user
 
