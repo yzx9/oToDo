@@ -50,6 +50,7 @@ func uploadFile(file *multipart.FileHeader, record entity.File) (string, error) 
 		return "", utils.NewError(otodo.ErrRequestEntityTooLarge, "file too large")
 	}
 
+	record.FileServerID = otodo.Conf.Server.ID
 	record.FilePath = applyFilePathTemplate(record)
 	err := utils.SaveFile(file, record.FilePath)
 	if err != nil {
