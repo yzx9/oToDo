@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/yzx9/otodo/dal"
 	"github.com/yzx9/otodo/entity"
+	"github.com/yzx9/otodo/utils"
 )
 
 func UpdateTag(todo entity.Todo, oldTodoTitle string) error {
@@ -33,15 +34,21 @@ func UpdateTag(todo entity.Todo, oldTodoTitle string) error {
 	for tagName, op := range tags {
 		if op {
 			// Insert new tag
-			if !dal.ExistTag(userID, tagName) {
-				if err := dal.InsertTag(entity.Tag{
+			exist, err := dal.ExistTag(userID, tagName)
+			if err != nil {
+				return utils.NewErrorWithUnknown("unknown error: %w", err)
+			}
+
+			if !exist {
+				tag := entity.Tag{
 					Entity: entity.Entity{
 						ID: uuid.NewString(),
 					},
 					Name:   tagName,
 					UserID: userID,
 					Todos:  make([]entity.Todo, 0),
-				}); err != nil {
+				}
+				if err := dal.InsertTag(&tag); err != nil {
 					return fmt.Errorf("fails to create tag: %w", err)
 				}
 			}

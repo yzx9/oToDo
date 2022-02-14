@@ -5,85 +5,63 @@ import (
 	"github.com/yzx9/otodo/utils"
 )
 
-var tags = make(map[string]entity.Tag)
-
-func InsertTag(tag entity.Tag) error {
-	tags[tag.ID] = tag
-	return nil
+func InsertTag(tag *entity.Tag) error {
+	re := db.Create(tag)
+	return utils.WrapGormErr(re.Error, "tag")
 }
 
-func GetTag(userID, tagName string) (entity.Tag, error) {
-	for _, tag := range tags {
-		if tag.UserID == userID && tag.Name == tagName {
-			return tag, nil
-		}
+func SelectTag(userID, tagName string) (entity.Tag, error) {
+	var tag entity.Tag
+	re := db.Where(&entity.Tag{
+		UserID: userID,
+		Name:   tagName,
+	}).First(&tag)
+	if re.Error != nil {
+		return entity.Tag{}, utils.WrapGormErr(re.Error, "tag")
 	}
 
-	return entity.Tag{}, utils.NewErrorWithNotFound("tag not found")
+	return tag, nil
 }
 
-func GetTags(userID string) ([]entity.Tag, error) {
-	vec := make([]entity.Tag, 0)
-	for _, tag := range tags {
-		if tag.UserID == userID {
-			vec = append(vec, tag)
-		}
+func SelectTags(userID string) ([]entity.Tag, error) {
+	var tags []entity.Tag
+	re := db.Where(&entity.Tag{UserID: userID}).Find(&tags)
+	if re.Error != nil {
+		return nil, utils.WrapGormErr(re.Error, "tag")
 	}
 
-	return vec, nil
+	return tags, nil
 }
 
 func InsertTagTodo(userID, todoID, tagName string) error {
-	for _, tag := range tags {
-		if tag.UserID == userID && tag.Name == tagName {
-			tag.Todos = append(tag.Todos, entity.Todo{
-				// TODO this is a known BUG, but can not be fixed
-				// before database setup.
-				Entity: entity.Entity{
-					ID: todoID,
-				},
-			})
-			tags[tag.ID] = tag
-			return nil
-		}
-	}
+	err := db.Model(&entity.Tag{}).Association("Todos").Append(&entity.Todo{
+		Entity: entity.Entity{
+			ID: todoID,
+		},
+	})
 
-	return utils.NewErrorWithNotFound("tag not found")
+	return utils.WrapGormErr(err, "tag todos")
 }
 
 func DeleteTagTodo(userID, todoID, tagName string) error {
-	for _, tag := range tags {
-		if tag.UserID != userID || tag.Name != tagName {
-			continue
-		}
+	err := db.Model(&entity.Tag{}).Association("Todos").Delete(&entity.Todo{
+		Entity: entity.Entity{
+			ID: todoID,
+		},
+	})
 
-		for i, todo := range tag.Todos {
-			if todo.ID != todoID {
-				continue
-			}
-
-			if len(tag.Todos) == 1 {
-				delete(tags, tag.ID)
-				return nil
-			}
-
-			tag.Todos = append(tag.Todos[:i-1], tag.Todos[i+1:]...)
-			tags[tag.ID] = tag
-			return nil
-		}
-
-		break
-	}
-
-	return utils.NewErrorWithNotFound("tag not found")
+	return utils.WrapGormErr(err, "tag todos")
 }
 
-func ExistTag(userID, tagName string) bool {
-	for _, tag := range tags {
-		if tag.UserID == userID && tag.Name == tagName {
-			return true
-		}
+func ExistTag(userID, tagName string) (bool, error) {
+	var count int64
+	re := db.Where(&entity.Tag{
+		UserID: userID,
+		Name:   tagName,
+	}).Count(&count)
+	if re.Error != nil {
+		return false, utils.WrapGormErr(re.Error, "tag")
 	}
 
-	return false
+	return count != 0, nil
 }
