@@ -17,9 +17,6 @@ func InsertUserInvalidRefreshToken(entity entity.UserInvalidRefreshToken) error 
 func ExistUserInvalidRefreshToken(userID, tokenID string) (bool, error) {
 	var count int64
 	re := db.Where(&entity.UserInvalidRefreshToken{
-		Entity: entity.Entity{
-			Deleted: false,
-		},
 		UserID:  userID,
 		TokenID: tokenID,
 	}).Count(&count)
