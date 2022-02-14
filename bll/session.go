@@ -43,7 +43,7 @@ func Login(userName, password string) (AuthTokenResult, error) {
 		return AuthTokenResult{}, fmt.Errorf("user not found: %v", userName)
 	}
 
-	if !bytes.Equal(user.Password, GetCryptoPassword(password)) {
+	if cryptoPwd := GetCryptoPassword(password); !bytes.Equal(user.Password[:], cryptoPwd[:]) {
 		return AuthTokenResult{}, fmt.Errorf("invalid credential")
 	}
 

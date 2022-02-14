@@ -60,7 +60,7 @@ func UpdateTag(todo entity.Todo, oldTodoTitle string) error {
 	return nil
 }
 
-var tagRegex = regexp.MustCompile(`^#(?P<tag>\\S+) `)
+var tagRegex = regexp.MustCompile(`^#(?P<tag>\\S{1,16}) `)
 
 func getTags(title string) map[string]bool {
 	tags := make(map[string]bool)

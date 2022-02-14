@@ -7,7 +7,7 @@ import (
 type Todo struct {
 	Entity
 
-	Title      string    `json:"title"`
+	Title      string    `json:"title" gorm:"size:128"`
 	Content    string    `json:"content"`
 	Importance bool      `json:"importance"`
 	Deadline   time.Time `json:"deadline"`

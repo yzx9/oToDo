@@ -84,7 +84,7 @@ func IsValidRefreshToken(userID, tokenID string) bool {
 }
 
 // Password
-func GetCryptoPassword(password string) []byte {
+func GetCryptoPassword(password string) [32]byte {
 	pwd := sha256.Sum256(append([]byte(password), passwordNonce...))
-	return pwd[:]
+	return pwd
 }

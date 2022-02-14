@@ -3,7 +3,7 @@ package entity
 type Tag struct {
 	Entity
 
-	Name string `json:"name"`
+	Name string `json:"name" gorm:"size:32"`
 
 	UserID string `json:"user_id" gorm:"size:36"`
 	User   User   `json:"-"`
