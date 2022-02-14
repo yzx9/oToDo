@@ -57,7 +57,7 @@ func uploadFile(file *multipart.FileHeader, record entity.File) (string, error) 
 		return "", fmt.Errorf("fails to upload file: %w", err)
 	}
 
-	err = dal.InsertFile(record)
+	err = dal.InsertFile(&record)
 	if err != nil {
 		return "", fmt.Errorf("fails to upload file: %w", err)
 	}
@@ -66,7 +66,7 @@ func uploadFile(file *multipart.FileHeader, record entity.File) (string, error) 
 }
 
 func GetFile(fileID string) (entity.File, error) {
-	file, err := dal.GetFile(fileID)
+	file, err := dal.SelectFile(fileID)
 	if err != nil {
 		return entity.File{}, utils.NewErrorWithNotFound("file not found: %v", fileID)
 	}
@@ -105,13 +105,13 @@ func applyFilePathTemplate(file entity.File) string {
 }
 
 func OwnFile(userID, fileID string) (entity.File, error) {
-	r := func(err error) (entity.File, error) {
+	write := func(err error) (entity.File, error) {
 		return entity.File{}, err
 	}
 
 	file, err := GetFile(fileID)
 	if err != nil {
-		return r(err)
+		return write(err)
 	}
 
 	switch entity.FileAccessType(file.AccessType) {
@@ -121,15 +121,15 @@ func OwnFile(userID, fileID string) (entity.File, error) {
 	case entity.FileTypeTodo:
 		user, err := dal.GetUserByTodo(file.RelatedID)
 		if err != nil {
-			return r(fmt.Errorf("fails to get user: %w", err))
+			return write(fmt.Errorf("fails to get user: %w", err))
 		}
 
 		if userID != user.ID {
-			return r(utils.NewErrorWithForbidden("unable to get non-owned file: %v", file.ID))
+			return write(utils.NewErrorWithForbidden("unable to get non-owned file: %v", file.ID))
 		}
 
 	default:
-		return r(fmt.Errorf("invalid file access type: %v", file.AccessType))
+		return write(fmt.Errorf("invalid file access type: %v", file.AccessType))
 	}
 
 	return file, nil

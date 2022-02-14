@@ -5,17 +5,20 @@ import (
 	"github.com/yzx9/otodo/utils"
 )
 
-var files = make(map[string]entity.File)
+func InsertFile(file *entity.File) error {
+	re := db.Create(file)
+	if re.Error != nil {
+		return utils.WrapGormErr(re.Error, "file")
+	}
 
-func InsertFile(file entity.File) error {
-	files[file.ID] = file
 	return nil
 }
 
-func GetFile(id string) (entity.File, error) {
-	file, ok := files[id]
-	if !ok {
-		return entity.File{}, utils.NewErrorWithNotFound("file not found")
+func SelectFile(id string) (entity.File, error) {
+	var file entity.File
+	re := db.Where("ID = ?", id).First(&file)
+	if re.Error != nil {
+		return entity.File{}, utils.WrapGormErr(re.Error, "file")
 	}
 
 	return file, nil
