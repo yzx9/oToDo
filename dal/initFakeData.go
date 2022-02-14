@@ -9,7 +9,9 @@ func init() {
 	// User
 	adminID := "0c13da37-4593-4b2e-8163-1cbdb6e50830"
 	InsertUser(entity.User{
-		ID:       adminID,
+		Entity: entity.Entity{
+			ID: adminID,
+		},
 		Name:     "admin",
 		Nickname: "Admin",
 		Password: []byte{ // admin123
@@ -22,7 +24,9 @@ func init() {
 	// Todo List
 	todoListID := "5f5459d1-ffdb-40ce-9e05-02af49938a45"
 	InsertTodoList(entity.TodoList{
-		ID:        todoListID,
+		Entity: entity.Entity{
+			ID: todoListID,
+		},
 		Name:      "To-Do",
 		UserID:    adminID,
 		Deletable: true,
@@ -30,14 +34,18 @@ func init() {
 
 	// Todo
 	InsertTodo(entity.Todo{
-		ID:         "32acb375-e9dc-473e-8f5f-8826f7783c1d",
+		Entity: entity.Entity{
+			ID: "32acb375-e9dc-473e-8f5f-8826f7783c1d",
+		},
 		Title:      "Hello, World!",
 		UserID:     adminID,
 		TodoListID: todoListID,
 	})
 
 	InsertTodo(entity.Todo{
-		ID:         "343dc2ce-1fbc-43ad-98d6-9cac1c67f2a6",
+		Entity: entity.Entity{
+			ID: "343dc2ce-1fbc-43ad-98d6-9cac1c67f2a6",
+		},
 		Title:      "你好，世界！",
 		UserID:     adminID,
 		TodoListID: todoListID,

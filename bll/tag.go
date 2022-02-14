@@ -35,7 +35,9 @@ func UpdateTag(todo entity.Todo, oldTodoTitle string) error {
 			// Insert new tag
 			if !dal.ExistTag(userID, tagName) {
 				if err := dal.InsertTag(entity.Tag{
-					ID:     uuid.NewString(),
+					Entity: entity.Entity{
+						ID: uuid.NewString(),
+					},
 					Name:   tagName,
 					UserID: userID,
 					Todos:  make([]entity.Todo, 0),

@@ -39,7 +39,9 @@ func InsertTagTodo(userID, todoID, tagName string) error {
 			tag.Todos = append(tag.Todos, entity.Todo{
 				// TODO this is a known BUG, but can not be fixed
 				// before database setup.
-				ID: todoID,
+				Entity: entity.Entity{
+					ID: todoID,
+				},
 			})
 			tags[tag.ID] = tag
 			return nil

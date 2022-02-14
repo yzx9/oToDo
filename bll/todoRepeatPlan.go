@@ -13,7 +13,9 @@ import (
 func CreateTodoRepeatPlan(plan entity.TodoRepeatPlan) (entity.TodoRepeatPlan, error) {
 	if !isValidTodoRepeatPlan(plan) {
 		return entity.TodoRepeatPlan{
-			ID: "",
+			Entity: entity.Entity{
+				ID: "",
+			},
 		}, nil
 	}
 
@@ -28,7 +30,9 @@ func CreateTodoRepeatPlan(plan entity.TodoRepeatPlan) (entity.TodoRepeatPlan, er
 func UpdateTodoRepeatPlan(plan, oldPlan entity.TodoRepeatPlan) (entity.TodoRepeatPlan, error) {
 	if !isValidTodoRepeatPlan(plan) {
 		return entity.TodoRepeatPlan{
-			ID: "",
+			Entity: entity.Entity{
+				ID: "",
+			},
 		}, nil
 	}
 

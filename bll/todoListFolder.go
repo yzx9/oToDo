@@ -11,7 +11,9 @@ import (
 
 func CreateTodoListFolder(userID string, todoListFolderName string) (entity.TodoListFolder, error) {
 	folder := entity.TodoListFolder{
-		ID:     uuid.NewString(),
+		Entity: entity.Entity{
+			ID: uuid.NewString(),
+		},
 		Name:   todoListFolderName,
 		UserID: userID,
 	}

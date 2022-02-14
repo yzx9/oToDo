@@ -20,18 +20,22 @@ const fileDestTemplate = "tmp/files/:date/:id:ext" // TODO Configurable
 func UploadTodoFile(todoID string, file *multipart.FileHeader) (string, error) {
 	fileID := uuid.NewString()
 	path, err := uploadFile(file, entity.File{
-		ID:         fileID,
+		Entity: entity.Entity{
+			ID:        fileID,
+			CreatedAt: time.Now(),
+		},
 		FileName:   file.Filename,
 		AccessType: string(entity.FileTypeTodo),
 		RelatedID:  todoID,
-		CreatedAt:  time.Now(),
 	})
 	if err != nil {
 		return "", err
 	}
 
 	err = dal.InsertTodoFile(entity.TodoFile{
-		ID:     uuid.NewString(),
+		Entity: entity.Entity{
+			ID: uuid.NewString(),
+		},
 		FileID: fileID,
 		TodoID: todoID,
 	})

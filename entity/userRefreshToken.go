@@ -1,10 +1,8 @@
 package entity
 
-import "time"
-
 type UserRefreshToken struct {
-	ID        string    `json:"id"`
-	UserID    string    `json:"user_id"`
-	TokenID   string    `json:"token_id"`
-	CreatedAt time.Time `json:"created_at"`
+	Entity
+
+	UserID  string `json:"user_id" gorm:"size:36"`
+	TokenID string `json:"token_id" gorm:"size:36"`
 }

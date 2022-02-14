@@ -1,11 +1,12 @@
 package entity
 
 type Tag struct {
-	ID   string `json:"id"`
+	Entity
+
 	Name string `json:"name"`
 
-	UserID string `json:"user_id"`
+	UserID string `json:"user_id" gorm:"size:36"`
 	User   User   `json:"-"`
 
-	Todos []Todo `json:"-"`
+	Todos []Todo `json:"-" gorm:"many2many:tag_todos;"`
 }

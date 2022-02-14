@@ -1,9 +1,5 @@
 package entity
 
-import (
-	"time"
-)
-
 type FileAccessType string
 
 const (
@@ -12,10 +8,10 @@ const (
 )
 
 type File struct {
-	ID         string    `json:"id"`
-	FileName   string    `json:"file_name"`
-	FilePath   string    `json:"file_path"`
-	AccessType string    `json:"access_type"` // FileAccessType
-	RelatedID  string    `json:"related_id"`  // Depend on access type
-	CreatedAt  time.Time `json:"created_at"`
+	Entity
+
+	FileName   string `json:"file_name"`
+	FilePath   string `json:"file_path"`
+	AccessType string `json:"access_type"` // FileAccessType
+	RelatedID  string `json:"related_id"`  // Depend on access type
 }

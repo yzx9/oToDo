@@ -5,7 +5,8 @@ import (
 )
 
 type Todo struct {
-	ID         string    `json:"id"`
+	Entity
+
 	Title      string    `json:"title"`
 	Content    string    `json:"content"`
 	Importance bool      `json:"importance"`
@@ -14,21 +15,18 @@ type Todo struct {
 	NotifyAt   time.Time `json:"notify_at"`
 	Done       bool      `json:"done"`
 	DoneAt     time.Time `json:"done_at"`
-	CreatedAt  time.Time `json:"created_at"`
-	UpdatedAt  time.Time `json:"updated_at"`
-	DeletedAt  time.Time `json:"deleted_at"`
 
-	UserID string `json:"user_id"`
+	UserID string `json:"user_id" gorm:"size:36"`
 	User   User   `json:"-"`
 
-	TodoListID string   `json:"todolist_id"`
+	TodoListID string   `json:"todolist_id" gorm:"size:36"`
 	TodoList   TodoList `json:"-"`
 
 	Files []TodoFile `json:"files"`
 
 	Steps []TodoStep `json:"steps"`
 
-	TodoRepeatPlanID string         `json:"-"`
+	TodoRepeatPlanID string         `json:"-" gorm:"size:36"`
 	TodoRepeatPlan   TodoRepeatPlan `json:"todo_repeat_plan"`
 	TodoRepeatFrom   string         `json:"todo_repeat_from"` // last todo id
 }

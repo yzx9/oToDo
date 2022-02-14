@@ -12,7 +12,8 @@ const (
 )
 
 type TodoRepeatPlan struct {
-	ID       string    `json:"-"`
+	Entity
+
 	Type     string    `json:"type"`
 	Interval int       `json:"interval"`
 	Before   time.Time `json:"before"`

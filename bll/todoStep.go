@@ -17,7 +17,9 @@ func CreateTodoStep(userID, todoID string, name string) (entity.TodoStep, error)
 	}
 
 	step := entity.TodoStep{
-		ID:     uuid.NewString(),
+		Entity: entity.Entity{
+			ID: uuid.NewString(),
+		},
 		Name:   name,
 		TodoID: todoID,
 	}

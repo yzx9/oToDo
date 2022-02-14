@@ -11,7 +11,9 @@ import (
 
 func CreateTodoList(userID string, todoListName string) (entity.TodoList, error) {
 	list := entity.TodoList{
-		ID:        uuid.NewString(),
+		Entity: entity.Entity{
+			ID: uuid.NewString(),
+		},
 		Name:      todoListName,
 		Deletable: true,
 		UserID:    userID,

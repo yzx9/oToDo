@@ -32,7 +32,9 @@ func CreateUser(payload CreateUserPayload) (entity.User, error) {
 
 	basicTodoListID := uuid.NewString()
 	user := entity.User{
-		ID:              uuid.NewString(),
+		Entity: entity.Entity{
+			ID: uuid.NewString(),
+		},
 		Name:            payload.UserName,
 		Nickname:        payload.Nickname,
 		Password:        GetCryptoPassword(payload.Password),
@@ -42,7 +44,9 @@ func CreateUser(payload CreateUserPayload) (entity.User, error) {
 
 	// TODO handle error
 	dal.InsertTodoList(entity.TodoList{
-		ID:        basicTodoListID,
+		Entity: entity.Entity{
+			ID: basicTodoListID,
+		},
 		Name:      "Todos", // TODO i18n
 		Deletable: false,
 		UserID:    user.ID,
@@ -59,10 +63,12 @@ func GetUser(userID string) (entity.User, error) {
 
 func CreateInvalidUserRefreshToken(userID, tokenID string) (entity.UserRefreshToken, error) {
 	model := entity.UserRefreshToken{
-		ID:        uuid.NewString(),
-		UserID:    userID,
-		TokenID:   tokenID,
-		CreatedAt: time.Now(),
+		Entity: entity.Entity{
+			ID:        uuid.NewString(),
+			CreatedAt: time.Now(),
+		},
+		UserID:  userID,
+		TokenID: tokenID,
 	}
 	if err := dal.InsertInvalidUserRefreshToken(model); err != nil {
 		return entity.UserRefreshToken{}, fmt.Errorf("fails to make user refresh token invalid: %w", err)
