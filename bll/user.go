@@ -37,7 +37,7 @@ func CreateUser(payload CreateUserPayload) (entity.User, error) {
 		Password:        GetCryptoPassword(payload.Password),
 		BasicTodoListID: basicTodoListID,
 	}
-	err := dal.InsertUser(user)
+	err := dal.InsertUser(&user)
 
 	// TODO handle error
 	dal.InsertTodoList(&entity.TodoList{
@@ -53,7 +53,7 @@ func CreateUser(payload CreateUserPayload) (entity.User, error) {
 }
 
 func GetUser(userID string) (entity.User, error) {
-	return dal.GetUser(userID)
+	return dal.SelectUser(userID)
 }
 
 // Invalid User Refresh Token

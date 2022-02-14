@@ -8,7 +8,7 @@ import (
 func init() {
 	// User
 	adminID := "0c13da37-4593-4b2e-8163-1cbdb6e50830"
-	InsertUser(entity.User{
+	InsertUser(&entity.User{
 		Entity: entity.Entity{
 			ID: adminID,
 		},

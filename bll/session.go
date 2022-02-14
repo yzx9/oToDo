@@ -32,7 +32,7 @@ type SessionTokenClaims struct {
 }
 
 func Login(userName, password string) (AuthTokenResult, error) {
-	user, err := dal.GetUserByUserName(userName)
+	user, err := dal.SelectUserByUserName(userName)
 	if err != nil {
 		return AuthTokenResult{}, fmt.Errorf("user not found: %v", userName)
 	}
@@ -53,7 +53,7 @@ func Logout(userID, refreshTokenID string) error {
 }
 
 func NewAccessToken(userID, refreshTokenID string) (AuthTokenResult, error) {
-	user, err := dal.GetUser(userID)
+	user, err := dal.SelectUser(userID)
 	if err != nil {
 		return AuthTokenResult{}, fmt.Errorf("fails to get user, %w", err)
 	}

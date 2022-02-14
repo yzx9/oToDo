@@ -5,43 +5,29 @@ import (
 	"github.com/yzx9/otodo/utils"
 )
 
-var users = make(map[string]entity.User)
-
-func InsertUser(user entity.User) error {
-	users[user.ID] = user
-	return nil
+func InsertUser(user *entity.User) error {
+	re := db.Create(user)
+	return utils.WrapGormErr(re.Error, "user")
 }
 
-func GetUser(id string) (entity.User, error) {
-	user, ok := users[id]
-	if !ok {
-		return entity.User{}, utils.NewErrorWithNotFound("user not found: %v", id)
-	}
-
-	return user, nil
+func SelectUser(id string) (entity.User, error) {
+	var user entity.User
+	re := db.Where("ID = ?", id).First(&user)
+	return user, utils.WrapGormErr(re.Error, "user")
 }
 
-func GetUserByUserName(username string) (entity.User, error) {
-	for _, user := range users {
-		if user.Name == username {
-			return user, nil
-		}
-	}
-
-	return entity.User{}, utils.NewErrorWithNotFound("user not found, username: %v", username)
+func SelectUserByUserName(username string) (entity.User, error) {
+	var user entity.User
+	re := db.Where("Name = ?", username).First(&user)
+	return user, utils.WrapGormErr(re.Error, "user")
 }
 
-func GetUserByTodo(todoID string) (entity.User, error) {
-	todo, err := SelectTodo(todoID)
-	if err != nil {
-		return entity.User{}, nil
+func SelectUserByTodo(todoID string) (entity.User, error) {
+	var todo entity.Todo
+	re := db.Where("ID = ?", todoID).Select("UserID").First(&todo)
+	if re.Error != nil {
+		return entity.User{}, utils.WrapGormErr(re.Error, "todo")
 	}
 
-	for _, user := range users {
-		if user.ID == todo.UserID {
-			return user, nil
-		}
-	}
-
-	return entity.User{}, utils.NewErrorWithNotFound("user not found, todo id: %v", todoID)
+	return SelectUser(todo.UserID)
 }

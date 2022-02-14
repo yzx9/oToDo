@@ -119,7 +119,8 @@ func OwnFile(userID, fileID string) (entity.File, error) {
 		break
 
 	case entity.FileTypeTodo:
-		user, err := dal.GetUserByTodo(file.RelatedID)
+		// TODO should check right from todo list
+		user, err := dal.SelectUserByTodo(file.RelatedID)
 		if err != nil {
 			return write(fmt.Errorf("fails to get user: %w", err))
 		}
