@@ -23,7 +23,7 @@ func init() {
 
 	// Todo List
 	todoListID := "5f5459d1-ffdb-40ce-9e05-02af49938a45"
-	InsertTodoList(entity.TodoList{
+	InsertTodoList(&entity.TodoList{
 		Entity: entity.Entity{
 			ID: todoListID,
 		},

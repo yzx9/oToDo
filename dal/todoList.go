@@ -5,55 +5,39 @@ import (
 	"github.com/yzx9/otodo/utils"
 )
 
-var todoLists = make(map[string]entity.TodoList)
-
-func InsertTodoList(todoList entity.TodoList) error {
-	todoLists[todoList.ID] = todoList
-	return nil
+func InsertTodoList(todoList *entity.TodoList) error {
+	re := db.Create(todoList)
+	return utils.WrapGormErr(re.Error, "todo list")
 }
 
-func GetTodoList(id string) (entity.TodoList, error) {
-	for _, v := range todoLists {
-		if v.ID == id {
-			return v, nil
-		}
-	}
-
-	return entity.TodoList{}, utils.NewErrorWithNotFound("todo list not found: %v", id)
+func SelectTodoList(id string) (entity.TodoList, error) {
+	var list entity.TodoList
+	re := db.Where("ID = ?", id).First(&list)
+	return list, utils.WrapGormErr(re.Error, "todo list")
 }
 
-func GetTodoLists(userId string) ([]entity.TodoList, error) {
-	vec := make([]entity.TodoList, 0)
-	for _, v := range todoLists {
-		if v.UserID == userId {
-			vec = append(vec, v)
-		}
-	}
-
-	return vec, nil
+func SelectTodoLists(userId string) ([]entity.TodoList, error) {
+	var lists []entity.TodoList
+	re := db.Where("UserID = ?", userId).Find(&lists)
+	return lists, utils.WrapGormErr(re.Error, "todo list")
 }
 
-func DeleteTodoList(todoListID string) error {
-	_, ok := todoLists[todoListID]
-	if !ok {
-		return utils.NewErrorWithNotFound("todo list not found: %v", todoListID)
-	}
-
-	delete(todoLists, todoListID)
-	return nil
+func DeleteTodoList(id string) error {
+	re := db.Delete(&entity.Todo{
+		Entity: entity.Entity{
+			ID: id,
+		},
+	})
+	return utils.WrapGormErr(re.Error, "todo list")
 }
 
-func ExistTodoList(id string) bool {
-	_, exist := todoLists[id]
-	return exist
+func DeleteTodoListsByFolder(todoListFolderID string) (int64, error) {
+	re := db.Delete(entity.TodoList{}, "TodoListFolderID = ?", todoListFolderID)
+	return re.RowsAffected, utils.WrapGormErr(re.Error, "todo list")
 }
 
-func DeleteTodoListsFromFolder(todoListFolderID string) error {
-	for i, v := range todoLists {
-		if v.TodoListFolderID == todoListFolderID {
-			v.TodoListFolderID = ""
-			todoLists[i] = v
-		}
-	}
-	return nil
+func ExistTodoList(id string) (bool, error) {
+	var count int64
+	re := db.Model(&entity.TodoList{}).Where("ID = ?", id).Count(&count)
+	return count != 0, utils.WrapGormErr(re.Error, "todo list")
 }

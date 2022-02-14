@@ -5,45 +5,34 @@ import (
 	"github.com/yzx9/otodo/utils"
 )
 
-var todoListFolders = make(map[string]entity.TodoListFolder)
-
-func InsertTodoListFolder(todoListFolder entity.TodoListFolder) error {
-	todoListFolders[todoListFolder.ID] = todoListFolder
-	return nil
+func InsertTodoListFolder(todoListFolder *entity.TodoListFolder) error {
+	re := db.Create(todoListFolder)
+	return utils.WrapGormErr(re.Error, "todo list folder")
 }
 
-func GetTodoListFolder(todoListFolderID string) (entity.TodoListFolder, error) {
-	for _, v := range todoListFolders {
-		if v.ID == todoListFolderID {
-			return v, nil
-		}
-	}
-
-	return entity.TodoListFolder{}, utils.NewErrorWithNotFound("todo list folder not found: %v", todoListFolderID)
+func GetTodoListFolder(id string) (entity.TodoListFolder, error) {
+	var folder entity.TodoListFolder
+	re := db.Where("ID = ?", id).First(&folder)
+	return folder, utils.WrapGormErr(re.Error, "todo list folder")
 }
 
 func GetTodoListFolders(userId string) ([]entity.TodoListFolder, error) {
-	vec := make([]entity.TodoListFolder, 0)
-	for _, v := range todoListFolders {
-		if v.UserID == userId {
-			vec = append(vec, v)
-		}
-	}
-
-	return vec, nil
+	var folders []entity.TodoListFolder
+	re := db.Where("UserID = ?", userId).Find(&folders)
+	return folders, utils.WrapGormErr(re.Error, "todo list folder")
 }
 
-func DeleteTodoListFolder(todoListFolderID string) error {
-	_, ok := todoListFolders[todoListFolderID]
-	if !ok {
-		return utils.NewErrorWithNotFound("todo list folder not found: %v", todoListFolderID)
-	}
-
-	delete(todoListFolders, todoListFolderID)
-	return nil
+func DeleteTodoListFolder(id string) error {
+	re := db.Delete(&entity.TodoListFolder{
+		Entity: entity.Entity{
+			ID: id,
+		},
+	})
+	return utils.WrapGormErr(re.Error, "todo list folder")
 }
 
-func ExistTodoListFolder(id string) bool {
-	_, exist := todoLists[id]
-	return exist
+func ExistTodoListFolder(id string) (bool, error) {
+	var count int64
+	re := db.Model(&entity.TodoListFolder{}).Where("ID = ?", id).Count(&count)
+	return count != 0, utils.WrapGormErr(re.Error, "tag")
 }

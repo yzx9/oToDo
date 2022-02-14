@@ -40,7 +40,7 @@ func CreateUser(payload CreateUserPayload) (entity.User, error) {
 	err := dal.InsertUser(user)
 
 	// TODO handle error
-	dal.InsertTodoList(entity.TodoList{
+	dal.InsertTodoList(&entity.TodoList{
 		Entity: entity.Entity{
 			ID: basicTodoListID,
 		},

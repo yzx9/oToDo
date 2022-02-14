@@ -17,7 +17,7 @@ func CreateTodoListFolder(userID string, todoListFolderName string) (entity.Todo
 		Name:   todoListFolderName,
 		UserID: userID,
 	}
-	if err := dal.InsertTodoListFolder(folder); err != nil {
+	if err := dal.InsertTodoListFolder(&folder); err != nil {
 		return entity.TodoListFolder{}, err
 	}
 
@@ -49,7 +49,7 @@ func DeleteTodoListFolder(userID, todoListFolderID string) (entity.TodoListFolde
 
 	// TODO[feat] Whether to cascade delete todo lists
 	// Cascade delete todo lists
-	if err = dal.DeleteTodoListsFromFolder(todoListFolderID); err != nil {
+	if _, err = dal.DeleteTodoListsByFolder(todoListFolderID); err != nil {
 		return write(fmt.Errorf("fails to cascade delete todo lists: %w", err))
 	}
 
