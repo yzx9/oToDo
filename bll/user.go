@@ -40,13 +40,13 @@ func CreateUser(payload CreateUserPayload) (entity.User, error) {
 	basicTodoList := entity.TodoList{
 		Name:      "Todos", // TODO i18n
 		Deletable: false,
-		User:      user,
+		UserID:    user.ID,
 	}
 	if err := dal.InsertTodoList(&basicTodoList); err != nil {
 		return entity.User{}, fmt.Errorf("fails to create user basic todo list: %w", err)
 	}
 
-	user.BasicTodoList = &basicTodoList
+	user.BasicTodoListID = basicTodoList.ID
 	if err := dal.SaveUser(&user); err != nil {
 		return entity.User{}, fmt.Errorf("fails to save user basic todo list: %w", err)
 	}
@@ -88,7 +88,7 @@ func IsValidRefreshToken(userID, tokenID string) (bool, error) {
 }
 
 // Password
-func GetCryptoPassword(password string) [32]byte {
+func GetCryptoPassword(password string) []byte {
 	pwd := sha256.Sum256(append([]byte(password), otodo.Conf.Secret.PasswordNonce...))
-	return pwd
+	return pwd[:]
 }
