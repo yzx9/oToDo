@@ -88,7 +88,8 @@ func UpdateTodo(userID string, todo entity.Todo) (entity.Todo, error) {
 
 	// Update values
 	if todo.Done && todo.DoneAt.IsZero() {
-		todo.DoneAt = time.Now()
+		t := time.Now()
+		todo.DoneAt = &t
 	}
 
 	plan, err := UpdateTodoRepeatPlan(todo.TodoRepeatPlan, oldTodo.TodoRepeatPlan)

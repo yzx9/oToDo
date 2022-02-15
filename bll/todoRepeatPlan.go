@@ -63,7 +63,7 @@ func CreateRepeatTodoIfNeed(todo entity.Todo) (bool, entity.Todo, error) {
 		return false, entity.Todo{}, nil
 	}
 
-	todo.Deadline = nextDeadline
+	todo.Deadline = &nextDeadline
 	if err := dal.InsertTodo(&todo); err != nil {
 		return false, entity.Todo{}, fmt.Errorf("fails to create todo: %w", err)
 	}
@@ -105,7 +105,7 @@ func isSameTodoRepeatPlan(plan, oldPlan entity.TodoRepeatPlan) bool {
 }
 
 func getTodoNextRepeatTime(todo entity.Todo) time.Time {
-	deadline := todo.Deadline
+	deadline := *todo.Deadline
 	interval := todo.TodoRepeatPlan.Interval
 
 	weekend := time.Sunday // TODO 此处默认周一为一周开始
@@ -124,6 +124,7 @@ func getTodoNextRepeatTime(todo entity.Todo) time.Time {
 		if deadline.Weekday() == weekend {
 			deadline = deadline.AddDate(0, 0, (interval-1)*7)
 		}
+
 		deadline = deadline.AddDate(0, 0, 1)
 		for i := 0; i < 7-1; i++ {
 			mask := int8(0x01 << deadline.Weekday())

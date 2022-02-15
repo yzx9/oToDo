@@ -37,7 +37,8 @@ func UpdateTodoStep(userID string, step entity.TodoStep) (entity.TodoStep, error
 	}
 
 	if step.Done && !oldStep.Done {
-		step.DoneAt = time.Now()
+		t := time.Now()
+		step.DoneAt = &t
 	}
 
 	if err = dal.SaveTodoStep(&step); err != nil {
