@@ -20,6 +20,7 @@ func setupRouter(e *gin.Engine) {
 
 		// File
 		// r.MaxMultipartMemory = MaxFileSize // 限制 Gin 上传文件时最大内存 (默认 32 MiB)
+		r.POST("/files", handlers.PostFileHandler)
 		r.GET("/files/:id", handlers.GetFileHandler)
 		r.GET("/files/presigned/:id", handlers.GetFilePresignedHandler)
 

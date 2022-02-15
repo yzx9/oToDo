@@ -76,8 +76,7 @@ func GetFilePath(userID, fileID string) (string, error) {
 		return "", err
 	}
 
-	path := applyFilePathTemplate(file)
-	return path, nil
+	return getFilePath(file), nil
 }
 
 func ForceGetFilePath(fileID string) (string, error) {
@@ -86,18 +85,7 @@ func ForceGetFilePath(fileID string) (string, error) {
 		return "", err
 	}
 
-	path := applyFilePathTemplate(file)
-	return path, nil
-}
-
-func applyFilePathTemplate(file *entity.File) string {
-	template := otodo.Conf.Server.FilePathTemplate
-	template = strings.ReplaceAll(template, ":id", file.ID)
-	template = strings.ReplaceAll(template, ":ext", filepath.Ext(file.FileName))
-	template = strings.ReplaceAll(template, ":name", file.FileName)
-	template = strings.ReplaceAll(template, ":path", file.FilePath)
-	template = strings.ReplaceAll(template, ":date", file.CreatedAt.Format("20060102"))
-	return template
+	return getFilePath(file), nil
 }
 
 func OwnFile(userID, fileID string) (*entity.File, error) {
@@ -130,4 +118,19 @@ func OwnFile(userID, fileID string) (*entity.File, error) {
 	}
 
 	return file, nil
+}
+
+func applyFilePathTemplate(file *entity.File) string {
+	template := otodo.Conf.Server.FilePathTemplate
+	template = strings.ReplaceAll(template, ":id", file.ID)
+	template = strings.ReplaceAll(template, ":ext", filepath.Ext(file.FileName))
+	template = strings.ReplaceAll(template, ":name", file.FileName)
+	template = strings.ReplaceAll(template, ":path", file.FilePath)
+	template = strings.ReplaceAll(template, ":date", file.CreatedAt.Format("20060102"))
+	return template
+}
+
+func getFilePath(file *entity.File) string {
+	// TODO[feat]: If exist multi servers, how to get file? maybe we need redirect
+	return file.FilePath
 }

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"regexp"
 
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/bll"
@@ -14,11 +15,18 @@ type FilePayload struct {
 	FileID string `json:"fileID"`
 }
 
-// Upload public file, for user avatar
-func PostPublicFileHandler(c *gin.Context) {
+var supportedFileTypeRegex = regexp.MustCompile(`.(jpg|jpeg|JPG|png|PNG|gif|GIF|ico|ICO)$`)
+
+// Upload public file, for user avatar, only support img now
+func PostFileHandler(c *gin.Context) {
 	file, err := c.FormFile("file")
 	if err != nil {
 		common.AbortWithError(c, utils.NewError(otodo.ErrPreconditionRequired, "file required"))
+		return
+	}
+
+	if !supportedFileTypeRegex.MatchString(file.Filename) {
+		common.AbortWithError(c, utils.NewError(otodo.ErrPreconditionFailed, "invalid file type"))
 		return
 	}
 
