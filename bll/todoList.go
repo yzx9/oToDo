@@ -21,28 +21,37 @@ func CreateTodoList(userID string, todoListName string) (entity.TodoList, error)
 	return list, nil
 }
 
-func GetTodoList(userID, todoListID string) (entity.TodoList, error) {
+func SelectTodoList(userID, todoListID string) (entity.TodoList, error) {
 	return OwnTodoList(userID, todoListID)
 }
 
-func GetTodoLists(userID string) ([]entity.TodoList, error) {
+func SelectTodoLists(userID string) ([]entity.TodoList, error) {
 	vec, err := dal.SelectTodoLists(userID)
 	if err != nil {
-		return nil, fmt.Errorf("fails to get user: %w", err)
+		return nil, fmt.Errorf("fails to get user todo lists: %w", err)
 	}
 
-	// TODO[feat] shared todo list
+	shared, err := dal.SelectSharedTodoLists(userID)
+	if err != nil {
+		return nil, fmt.Errorf("fails to get user shared todo lists: %w", err)
+	}
 
+	vec = append(vec, shared...)
 	return vec, nil
 }
 
 func DeleteTodoList(userID, todoListID string) (entity.TodoList, error) {
-	todoList, err := OwnTodoList(userID, todoListID)
+	// only allow delete by owner, not shared users
+	todoList, err := dal.SelectTodoList(todoListID)
 	if err != nil {
-		return entity.TodoList{}, err
+		return entity.TodoList{}, fmt.Errorf("fails to get todo list: %w", err)
 	}
 
-	// TODO[feat] only allow delete by owner, not shared users
+	if todoList.UserID != userID {
+		return entity.TodoList{}, utils.NewErrorWithForbidden("unable to handle non-owned todo list: %v", todoListID)
+	}
+
+	// check if deletable
 	if !todoList.Deletable {
 		return entity.TodoList{}, utils.NewErrorWithPreconditionFailed("todo list not deletable: %v", todoListID)
 	}
@@ -59,7 +68,7 @@ func DeleteTodoList(userID, todoListID string) (entity.TodoList, error) {
 	return todoList, nil
 }
 
-// Verify permission
+// Verify permission, owner or shared user
 func OwnTodoList(userID, todoListID string) (entity.TodoList, error) {
 	todoList, err := dal.SelectTodoList(todoListID)
 	if err != nil {

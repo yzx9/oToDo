@@ -14,4 +14,6 @@ type User struct {
 	BasicTodoList   *TodoList `json:"-"`
 
 	TodoLists []TodoList `json:"-"`
+
+	SharedTodoLists []*TodoList `json:"-" gorm:"many2many:todo_list_shared_users"`
 }

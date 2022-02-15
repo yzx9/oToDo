@@ -22,6 +22,12 @@ func SelectTodoLists(userId string) ([]entity.TodoList, error) {
 	return lists, utils.WrapGormErr(re.Error, "todo list")
 }
 
+func SelectSharedTodoLists(userId string) ([]entity.TodoList, error) {
+	var lists []entity.TodoList
+	err := db.Model(&entity.User{}).Where("UserID = ?", userId).Association("SharedTodoLists").Find(&lists)
+	return lists, utils.WrapGormErr(err, "todo list")
+}
+
 func DeleteTodoList(id string) error {
 	re := db.Delete(&entity.Todo{
 		Entity: entity.Entity{

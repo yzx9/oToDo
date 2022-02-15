@@ -24,7 +24,7 @@ func GetCurrentUserHandler(c *gin.Context) {
 // Get todo lists for current user
 func GetCurrentUserTodoListsHandler(c *gin.Context) {
 	userID := common.MustGetAccessUserID(c)
-	todos, err := bll.GetTodoLists(userID)
+	todos, err := bll.SelectTodoLists(userID)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return

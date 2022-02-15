@@ -11,4 +11,6 @@ type TodoList struct {
 
 	TodoListFolderID string         `json:"todoListFolderID" gorm:"type:char(36);"`
 	TodoListFolder   TodoListFolder `json:"-"`
+
+	SharedUsers []*User `json:"-" gorm:"many2many:todo_list_shared_users"`
 }
