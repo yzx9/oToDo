@@ -9,6 +9,6 @@ type TodoStep struct {
 	Done   bool      `json:"done"`
 	DoneAt time.Time `json:"done_at"`
 
-	TodoID string `json:"todo_id" gorm:"size:36"`
+	TodoID string `json:"todo_id" gorm:"type:char(36);"`
 	Todo   Todo   `json:"-"`
 }

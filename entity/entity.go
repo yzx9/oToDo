@@ -8,7 +8,7 @@ import (
 )
 
 type Entity struct {
-	ID        string         `json:"id" gorm:"primaryKey;size:36"`
+	ID        string         `json:"id" gorm:"primaryKey;type:char(36);"`
 	CreatedAt time.Time      `json:"created_at" gorm:"not null"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
