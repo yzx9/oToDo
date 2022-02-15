@@ -73,8 +73,15 @@ func OwnTodoList(userID, todoListID string) (entity.TodoList, error) {
 		return entity.TodoList{}, fmt.Errorf("fails to get todo list: %v", todoListID)
 	}
 
-	if todoList.UserID != userID && !HasSharing(userID, todoListID) {
-		return entity.TodoList{}, utils.NewErrorWithForbidden("unable to handle non-owned todo list: %v", todoListID)
+	if todoList.UserID != userID {
+		sharing, err := HasSharing(userID, todoListID)
+		if err != nil {
+			return entity.TodoList{}, fmt.Errorf("fails to get todo list sharing: %v", todoListID)
+		}
+
+		if !sharing {
+			return entity.TodoList{}, utils.NewErrorWithForbidden("unable to handle non-owned todo list: %v", todoListID)
+		}
 	}
 
 	return todoList, nil

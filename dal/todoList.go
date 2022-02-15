@@ -47,3 +47,14 @@ func ExistTodoList(id string) (bool, error) {
 	re := db.Model(&entity.TodoList{}).Where("id = ?", id).Count(&count)
 	return count != 0, utils.WrapGormErr(re.Error, "todo list")
 }
+
+func ExistTodoListSharing(userID, todoListID string) (bool, error) {
+	user := entity.User{}
+	user.ID = userID
+	var lists []entity.TodoList
+	if err := db.Model(&user).Association("SharedTodoLists").Find(&lists, "id = ?", todoListID); err != nil {
+		return false, utils.WrapGormErr(err, "todo list")
+	}
+
+	return len(lists) != 0, nil
+}
