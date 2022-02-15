@@ -10,13 +10,13 @@ func InsertTodoListFolder(todoListFolder *entity.TodoListFolder) error {
 	return utils.WrapGormErr(re.Error, "todo list folder")
 }
 
-func GetTodoListFolder(id string) (entity.TodoListFolder, error) {
+func SelectTodoListFolder(id string) (entity.TodoListFolder, error) {
 	var folder entity.TodoListFolder
 	re := db.Where("ID = ?", id).First(&folder)
 	return folder, utils.WrapGormErr(re.Error, "todo list folder")
 }
 
-func GetTodoListFolders(userId string) ([]entity.TodoListFolder, error) {
+func SelectTodoListFolders(userId string) ([]entity.TodoListFolder, error) {
 	var folders []entity.TodoListFolder
 	re := db.Where("UserID = ?", userId).Find(&folders)
 	return folders, utils.WrapGormErr(re.Error, "todo list folder")

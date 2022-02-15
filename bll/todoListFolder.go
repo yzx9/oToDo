@@ -25,12 +25,8 @@ func GetTodoListFolder(userID, todoListFolderID string) (entity.TodoListFolder, 
 }
 
 func GetTodoListFolders(userID string) ([]entity.TodoListFolder, error) {
-	vec, err := dal.GetTodoListFolders(userID)
-	if err != nil {
-		return nil, fmt.Errorf("fails to get user: %w", err)
-	}
-
-	return vec, nil
+	vec, err := dal.SelectTodoListFolders(userID)
+	return vec, fmt.Errorf("fails to get user: %w", err)
 }
 
 func DeleteTodoListFolder(userID, todoListFolderID string) (entity.TodoListFolder, error) {
@@ -58,7 +54,7 @@ func DeleteTodoListFolder(userID, todoListFolderID string) (entity.TodoListFolde
 
 // Verify permission
 func OwnTodoListFolder(userID, todoListFolderID string) (entity.TodoListFolder, error) {
-	todoListFolder, err := dal.GetTodoListFolder(todoListFolderID)
+	todoListFolder, err := dal.SelectTodoListFolder(todoListFolderID)
 	if err != nil {
 		return entity.TodoListFolder{}, fmt.Errorf("fails to get todo list folder: %v", todoListFolderID)
 	}
