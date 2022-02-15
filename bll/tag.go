@@ -10,7 +10,7 @@ import (
 	"github.com/yzx9/otodo/utils"
 )
 
-func UpdateTag(todo entity.Todo, oldTodoTitle string) error {
+func UpdateTag(todo *entity.Todo, oldTodoTitle string) error {
 	if todo.Title == oldTodoTitle {
 		return nil
 	}

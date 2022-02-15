@@ -9,25 +9,25 @@ import (
 	"github.com/yzx9/otodo/utils"
 )
 
-func CreateTodo(userID string, todo entity.Todo) (entity.Todo, error) {
+func CreateTodo(userID string, todo *entity.Todo) error {
 	_, err := OwnTodoList(userID, todo.TodoListID)
 	if err != nil {
-		return entity.Todo{}, fmt.Errorf("fails to get todo list: %w", err)
+		return fmt.Errorf("fails to get todo list: %w", err)
 	}
 
 	todo.UserID = userID // override user
 
 	plan, err := CreateTodoRepeatPlan(todo.TodoRepeatPlan)
 	if err != nil {
-		return entity.Todo{}, fmt.Errorf("fails to create todo repeat plan: %w", err)
+		return fmt.Errorf("fails to create todo repeat plan: %w", err)
 	}
 	todo.TodoRepeatPlanID = plan.ID
 
-	if err := dal.InsertTodo(&todo); err != nil {
-		return entity.Todo{}, fmt.Errorf("fails to create todo: %w", err)
+	if err := dal.InsertTodo(todo); err != nil {
+		return fmt.Errorf("fails to create todo: %w", err)
 	}
 
-	return todo, nil
+	return nil
 }
 
 func GetTodo(userID, todoID string) (entity.Todo, error) {
@@ -75,15 +75,15 @@ func GetNotNotifiedTodos(userID string) ([]entity.Todo, error) {
 	return todos, nil
 }
 
-func UpdateTodo(userID string, todo entity.Todo) (entity.Todo, error) {
+func UpdateTodo(userID string, todo *entity.Todo) error {
 	// Limits
 	oldTodo, err := OwnTodo(userID, todo.ID)
 	if err != nil {
-		return entity.Todo{}, err
+		return err
 	}
 
 	if oldTodo.UserID != todo.UserID {
-		return entity.Todo{}, utils.NewErrorWithPreconditionFailed("unable to update todo owner")
+		return utils.NewErrorWithPreconditionFailed("unable to update todo owner")
 	}
 
 	// Update values
@@ -94,29 +94,29 @@ func UpdateTodo(userID string, todo entity.Todo) (entity.Todo, error) {
 
 	plan, err := UpdateTodoRepeatPlan(todo.TodoRepeatPlan, oldTodo.TodoRepeatPlan)
 	if err != nil {
-		return entity.Todo{}, err
+		return err
 	}
 	todo.TodoRepeatPlanID = plan.ID
 
 	// Save
-	if err = dal.SaveTodo(&todo); err != nil {
-		return entity.Todo{}, err
+	if err = dal.SaveTodo(todo); err != nil {
+		return err
 	}
 
 	// Events
 	// TODO[perf] Following events can be async
 	if err = UpdateTag(todo, oldTodo.Title); err != nil {
-		return entity.Todo{}, err
+		return err
 	}
 
 	if !oldTodo.Done && todo.Done {
 		// TODO[feat] Notify new todo
-		if _, _, err = CreateRepeatTodoIfNeed(todo); err != nil {
-			return entity.Todo{}, err
+		if _, _, err = CreateRepeatTodoIfNeed(*todo); err != nil {
+			return err
 		}
 	}
 
-	return todo, nil
+	return nil
 }
 
 func DeleteTodo(userID, todoID string) (entity.Todo, error) {
@@ -129,7 +129,7 @@ func DeleteTodo(userID, todoID string) (entity.Todo, error) {
 		return entity.Todo{}, fmt.Errorf("fails to delete todo: %v", todoID)
 	}
 
-	if err = UpdateTag(todo, ""); err != nil {
+	if err = UpdateTag(&todo, ""); err != nil {
 		return entity.Todo{}, err
 	}
 

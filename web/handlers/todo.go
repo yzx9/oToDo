@@ -12,15 +12,13 @@ import (
 // Create todo
 func PostTodoHandler(c *gin.Context) {
 	todo := entity.Todo{}
-	err := c.ShouldBind(&todo)
-	if err != nil {
+	if err := c.ShouldBind(&todo); err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
 
 	userID := common.MustGetAccessUserID(c)
-	todo, err = bll.CreateTodo(userID, todo)
-	if err != nil {
+	if err := bll.CreateTodo(userID, &todo); err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
@@ -56,8 +54,7 @@ func PutTodoHandler(c *gin.Context) {
 	}
 
 	userID := common.MustGetAccessUserID(c)
-	todo, err = bll.UpdateTodo(userID, todo)
-	if err != nil {
+	if err = bll.UpdateTodo(userID, &todo); err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
