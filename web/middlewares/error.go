@@ -8,6 +8,11 @@ import (
 	"github.com/yzx9/otodo/otodo"
 )
 
+type errorPayload struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
 func ErrorMiddleware() func(*gin.Context) {
 	return func(c *gin.Context) {
 		c.Next()
@@ -21,7 +26,10 @@ func ErrorMiddleware() func(*gin.Context) {
 				return
 			}
 
-			c.AbortWithError(http.StatusBadRequest, err)
+			c.JSON(http.StatusBadRequest, errorPayload{
+				Code:    getUserErrorCodeFromError(typedError),
+				Message: err.Error(),
+			})
 		}
 	}
 }
@@ -59,4 +67,8 @@ func getHttpCodeFromError(err otodo.Error) int {
 	default:
 		return http.StatusBadRequest
 	}
+}
+
+func getUserErrorCodeFromError(err otodo.Error) int {
+	return int(err.Code) // TODO
 }
