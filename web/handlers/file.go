@@ -10,6 +10,27 @@ import (
 	"github.com/yzx9/otodo/web/common"
 )
 
+type FilePayload struct {
+	FileID string `json:"fileID"`
+}
+
+// Upload public file, for user avatar
+func PostPublicFileHandler(c *gin.Context) {
+	file, err := c.FormFile("file")
+	if err != nil {
+		common.AbortWithError(c, utils.NewError(otodo.ErrPreconditionRequired, "file required"))
+		return
+	}
+
+	fileID, err := bll.UploadPublicFile(file)
+	if err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, FilePayload{fileID})
+}
+
 // Upload todo file, only support single file now
 func PostTodoFileHandler(c *gin.Context) {
 	fileID, err := common.GetRequiredParam(c, "id")
@@ -30,9 +51,7 @@ func PostTodoFileHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, struct {
-		FileID string `json:"file_id"`
-	}{fileID})
+	c.JSON(http.StatusOK, FilePayload{fileID})
 }
 
 // Upload file, only support single file now
@@ -66,10 +85,10 @@ func PostFilePresignHandler(c *gin.Context) {
 	}
 
 	payload := struct {
-		ExpiresIn int `json:"expires_in"` // Unix
+		ExpiresIn int `json:"expiresIn"` // Unix
 	}{}
 	if err := c.ShouldBind(&payload); err != nil {
-		common.AbortWithError(c, utils.NewError(otodo.ErrPreconditionRequired, "expires_in required"))
+		common.AbortWithError(c, utils.NewError(otodo.ErrPreconditionRequired, "expiresIn required"))
 		return
 	}
 
@@ -80,9 +99,7 @@ func PostFilePresignHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, struct {
-		PresignedFileID string `json:"presigned_file_id"`
-	}{presigned})
+	c.JSON(http.StatusOK, FilePayload{presigned})
 }
 
 // Get file from presigned id

@@ -14,6 +14,15 @@ import (
 
 const maxFileSize = 8 << 20 // 8MiB
 
+func UploadPublicFile(file *multipart.FileHeader) (string, error) {
+	record := entity.File{
+		FileName:   file.Filename,
+		AccessType: string(entity.FileTypePublic),
+	}
+	err := uploadFile(file, &record)
+	return record.ID, err
+}
+
 func UploadTodoFile(todoID string, file *multipart.FileHeader) (string, error) {
 	record := entity.File{
 		FileName:   file.Filename,
