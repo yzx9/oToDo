@@ -25,12 +25,13 @@ func CreateServer() *Server {
 		gin.Recovery(),
 		middlewares.ErrorMiddleware())
 
-	setupRouter(r)
-
-	return &Server{
+	s := Server{
 		engine: r,
 		addr:   ":8080",
 	}
+
+	s.setupRouter()
+	return &s
 }
 
 func (s *Server) LoadConfig(dir string) {

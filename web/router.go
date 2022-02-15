@@ -8,8 +8,8 @@ import (
 	"github.com/yzx9/otodo/web/middlewares"
 )
 
-func setupRouter(e *gin.Engine) {
-	r := e.Group("/api")
+func (s *Server) setupRouter() {
+	r := s.engine.Group("/api")
 
 	// Public routes
 	{
