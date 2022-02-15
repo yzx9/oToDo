@@ -13,7 +13,7 @@ const fileSignedMaxExpiresIn = 6 * time.Hour
 type filePresignedPayload struct {
 	TokenClaims
 	UserID string `json:"uid"`
-	FileID string `json:"file_id"`
+	FileID string `json:"fileID"`
 }
 
 func CreateFilePresignedID(userID, fileID string) (string, error) {

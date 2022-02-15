@@ -12,14 +12,14 @@ type Todo struct {
 	Importance bool      `json:"importance"`
 	Deadline   time.Time `json:"deadline"`
 	Notified   bool      `json:"notified"`
-	NotifyAt   time.Time `json:"notify_at"`
+	NotifyAt   time.Time `json:"notifyAt"`
 	Done       bool      `json:"done"`
-	DoneAt     time.Time `json:"done_at"`
+	DoneAt     time.Time `json:"doneAt"`
 
-	UserID string `json:"user_id" gorm:"type:char(36);"`
+	UserID string `json:"userID" gorm:"type:char(36);"`
 	User   User   `json:"-"`
 
-	TodoListID string   `json:"todolist_id" gorm:"type:char(36);"`
+	TodoListID string   `json:"todolistID" gorm:"type:char(36);"`
 	TodoList   TodoList `json:"-"`
 
 	Files []TodoFile `json:"files"`
@@ -27,8 +27,8 @@ type Todo struct {
 	Steps []TodoStep `json:"steps"`
 
 	TodoRepeatPlanID string         `json:"-" gorm:"type:char(36);"`
-	TodoRepeatPlan   TodoRepeatPlan `json:"todo_repeat_plan"`
+	TodoRepeatPlan   TodoRepeatPlan `json:"todoRepeatPlan"`
 
-	TodoRepeatFromID *string `json:"todo_repeat_from_id" gorm:"type:char(36);"` // last todo id
+	TodoRepeatFromID *string `json:"todoRepeatFromID" gorm:"type:char(36);"` // last todo id
 	TodoRepeatFrom   *Todo   `json:"-"`
 }

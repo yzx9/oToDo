@@ -10,9 +10,9 @@ const (
 type File struct {
 	Entity
 
-	FileName     string `json:"file_name"`
+	FileName     string `json:"fileName"`
 	FileServerID string `json:"-" gorm:"size:15"`
-	FilePath     string `json:"file_path"`
-	AccessType   string `json:"access_type" gorm:"size:8"`        // FileAccessType
-	RelatedID    string `json:"related_id" gorm:"type:char(36);"` // Depend on access type
+	FilePath     string `json:"filePath"`
+	AccessType   string `json:"accessType" gorm:"size:8"`        // FileAccessType
+	RelatedID    string `json:"relatedID" gorm:"type:char(36);"` // Depend on access type
 }

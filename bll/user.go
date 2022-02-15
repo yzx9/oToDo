@@ -14,7 +14,7 @@ import (
 
 // User
 type CreateUserPayload struct {
-	UserName string `json:"user_name"`
+	UserName string `json:"userName"`
 	Password string `json:"password"`
 	Nickname string `json:"nickname"`
 }

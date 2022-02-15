@@ -7,8 +7,8 @@ type TodoStep struct {
 
 	Name   string    `json:"name" gorm:"-"`
 	Done   bool      `json:"done"`
-	DoneAt time.Time `json:"done_at"`
+	DoneAt time.Time `json:"doneAt"`
 
-	TodoID string `json:"todo_id" gorm:"type:char(36);"`
+	TodoID string `json:"todoID" gorm:"type:char(36);"`
 	Todo   Todo   `json:"-"`
 }

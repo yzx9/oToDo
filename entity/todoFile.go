@@ -3,10 +3,10 @@ package entity
 type TodoFile struct {
 	Entity
 
-	FileID   string `json:"file_id" gorm:"type:char(36);"`
-	FileName string `json:"file_name" gorm:"-"`
+	FileID   string `json:"fileID" gorm:"type:char(36);"`
+	FileName string `json:"fileName" gorm:"-"`
 	File     File   `json:"-"`
 
-	TodoID string `json:"todo_id" gorm:"type:char(36);"`
+	TodoID string `json:"todoID" gorm:"type:char(36);"`
 	Todo   Todo   `json:"-"`
 }

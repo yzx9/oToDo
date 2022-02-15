@@ -6,9 +6,9 @@ type TodoList struct {
 	Name      string `json:"name" gorm:"size:128"`
 	Deletable bool   `json:"deletable"`
 
-	UserID string `json:"user_id" gorm:"type:char(36);"`
+	UserID string `json:"userID" gorm:"type:char(36);"`
 	User   User   `json:"-"`
 
-	TodoListFolderID string         `json:"todo_list_folder_id" gorm:"type:char(36);"`
+	TodoListFolderID string         `json:"todoListFolderID" gorm:"type:char(36);"`
 	TodoListFolder   TodoListFolder `json:"-"`
 }

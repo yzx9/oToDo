@@ -19,10 +19,10 @@ var authorizationRegexString = "^[Bb]earer (?P<token>[\\w-]+.[\\w-]+.[\\w-]+)$"
 var authorizationRegex = regexp.MustCompile(authorizationRegexString)
 
 type AuthTokenResult struct {
-	AccessToken  string
-	TokenType    string
-	ExpiresIn    int64
-	RefreshToken string
+	AccessToken  string `json:"accessToken"`
+	TokenType    string `json:"tokenType"`
+	ExpiresIn    int64  `json:"expiresIn"`
+	RefreshToken string `json:"refreshToken,omitempty"`
 }
 
 type SessionTokenClaims struct {
