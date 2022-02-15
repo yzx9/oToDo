@@ -12,6 +12,6 @@ func InsertFile(file *entity.File) error {
 
 func SelectFile(id string) (*entity.File, error) {
 	var file entity.File
-	re := db.Where("ID = ?", id).First(&file)
+	re := db.Where("id = ?", id).First(&file)
 	return &file, utils.WrapGormErr(re.Error, "file")
 }

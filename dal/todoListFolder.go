@@ -18,7 +18,7 @@ func SelectTodoListFolder(id string) (entity.TodoListFolder, error) {
 
 func SelectTodoListFolders(userId string) ([]entity.TodoListFolder, error) {
 	var folders []entity.TodoListFolder
-	re := db.Where("UserID = ?", userId).Find(&folders)
+	re := db.Where(entity.TodoListFolder{UserID: userId}).Find(&folders)
 	return folders, utils.WrapGormErr(re.Error, "todo list folder")
 }
 
@@ -33,6 +33,6 @@ func DeleteTodoListFolder(id string) error {
 
 func ExistTodoListFolder(id string) (bool, error) {
 	var count int64
-	re := db.Model(&entity.TodoListFolder{}).Where("ID = ?", id).Count(&count)
+	re := db.Model(&entity.TodoListFolder{}).Where("id = ?", id).Count(&count)
 	return count != 0, utils.WrapGormErr(re.Error, "tag")
 }

@@ -12,13 +12,13 @@ func InsertTodoStep(step *entity.TodoStep) error {
 
 func SelectTodoStep(id string) (entity.TodoStep, error) {
 	var step entity.TodoStep
-	re := db.Where("ID = ?", id).First(&step)
+	re := db.Where("id = ?", id).First(&step)
 	return step, utils.WrapGormErr(re.Error, "todo step")
 }
 
 func SelectTodoSteps(todoID string) ([]entity.TodoStep, error) {
 	var steps []entity.TodoStep
-	re := db.Where("TodoID = ?", todoID).Find(&steps)
+	re := db.Where(entity.TodoStep{TodoID: todoID}).Find(&steps)
 	return steps, utils.WrapGormErr(re.Error, "todo step")
 }
 

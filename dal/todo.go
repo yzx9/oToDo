@@ -13,31 +13,31 @@ func InsertTodo(todo *entity.Todo) error {
 
 func SelectTodo(id string) (entity.Todo, error) {
 	var todo entity.Todo
-	re := getTodosWithPreload().Where("ID = ?", id).First(&todo)
+	re := getTodosWithPreload().Where("id = ?", id).First(&todo)
 	return todo, utils.WrapGormErr(re.Error, "todo")
 }
 
 func SelectTodos(todoListID string) ([]entity.Todo, error) {
 	var todos []entity.Todo
-	re := getTodosWithPreload().Where("TodoListID = ?", todoListID).Find(&todos)
+	re := getTodosWithPreload().Where(entity.Todo{TodoListID: todoListID}).Find(&todos)
 	return todos, utils.WrapGormErr(re.Error, "todos")
 }
 
 func SelectImportantTodos(userID string) ([]entity.Todo, error) {
 	var todos []entity.Todo
-	re := getTodosWithPreload().Where("UserID = ?", userID).Where("Importance", true).Find(&todos)
+	re := getTodosWithPreload().Where(entity.Todo{UserID: userID}).Where("Importance", true).Find(&todos)
 	return todos, utils.WrapGormErr(re.Error, "important todos")
 }
 
 func SelectPlanedTodos(userID string) ([]entity.Todo, error) {
 	var todos []entity.Todo
-	re := getTodosWithPreload().Where("UserID = ?", userID).Not("Deadline", nil).Order("Deadline").Find(&todos)
+	re := getTodosWithPreload().Where(entity.Todo{UserID: userID}).Not("deadline", nil).Order("deadline").Find(&todos)
 	return todos, utils.WrapGormErr(re.Error, "planed todos")
 }
 
 func SelectNotNotifiedTodos(userID string) ([]entity.Todo, error) {
 	var todos []entity.Todo
-	re := getTodosWithPreload().Where("UserID = ?", userID).Not("Notified", false).Order("Deadline").Find(&todos)
+	re := getTodosWithPreload().Where(entity.Todo{UserID: userID}).Not("notified", false).Order("notify_at").Find(&todos)
 	return todos, utils.WrapGormErr(re.Error, "not notified todos")
 }
 
@@ -60,6 +60,6 @@ func DeleteTodo(id string) error {
 }
 
 func DeleteTodos(todoListID string) (int64, error) {
-	re := db.Delete(entity.Todo{}, "TodoListID = ?", todoListID)
+	re := db.Where(entity.Todo{TodoListID: todoListID}).Delete(entity.Todo{})
 	return re.RowsAffected, utils.WrapGormErr(re.Error, "todo")
 }

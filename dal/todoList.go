@@ -12,19 +12,19 @@ func InsertTodoList(todoList *entity.TodoList) error {
 
 func SelectTodoList(id string) (entity.TodoList, error) {
 	var list entity.TodoList
-	re := db.Where("ID = ?", id).First(&list)
+	re := db.Where("id = ?", id).First(&list)
 	return list, utils.WrapGormErr(re.Error, "todo list")
 }
 
 func SelectTodoLists(userId string) ([]entity.TodoList, error) {
 	var lists []entity.TodoList
-	re := db.Where("UserID = ?", userId).Find(&lists)
+	re := db.Where(entity.TodoList{UserID: userId}).Find(&lists)
 	return lists, utils.WrapGormErr(re.Error, "todo list")
 }
 
 func SelectSharedTodoLists(userId string) ([]entity.TodoList, error) {
 	var lists []entity.TodoList
-	err := db.Model(&entity.User{}).Where("UserID = ?", userId).Association("SharedTodoLists").Find(&lists)
+	err := db.Model(&entity.User{}).Where(entity.TodoList{UserID: userId}).Association("SharedTodoLists").Find(&lists)
 	return lists, utils.WrapGormErr(err, "todo list")
 }
 
@@ -38,12 +38,12 @@ func DeleteTodoList(id string) error {
 }
 
 func DeleteTodoListsByFolder(todoListFolderID string) (int64, error) {
-	re := db.Delete(entity.TodoList{}, "TodoListFolderID = ?", todoListFolderID)
+	re := db.Where(entity.TodoList{TodoListFolderID: todoListFolderID}).Delete(entity.TodoList{})
 	return re.RowsAffected, utils.WrapGormErr(re.Error, "todo list")
 }
 
 func ExistTodoList(id string) (bool, error) {
 	var count int64
-	re := db.Model(&entity.TodoList{}).Where("ID = ?", id).Count(&count)
+	re := db.Model(&entity.TodoList{}).Where("id = ?", id).Count(&count)
 	return count != 0, utils.WrapGormErr(re.Error, "todo list")
 }

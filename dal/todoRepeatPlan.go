@@ -12,7 +12,7 @@ func InsertTodoRepeatPlan(plan *entity.TodoRepeatPlan) error {
 
 func SelectTodoRepeatPlan(id string) (entity.TodoRepeatPlan, error) {
 	var plan entity.TodoRepeatPlan
-	re := db.Where("ID = ?", id).First(&plan)
+	re := db.Where("id = ?", id).First(&plan)
 	return plan, utils.WrapGormErr(re.Error, "todo repeat plan")
 }
 
