@@ -6,8 +6,26 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/bll"
+	"github.com/yzx9/otodo/entity"
 	"github.com/yzx9/otodo/web/common"
 )
+
+// Create todo list
+func PostTodoListHandler(c *gin.Context) {
+	list := entity.TodoList{}
+	if err := c.ShouldBind(&list); err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
+	userID := common.MustGetAccessUserID(c)
+	if err := bll.CreateTodoList(userID, &list); err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, list)
+}
 
 // Get todo list
 func GetTodoListHandler(c *gin.Context) {

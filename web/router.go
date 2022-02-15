@@ -71,6 +71,7 @@ func setupRouter(e *gin.Engine) {
 		r.POST("/todos/:id/steps/:step-id", handlers.DeleteTodoStepHandler)
 
 		// Todo List
+		r.POST("/todo-lists", handlers.PostTodoListHandler)
 		r.GET("/todo-lists/:id", handlers.GetTodoListHandler)
 		r.DELETE("/todo-lists/:id", handlers.DeleteTodoListHandler)
 

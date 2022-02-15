@@ -8,17 +8,15 @@ import (
 	"github.com/yzx9/otodo/utils"
 )
 
-func CreateTodoList(userID string, todoListName string) (entity.TodoList, error) {
-	list := entity.TodoList{
-		Name:      todoListName,
-		Deletable: true,
-		UserID:    userID,
-	}
-	if err := dal.InsertTodoList(&list); err != nil {
-		return entity.TodoList{}, fmt.Errorf("fails to create todo list: %v", todoListName)
+func CreateTodoList(userID string, todoList *entity.TodoList) error {
+	todoList.Deletable = false
+	todoList.UserID = userID
+	todoList.TodoListFolderID = ""
+	if err := dal.InsertTodoList(todoList); err != nil {
+		return fmt.Errorf("fails to create todo list: %w", err)
 	}
 
-	return list, nil
+	return nil
 }
 
 func SelectTodoList(userID, todoListID string) (entity.TodoList, error) {
