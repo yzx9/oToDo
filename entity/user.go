@@ -3,7 +3,7 @@ package entity
 type User struct {
 	Entity
 
-	Name      string `json:"name" gorm:"size:128"`
+	Name      string `json:"name" gorm:"size:128;uniqueIndex;"`
 	Nickname  string `json:"nickname" gorm:"size:128"`
 	Password  []byte `json:"password" gorm:"size:32;"`
 	Email     string `json:"email" gorm:"size:32;"`

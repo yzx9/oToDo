@@ -9,6 +9,7 @@ import (
 	"github.com/yzx9/otodo/dal"
 	"github.com/yzx9/otodo/entity"
 	"github.com/yzx9/otodo/otodo"
+	"github.com/yzx9/otodo/utils"
 )
 
 // User
@@ -20,11 +21,20 @@ type CreateUserPayload struct {
 
 func CreateUser(payload CreateUserPayload) (entity.User, error) {
 	if len(payload.UserName) < 5 {
-		return entity.User{}, fmt.Errorf("invalid user name: %v", payload.UserName)
+		return entity.User{}, fmt.Errorf("user name too short: %v", payload.UserName)
 	}
 
 	if len(payload.Password) < 6 {
 		return entity.User{}, fmt.Errorf("password too short")
+	}
+
+	exist, err := dal.ExistUserByUserName(payload.UserName)
+	if err != nil {
+		return entity.User{}, fmt.Errorf("fails to valid user name: %w", err)
+	}
+
+	if exist {
+		return entity.User{}, utils.NewError(otodo.ErrDuplicateID, "user name has been used: %v", payload.UserName)
 	}
 
 	user := entity.User{

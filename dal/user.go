@@ -36,3 +36,9 @@ func SaveUser(user *entity.User) error {
 	re := db.Save(&user)
 	return utils.WrapGormErr(re.Error, "user")
 }
+
+func ExistUserByUserName(username string) (bool, error) {
+	var count int64
+	re := db.Model(&entity.User{}).Where("Name = ?", username).Count(&count)
+	return count != 0, utils.WrapGormErr(re.Error, "user")
+}
