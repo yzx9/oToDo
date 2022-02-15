@@ -10,7 +10,7 @@ import (
 )
 
 func CreateTodo(userID string, todo *entity.Todo) error {
-	_, err := OwnTodoList(userID, todo.TodoListID)
+	_, err := OwnOrSharedTodoList(userID, todo.TodoListID)
 	if err != nil {
 		return fmt.Errorf("fails to get todo list: %w", err)
 	}
@@ -32,11 +32,15 @@ func CreateTodo(userID string, todo *entity.Todo) error {
 
 func GetTodo(userID, todoID string) (entity.Todo, error) {
 	todo, err := OwnTodo(userID, todoID)
-	return todo, fmt.Errorf("fails to get todo: %w", err)
+	if err != nil {
+		return entity.Todo{}, fmt.Errorf("fails to get todo: %w", err)
+	}
+
+	return todo, nil
 }
 
 func GetTodos(userID, todoListID string) ([]entity.Todo, error) {
-	if _, err := OwnTodoList(userID, todoListID); err != nil {
+	if _, err := OwnOrSharedTodoList(userID, todoListID); err != nil {
 		return nil, err
 	}
 
@@ -137,17 +141,13 @@ func DeleteTodo(userID, todoID string) (entity.Todo, error) {
 }
 
 func OwnTodo(userID, todoID string) (entity.Todo, error) {
-	r := func(err error) (entity.Todo, error) {
-		return entity.Todo{}, err
-	}
-
 	todo, err := dal.SelectTodo(todoID)
 	if err != nil {
-		return r(fmt.Errorf("fails to get todo: %v", todoID))
+		return entity.Todo{}, fmt.Errorf("fails to get todo: %v", todoID)
 	}
 
-	if _, err = OwnTodoList(userID, todo.TodoListID); err != nil {
-		return r(utils.NewErrorWithForbidden("unable to handle non-owned todo: %v", todo.ID))
+	if _, err = OwnOrSharedTodoList(userID, todo.TodoListID); err != nil {
+		return entity.Todo{}, utils.NewErrorWithForbidden("unable to handle non-owned todo: %v", todo.ID)
 	}
 
 	return todo, nil

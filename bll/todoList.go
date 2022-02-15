@@ -20,7 +20,7 @@ func CreateTodoList(userID string, todoList *entity.TodoList) error {
 }
 
 func SelectTodoList(userID, todoListID string) (entity.TodoList, error) {
-	return OwnTodoList(userID, todoListID)
+	return OwnOrSharedTodoList(userID, todoListID)
 }
 
 func SelectTodoLists(userID string) ([]entity.TodoList, error) {
@@ -40,13 +40,9 @@ func SelectTodoLists(userID string) ([]entity.TodoList, error) {
 
 func DeleteTodoList(userID, todoListID string) (entity.TodoList, error) {
 	// only allow delete by owner, not shared users
-	todoList, err := dal.SelectTodoList(todoListID)
+	todoList, err := OwnTodoList(userID, todoListID)
 	if err != nil {
-		return entity.TodoList{}, fmt.Errorf("fails to get todo list: %w", err)
-	}
-
-	if todoList.UserID != userID {
-		return entity.TodoList{}, utils.NewErrorWithForbidden("unable to handle non-owned todo list: %v", todoListID)
+		return entity.TodoList{}, err
 	}
 
 	// check if deletable
@@ -66,8 +62,22 @@ func DeleteTodoList(userID, todoListID string) (entity.TodoList, error) {
 	return todoList, nil
 }
 
-// Verify permission, owner or shared user
+// owner
 func OwnTodoList(userID, todoListID string) (entity.TodoList, error) {
+	todoList, err := dal.SelectTodoList(todoListID)
+	if err != nil {
+		return entity.TodoList{}, fmt.Errorf("fails to get todo list: %v", todoListID)
+	}
+
+	if todoList.UserID != userID {
+		return entity.TodoList{}, utils.NewErrorWithForbidden("unable to handle non-owned todo list: %v", todoListID)
+	}
+
+	return todoList, nil
+}
+
+// owner or shared user
+func OwnOrSharedTodoList(userID, todoListID string) (entity.TodoList, error) {
 	todoList, err := dal.SelectTodoList(todoListID)
 	if err != nil {
 		return entity.TodoList{}, fmt.Errorf("fails to get todo list: %v", todoListID)
@@ -80,7 +90,7 @@ func OwnTodoList(userID, todoListID string) (entity.TodoList, error) {
 		}
 
 		if !sharing {
-			return entity.TodoList{}, utils.NewErrorWithForbidden("unable to handle non-owned todo list: %v", todoListID)
+			return entity.TodoList{}, utils.NewErrorWithForbidden("unable to handle unauthorized todo list: %v", todoListID)
 		}
 	}
 
