@@ -56,13 +56,9 @@ func uploadFile(file *multipart.FileHeader, record *entity.File) error {
 	return nil
 }
 
-func GetFile(fileID string) (entity.File, error) {
+func GetFile(fileID string) (*entity.File, error) {
 	file, err := dal.SelectFile(fileID)
-	if err != nil {
-		return entity.File{}, utils.NewErrorWithNotFound("file not found: %v", fileID)
-	}
-
-	return file, nil
+	return file, fmt.Errorf("fails to get file: %w", err)
 }
 
 func GetFilePath(userID, fileID string) (string, error) {
@@ -71,7 +67,7 @@ func GetFilePath(userID, fileID string) (string, error) {
 		return "", err
 	}
 
-	path := applyFilePathTemplate(&file)
+	path := applyFilePathTemplate(file)
 	return path, nil
 }
 
@@ -81,7 +77,7 @@ func ForceGetFilePath(fileID string) (string, error) {
 		return "", err
 	}
 
-	path := applyFilePathTemplate(&file)
+	path := applyFilePathTemplate(file)
 	return path, nil
 }
 
@@ -95,9 +91,9 @@ func applyFilePathTemplate(file *entity.File) string {
 	return template
 }
 
-func OwnFile(userID, fileID string) (entity.File, error) {
-	write := func(err error) (entity.File, error) {
-		return entity.File{}, err
+func OwnFile(userID, fileID string) (*entity.File, error) {
+	write := func(err error) (*entity.File, error) {
+		return nil, err
 	}
 
 	file, err := GetFile(fileID)
