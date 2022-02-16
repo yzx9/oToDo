@@ -7,7 +7,7 @@ import (
 
 	"github.com/yzx9/otodo/dal"
 	"github.com/yzx9/otodo/model/entity"
-	"github.com/yzx9/otodo/utils"
+	"github.com/yzx9/otodo/util"
 )
 
 func UpdateTag(todo *entity.Todo, oldTodoTitle string) error {
@@ -35,7 +35,7 @@ func UpdateTag(todo *entity.Todo, oldTodoTitle string) error {
 			// Insert new tag
 			exist, err := dal.ExistTag(userID, tagName)
 			if err != nil {
-				return utils.NewErrorWithUnknown("unknown error: %w", err)
+				return util.NewErrorWithUnknown("unknown error: %w", err)
 			}
 
 			if !exist {

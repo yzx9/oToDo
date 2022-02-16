@@ -1,4 +1,4 @@
-package utils
+package util
 
 import (
 	"github.com/yzx9/otodo/otodo"

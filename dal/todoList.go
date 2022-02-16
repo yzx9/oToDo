@@ -2,24 +2,24 @@ package dal
 
 import (
 	"github.com/yzx9/otodo/model/entity"
-	"github.com/yzx9/otodo/utils"
+	"github.com/yzx9/otodo/util"
 )
 
 func InsertTodoList(todoList *entity.TodoList) error {
 	re := db.Create(todoList)
-	return utils.WrapGormErr(re.Error, "todo list")
+	return util.WrapGormErr(re.Error, "todo list")
 }
 
 func SelectTodoList(id string) (entity.TodoList, error) {
 	var list entity.TodoList
 	re := db.Where("id = ?", id).First(&list)
-	return list, utils.WrapGormErr(re.Error, "todo list")
+	return list, util.WrapGormErr(re.Error, "todo list")
 }
 
 func SelectTodoLists(userId string) ([]entity.TodoList, error) {
 	var lists []entity.TodoList
 	re := db.Where(entity.TodoList{UserID: userId}).Find(&lists)
-	return lists, utils.WrapGormErr(re.Error, "todo list")
+	return lists, util.WrapGormErr(re.Error, "todo list")
 }
 
 func DeleteTodoList(id string) error {
@@ -28,18 +28,18 @@ func DeleteTodoList(id string) error {
 			ID: id,
 		},
 	})
-	return utils.WrapGormErr(re.Error, "todo list")
+	return util.WrapGormErr(re.Error, "todo list")
 }
 
 func DeleteTodoListsByFolder(todoListFolderID string) (int64, error) {
 	re := db.Where(entity.TodoList{TodoListFolderID: todoListFolderID}).Delete(entity.TodoList{})
-	return re.RowsAffected, utils.WrapGormErr(re.Error, "todo list")
+	return re.RowsAffected, util.WrapGormErr(re.Error, "todo list")
 }
 
 func ExistTodoList(id string) (bool, error) {
 	var count int64
 	re := db.Model(&entity.TodoList{}).Where("id = ?", id).Count(&count)
-	return count != 0, utils.WrapGormErr(re.Error, "todo list")
+	return count != 0, util.WrapGormErr(re.Error, "todo list")
 }
 
 /**
@@ -50,28 +50,28 @@ func InsertTodoListSharedUser(userID, todoListID string) error {
 	user := entity.User{Entity: entity.Entity{ID: userID}}
 	list := entity.TodoList{Entity: entity.Entity{ID: todoListID}}
 	err := db.Model(&user).Association("SharedTodoLists").Append(&list)
-	return utils.WrapGormErr(err, "todo list shared user")
+	return util.WrapGormErr(err, "todo list shared user")
 }
 
 func SelectSharedTodoLists(userID string) ([]entity.TodoList, error) {
 	user := entity.User{Entity: entity.Entity{ID: userID}}
 	var lists []entity.TodoList
 	err := db.Model(&user).Association("SharedTodoLists").Find(&lists)
-	return lists, utils.WrapGormErr(err, "user shared todo list")
+	return lists, util.WrapGormErr(err, "user shared todo list")
 }
 
 func SelectTodoListSharedUsers(todoListID string) ([]entity.User, error) {
 	list := entity.TodoList{Entity: entity.Entity{ID: todoListID}}
 	var users []entity.User
 	err := db.Model(&list).Association("SharedUsers").Find(&users)
-	return users, utils.WrapGormErr(err, "todo list shared users")
+	return users, util.WrapGormErr(err, "todo list shared users")
 }
 
 func DeleteTodoListSharedUser(userID, todoListID string) error {
 	user := entity.User{Entity: entity.Entity{ID: userID}}
 	list := entity.TodoList{Entity: entity.Entity{ID: todoListID}}
 	err := db.Model(&list).Association("SharedUsers").Delete(&user)
-	return utils.WrapGormErr(err, "todo list shared users")
+	return util.WrapGormErr(err, "todo list shared users")
 }
 
 func ExistTodoListSharing(userID, todoListID string) (bool, error) {
@@ -79,7 +79,7 @@ func ExistTodoListSharing(userID, todoListID string) (bool, error) {
 	user := entity.User{Entity: entity.Entity{ID: userID}}
 	var lists []entity.TodoList
 	if err := db.Model(&user).Association("SharedTodoLists").Find(&lists, "id = ?", todoListID); err != nil {
-		return false, utils.WrapGormErr(err, "todo list sharing")
+		return false, util.WrapGormErr(err, "todo list sharing")
 	}
 
 	return len(lists) != 0, nil

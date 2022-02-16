@@ -5,7 +5,7 @@ import (
 
 	"github.com/yzx9/otodo/model/entity"
 	"github.com/yzx9/otodo/otodo"
-	"github.com/yzx9/otodo/utils"
+	"github.com/yzx9/otodo/util"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -14,7 +14,7 @@ var db *gorm.DB
 
 func InitDatabase() error {
 	write := func(err error) error {
-		return utils.NewError(otodo.ErrDatabaseConnectFailed, "fails to connect database: %w", err)
+		return util.NewError(otodo.ErrDatabaseConnectFailed, "fails to connect database: %w", err)
 	}
 	var err error
 

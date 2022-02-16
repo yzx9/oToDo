@@ -8,7 +8,7 @@ import (
 	"github.com/yzx9/otodo/bll"
 	"github.com/yzx9/otodo/model/dto"
 	"github.com/yzx9/otodo/otodo"
-	"github.com/yzx9/otodo/utils"
+	"github.com/yzx9/otodo/util"
 	"github.com/yzx9/otodo/web/common"
 )
 
@@ -18,12 +18,12 @@ var supportedFileTypeRegex = regexp.MustCompile(`.(jpg|jpeg|JPG|png|PNG|gif|GIF|
 func PostFileHandler(c *gin.Context) {
 	file, err := c.FormFile("file")
 	if err != nil {
-		common.AbortWithError(c, utils.NewError(otodo.ErrPreconditionRequired, "file required"))
+		common.AbortWithError(c, util.NewError(otodo.ErrPreconditionRequired, "file required"))
 		return
 	}
 
 	if !supportedFileTypeRegex.MatchString(file.Filename) {
-		common.AbortWithError(c, utils.NewError(otodo.ErrPreconditionFailed, "invalid file type"))
+		common.AbortWithError(c, util.NewError(otodo.ErrPreconditionFailed, "invalid file type"))
 		return
 	}
 
@@ -46,7 +46,7 @@ func PostTodoFileHandler(c *gin.Context) {
 
 	file, err := c.FormFile("file")
 	if err != nil {
-		common.AbortWithError(c, utils.NewError(otodo.ErrPreconditionRequired, "file required"))
+		common.AbortWithError(c, util.NewError(otodo.ErrPreconditionRequired, "file required"))
 		return
 	}
 
@@ -91,7 +91,7 @@ func PostFilePresignHandler(c *gin.Context) {
 
 	payload := dto.FilePreSignDTO{}
 	if err := c.ShouldBind(&payload); err != nil {
-		common.AbortWithError(c, utils.NewError(otodo.ErrPreconditionRequired, "expiresIn required"))
+		common.AbortWithError(c, util.NewError(otodo.ErrPreconditionRequired, "expiresIn required"))
 		return
 	}
 

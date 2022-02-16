@@ -5,7 +5,7 @@ import (
 
 	"github.com/yzx9/otodo/dal"
 	"github.com/yzx9/otodo/model/entity"
-	"github.com/yzx9/otodo/utils"
+	"github.com/yzx9/otodo/util"
 )
 
 func CreateTodoListSharedUser(userID, todoListID string) error {
@@ -48,7 +48,7 @@ func DeleteTodoListSharedUser(operatorID, userID, todoListID string) error {
 	}
 
 	if todoList.UserID != operatorID && userID != operatorID {
-		return utils.NewErrorWithForbidden("unable to delete shared user")
+		return util.NewErrorWithForbidden("unable to delete shared user")
 	}
 
 	if err := dal.DeleteTodoListSharedUser(userID, todoListID); err != nil {
@@ -81,7 +81,7 @@ func OwnOrSharedTodoList(userID, todoListID string) (entity.TodoList, error) {
 		}
 
 		if !sharing {
-			return entity.TodoList{}, utils.NewErrorWithForbidden("unable to handle unauthorized todo list: %v", todoListID)
+			return entity.TodoList{}, util.NewErrorWithForbidden("unable to handle unauthorized todo list: %v", todoListID)
 		}
 	}
 

@@ -2,12 +2,12 @@ package dal
 
 import (
 	"github.com/yzx9/otodo/model/entity"
-	"github.com/yzx9/otodo/utils"
+	"github.com/yzx9/otodo/util"
 )
 
 func InsertTag(tag *entity.Tag) error {
 	re := db.Create(tag)
-	return utils.WrapGormErr(re.Error, "tag")
+	return util.WrapGormErr(re.Error, "tag")
 }
 
 func SelectTag(userID, tagName string) (entity.Tag, error) {
@@ -17,7 +17,7 @@ func SelectTag(userID, tagName string) (entity.Tag, error) {
 		Name:   tagName,
 	}).First(&tag)
 	if re.Error != nil {
-		return entity.Tag{}, utils.WrapGormErr(re.Error, "tag")
+		return entity.Tag{}, util.WrapGormErr(re.Error, "tag")
 	}
 
 	return tag, nil
@@ -27,7 +27,7 @@ func SelectTags(userID string) ([]entity.Tag, error) {
 	var tags []entity.Tag
 	re := db.Where(&entity.Tag{UserID: userID}).Find(&tags)
 	if re.Error != nil {
-		return nil, utils.WrapGormErr(re.Error, "tag")
+		return nil, util.WrapGormErr(re.Error, "tag")
 	}
 
 	return tags, nil
@@ -40,7 +40,7 @@ func InsertTagTodo(userID, todoID, tagName string) error {
 		},
 	})
 
-	return utils.WrapGormErr(err, "tag todos")
+	return util.WrapGormErr(err, "tag todos")
 }
 
 func DeleteTagTodo(userID, todoID, tagName string) error {
@@ -50,7 +50,7 @@ func DeleteTagTodo(userID, todoID, tagName string) error {
 		},
 	})
 
-	return utils.WrapGormErr(err, "tag todos")
+	return util.WrapGormErr(err, "tag todos")
 }
 
 func ExistTag(userID, tagName string) (bool, error) {
@@ -60,7 +60,7 @@ func ExistTag(userID, tagName string) (bool, error) {
 		Name:   tagName,
 	}).Count(&count)
 	if re.Error != nil {
-		return false, utils.WrapGormErr(re.Error, "tag")
+		return false, util.WrapGormErr(re.Error, "tag")
 	}
 
 	return count != 0, nil

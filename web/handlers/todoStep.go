@@ -9,7 +9,7 @@ import (
 	"github.com/yzx9/otodo/model/dto"
 	"github.com/yzx9/otodo/model/entity"
 	"github.com/yzx9/otodo/otodo"
-	"github.com/yzx9/otodo/utils"
+	"github.com/yzx9/otodo/util"
 	"github.com/yzx9/otodo/web/common"
 )
 
@@ -23,7 +23,7 @@ func PostTodoStepHandler(c *gin.Context) {
 
 	payload := dto.TodoStepDTO{}
 	if c.ShouldBind(&payload) != nil {
-		common.AbortWithError(c, utils.NewError(otodo.ErrPreconditionRequired, "name required"))
+		common.AbortWithError(c, util.NewError(otodo.ErrPreconditionRequired, "name required"))
 		return
 	}
 

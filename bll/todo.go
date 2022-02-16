@@ -6,7 +6,7 @@ import (
 
 	"github.com/yzx9/otodo/dal"
 	"github.com/yzx9/otodo/model/entity"
-	"github.com/yzx9/otodo/utils"
+	"github.com/yzx9/otodo/util"
 )
 
 func CreateTodo(userID string, todo *entity.Todo) error {
@@ -87,7 +87,7 @@ func UpdateTodo(userID string, todo *entity.Todo) error {
 	}
 
 	if oldTodo.UserID != todo.UserID {
-		return utils.NewErrorWithPreconditionFailed("unable to update todo owner")
+		return util.NewErrorWithPreconditionFailed("unable to update todo owner")
 	}
 
 	// Update values
@@ -147,7 +147,7 @@ func OwnTodo(userID, todoID string) (entity.Todo, error) {
 	}
 
 	if _, err = OwnOrSharedTodoList(userID, todo.TodoListID); err != nil {
-		return entity.Todo{}, utils.NewErrorWithForbidden("unable to handle non-owned todo: %v", todo.ID)
+		return entity.Todo{}, util.NewErrorWithForbidden("unable to handle non-owned todo: %v", todo.ID)
 	}
 
 	return todo, nil

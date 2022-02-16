@@ -2,24 +2,24 @@ package dal
 
 import (
 	"github.com/yzx9/otodo/model/entity"
-	"github.com/yzx9/otodo/utils"
+	"github.com/yzx9/otodo/util"
 )
 
 func InsertTodoListFolder(todoListFolder *entity.TodoListFolder) error {
 	re := db.Create(todoListFolder)
-	return utils.WrapGormErr(re.Error, "todo list folder")
+	return util.WrapGormErr(re.Error, "todo list folder")
 }
 
 func SelectTodoListFolder(id string) (entity.TodoListFolder, error) {
 	var folder entity.TodoListFolder
 	re := db.Where("ID = ?", id).First(&folder)
-	return folder, utils.WrapGormErr(re.Error, "todo list folder")
+	return folder, util.WrapGormErr(re.Error, "todo list folder")
 }
 
 func SelectTodoListFolders(userId string) ([]entity.TodoListFolder, error) {
 	var folders []entity.TodoListFolder
 	re := db.Where(entity.TodoListFolder{UserID: userId}).Find(&folders)
-	return folders, utils.WrapGormErr(re.Error, "todo list folder")
+	return folders, util.WrapGormErr(re.Error, "todo list folder")
 }
 
 func DeleteTodoListFolder(id string) error {
@@ -28,11 +28,11 @@ func DeleteTodoListFolder(id string) error {
 			ID: id,
 		},
 	})
-	return utils.WrapGormErr(re.Error, "todo list folder")
+	return util.WrapGormErr(re.Error, "todo list folder")
 }
 
 func ExistTodoListFolder(id string) (bool, error) {
 	var count int64
 	re := db.Model(&entity.TodoListFolder{}).Where("id = ?", id).Count(&count)
-	return count != 0, utils.WrapGormErr(re.Error, "tag")
+	return count != 0, util.WrapGormErr(re.Error, "tag")
 }

@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/yzx9/otodo/model/dto"
-	"github.com/yzx9/otodo/utils"
+	"github.com/yzx9/otodo/util"
 )
 
 // Configurable
@@ -19,7 +19,7 @@ func CreateFilePresignedID(userID, fileID string) (string, error) {
 func CreateFilePresignedIDWithExp(userID, fileID string, exp int) (string, error) {
 	expiresIn := time.Duration(exp * int(time.Second))
 	if expiresIn > fileSignedMaxExpiresIn {
-		return "", utils.NewErrorWithPreconditionFailed("expires is too long")
+		return "", util.NewErrorWithPreconditionFailed("expires is too long")
 	}
 
 	_, err := OwnFile(userID, fileID)
@@ -37,7 +37,7 @@ func CreateFilePresignedIDWithExp(userID, fileID string, exp int) (string, error
 
 func ParseFileSignedID(filePresignedID string) (string, error) {
 	write := func() (string, error) {
-		return "", utils.NewErrorWithPreconditionFailed("invalid presigned file id")
+		return "", util.NewErrorWithPreconditionFailed("invalid presigned file id")
 	}
 
 	payload, err := base64.StdEncoding.DecodeString(filePresignedID)

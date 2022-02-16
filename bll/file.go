@@ -9,7 +9,7 @@ import (
 	"github.com/yzx9/otodo/dal"
 	"github.com/yzx9/otodo/model/entity"
 	"github.com/yzx9/otodo/otodo"
-	"github.com/yzx9/otodo/utils"
+	"github.com/yzx9/otodo/util"
 )
 
 const maxFileSize = 8 << 20 // 8MiB
@@ -47,12 +47,12 @@ func UploadTodoFile(todoID string, file *multipart.FileHeader) (string, error) {
 
 func uploadFile(file *multipart.FileHeader, record *entity.File) error {
 	if file.Size > maxFileSize {
-		return utils.NewError(otodo.ErrRequestEntityTooLarge, "file too large")
+		return util.NewError(otodo.ErrRequestEntityTooLarge, "file too large")
 	}
 
 	record.FileServerID = otodo.Conf.Server.ID
 	record.FilePath = applyFilePathTemplate(record)
-	err := utils.SaveFile(file, record.FilePath)
+	err := util.SaveFile(file, record.FilePath)
 	if err != nil {
 		return fmt.Errorf("fails to upload file: %w", err)
 	}
@@ -110,7 +110,7 @@ func OwnFile(userID, fileID string) (*entity.File, error) {
 		}
 
 		if userID != user.ID {
-			return write(utils.NewErrorWithForbidden("unable to get non-owned file: %v", file.ID))
+			return write(util.NewErrorWithForbidden("unable to get non-owned file: %v", file.ID))
 		}
 
 	default:

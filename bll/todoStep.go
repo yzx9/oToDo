@@ -6,7 +6,7 @@ import (
 
 	"github.com/yzx9/otodo/dal"
 	"github.com/yzx9/otodo/model/entity"
-	"github.com/yzx9/otodo/utils"
+	"github.com/yzx9/otodo/util"
 )
 
 func CreateTodoStep(userID, todoID string, name string) (entity.TodoStep, error) {
@@ -69,7 +69,7 @@ func OwnTodoStep(userID, todoStepID string) (entity.TodoStep, error) {
 
 	_, err = OwnTodo(userID, step.TodoID)
 	if err != nil {
-		return entity.TodoStep{}, utils.NewErrorWithForbidden("unable to handle non-owned todo: %v", step.ID)
+		return entity.TodoStep{}, util.NewErrorWithForbidden("unable to handle non-owned todo: %v", step.ID)
 	}
 
 	return step, nil

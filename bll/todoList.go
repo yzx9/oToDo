@@ -5,7 +5,7 @@ import (
 
 	"github.com/yzx9/otodo/dal"
 	"github.com/yzx9/otodo/model/entity"
-	"github.com/yzx9/otodo/utils"
+	"github.com/yzx9/otodo/util"
 )
 
 func CreateTodoList(userID string, todoList *entity.TodoList) error {
@@ -47,7 +47,7 @@ func DeleteTodoList(userID, todoListID string) (entity.TodoList, error) {
 
 	// check if deletable
 	if !todoList.Deletable {
-		return entity.TodoList{}, utils.NewErrorWithPreconditionFailed("todo list not deletable: %v", todoListID)
+		return entity.TodoList{}, util.NewErrorWithPreconditionFailed("todo list not deletable: %v", todoListID)
 	}
 
 	// cascade delete todos
@@ -70,7 +70,7 @@ func OwnTodoList(userID, todoListID string) (entity.TodoList, error) {
 	}
 
 	if todoList.UserID != userID {
-		return entity.TodoList{}, utils.NewErrorWithForbidden("unable to handle non-owned todo list: %v", todoListID)
+		return entity.TodoList{}, util.NewErrorWithForbidden("unable to handle non-owned todo list: %v", todoListID)
 	}
 
 	return todoList, nil

@@ -10,7 +10,7 @@ import (
 	"github.com/yzx9/otodo/model/dto"
 	"github.com/yzx9/otodo/model/entity"
 	"github.com/yzx9/otodo/otodo"
-	"github.com/yzx9/otodo/utils"
+	"github.com/yzx9/otodo/util"
 )
 
 func CreateUser(payload dto.CreateUserDTO) (entity.User, error) {
@@ -28,7 +28,7 @@ func CreateUser(payload dto.CreateUserDTO) (entity.User, error) {
 	}
 
 	if exist {
-		return entity.User{}, utils.NewError(otodo.ErrDuplicateID, "user name has been used: %v", payload.UserName)
+		return entity.User{}, util.NewError(otodo.ErrDuplicateID, "user name has been used: %v", payload.UserName)
 	}
 
 	user := entity.User{

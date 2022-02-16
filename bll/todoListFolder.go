@@ -5,7 +5,7 @@ import (
 
 	"github.com/yzx9/otodo/dal"
 	"github.com/yzx9/otodo/model/entity"
-	"github.com/yzx9/otodo/utils"
+	"github.com/yzx9/otodo/util"
 )
 
 func CreateTodoListFolder(userID string, todoListFolderName string) (entity.TodoListFolder, error) {
@@ -60,7 +60,7 @@ func OwnTodoListFolder(userID, todoListFolderID string) (entity.TodoListFolder, 
 	}
 
 	if todoListFolder.UserID != userID {
-		return entity.TodoListFolder{}, utils.NewErrorWithForbidden("unable to handle non-owned todo list folder: %v", todoListFolderID)
+		return entity.TodoListFolder{}, util.NewErrorWithForbidden("unable to handle non-owned todo list folder: %v", todoListFolderID)
 	}
 
 	return todoListFolder, nil
