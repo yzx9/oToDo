@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"mime/multipart"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -15,7 +16,14 @@ import (
 
 const maxFileSize = 8 << 20 // 8MiB
 
+var supportedFileTypeRegex = regexp.MustCompile(`.(jpg|jpeg|JPG|png|PNG|gif|GIF|ico|ICO)$`)
+
 func UploadPublicFile(file *multipart.FileHeader) (int64, error) {
+	// only support img now
+	if !supportedFileTypeRegex.MatchString(file.Filename) {
+		return 0, util.NewError(otodo.ErrPreconditionFailed, "invalid file type")
+	}
+
 	record := entity.File{
 		FileName:   file.Filename,
 		AccessType: string(entity.FileTypePublic),
