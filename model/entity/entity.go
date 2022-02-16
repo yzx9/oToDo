@@ -3,18 +3,18 @@ package entity
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"github.com/yzx9/otodo/otodo"
 	"gorm.io/gorm"
 )
 
 type Entity struct {
-	ID        string         `json:"id" gorm:"primaryKey;type:char(36);"`
+	ID        int64          `json:"id" gorm:"primaryKey"`
 	CreatedAt time.Time      `json:"createdAt" gorm:"not null"`
 	UpdatedAt time.Time      `json:"updatedAt"`
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
 }
 
 func (e *Entity) BeforeCreate(tx *gorm.DB) (err error) {
-	e.ID = uuid.NewString()
+	e.ID = otodo.NewID()
 	return
 }

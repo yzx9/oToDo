@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -15,7 +14,7 @@ import (
 
 // Create todo step
 func PostTodoStepHandler(c *gin.Context) {
-	todoID, err := common.GetRequiredParam(c, "id")
+	todoID, err := common.GetRequiredParamID(c, "id")
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -58,15 +57,15 @@ func PutTodoStepHandler(c *gin.Context) {
 
 // Delete todo step
 func DeleteTodoStepHandler(c *gin.Context) {
-	todoID, err := common.GetRequiredParam(c, "id")
+	todoID, err := common.GetRequiredParamID(c, "id")
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
 
-	stepID, ok := c.Params.Get("step-id")
-	if !ok {
-		common.AbortWithError(c, fmt.Errorf("step-id required"))
+	stepID, err := common.GetRequiredParamID(c, "step-id")
+	if err != nil {
+		common.AbortWithError(c, err)
 		return
 	}
 

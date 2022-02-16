@@ -13,6 +13,6 @@ type File struct {
 	FileName     string `json:"fileName"`
 	FileServerID string `json:"-" gorm:"size:15"`
 	FilePath     string `json:"-" gorm:"size:128"`
-	AccessType   string `json:"accessType" gorm:"size:8"`        // FileAccessType
-	RelatedID    string `json:"relatedID" gorm:"type:char(36);"` // Depend on access type
+	AccessType   string `json:"accessType" gorm:"size:8"` // FileAccessType
+	RelatedID    int64  `json:"relatedID"`                // Depend on access type
 }

@@ -8,7 +8,7 @@ import (
 	"github.com/yzx9/otodo/util"
 )
 
-func CreateTodoListSharedUser(userID, todoListID string) error {
+func CreateTodoListSharedUser(userID, todoListID int64) error {
 	exist, err := ExistTodoListSharing(userID, todoListID)
 	if err != nil {
 		return err
@@ -24,7 +24,7 @@ func CreateTodoListSharedUser(userID, todoListID string) error {
 	return nil
 }
 
-func GetTodoListSharedUsers(userID string, todoListID string) ([]entity.User, error) {
+func GetTodoListSharedUsers(userID, todoListID int64) ([]entity.User, error) {
 	_, err := OwnOrSharedTodoList(userID, todoListID)
 	if err != nil {
 		return nil, err
@@ -41,7 +41,7 @@ func GetTodoListSharedUsers(userID string, todoListID string) ([]entity.User, er
 // Delete shared user from todo list,
 // can be called by owner to delete anyone,
 // or called by shared user to delete themselves
-func DeleteTodoListSharedUser(operatorID, userID, todoListID string) error {
+func DeleteTodoListSharedUser(operatorID, userID, todoListID int64) error {
 	todoList, err := OwnOrSharedTodoList(operatorID, todoListID)
 	if err != nil {
 		return err
@@ -58,7 +58,7 @@ func DeleteTodoListSharedUser(operatorID, userID, todoListID string) error {
 	return nil
 }
 
-func ExistTodoListSharing(userID, todoListID string) (bool, error) {
+func ExistTodoListSharing(userID, todoListID int64) (bool, error) {
 	exist, err := dal.ExistTodoListSharing(userID, todoListID)
 	if err != nil {
 		return false, fmt.Errorf("fails to valid sharing: %w", err)
@@ -68,7 +68,7 @@ func ExistTodoListSharing(userID, todoListID string) (bool, error) {
 }
 
 // owner or shared user
-func OwnOrSharedTodoList(userID, todoListID string) (entity.TodoList, error) {
+func OwnOrSharedTodoList(userID, todoListID int64) (entity.TodoList, error) {
 	todoList, err := dal.SelectTodoList(todoListID)
 	if err != nil {
 		return entity.TodoList{}, fmt.Errorf("fails to get todo list: %v", todoListID)

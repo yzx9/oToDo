@@ -35,12 +35,12 @@ func Login(userName, password string) (dto.SessionDTO, error) {
 	return re, nil
 }
 
-func Logout(userID, refreshTokenID string) error {
+func Logout(userID int64, refreshTokenID string) error {
 	_, err := CreateUserInvalidRefreshToken(userID, refreshTokenID)
 	return err
 }
 
-func NewAccessToken(userID, refreshTokenID string) (dto.SessionDTO, error) {
+func NewAccessToken(userID int64, refreshTokenID string) (dto.SessionDTO, error) {
 	user, err := dal.SelectUser(userID)
 	if err != nil {
 		return dto.SessionDTO{}, fmt.Errorf("fails to get user, %w", err)
@@ -62,12 +62,6 @@ func ParseAccessToken(authorization string) (*jwt.Token, error) {
 	token, err := ParseToken(matches[1], &dto.SessionTokenClaims{})
 	if err != nil {
 		return nil, fmt.Errorf("fails to parse access token: %w", err)
-	}
-
-	claims, ok := token.Claims.(*dto.SessionTokenClaims)
-	_, err = uuid.Parse(claims.UserID)
-	if !ok || err != nil {
-		return nil, fmt.Errorf("invalid access token")
 	}
 
 	return token, nil

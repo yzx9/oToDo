@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -29,7 +28,7 @@ func PostTodoListHandler(c *gin.Context) {
 
 // Get todo list
 func GetTodoListHandler(c *gin.Context) {
-	id, err := common.GetRequiredParam(c, "id")
+	id, err := common.GetRequiredParamID(c, "id")
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -40,7 +39,7 @@ func GetTodoListHandler(c *gin.Context) {
 
 // Get todos in todo list
 func GetTodoListTodosHandler(c *gin.Context) {
-	todoListID, err := common.GetRequiredParam(c, "id")
+	todoListID, err := common.GetRequiredParamID(c, "id")
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -58,9 +57,9 @@ func GetTodoListTodosHandler(c *gin.Context) {
 
 // Delete todo list
 func DeleteTodoListHandler(c *gin.Context) {
-	id, ok := c.Params.Get("id")
-	if !ok {
-		common.AbortWithError(c, fmt.Errorf("id required"))
+	id, err := common.GetRequiredParamID(c, "id")
+	if err != nil {
+		common.AbortWithError(c, err)
 		return
 	}
 
@@ -81,7 +80,12 @@ func DeleteTodoListHandler(c *gin.Context) {
 // Get shared users in todo list
 func GetTodoListSharedUsersHandler(c *gin.Context) {
 	userID := common.MustGetAccessUserID(c)
-	todoListID := common.MustGetParam(c, "id")
+	todoListID, err := common.GetRequiredParamID(c, "id")
+	if err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
 	users, err := bll.GetTodoListSharedUsers(userID, todoListID)
 	if err != nil {
 		common.AbortWithError(c, err)
@@ -96,8 +100,17 @@ func GetTodoListSharedUsersHandler(c *gin.Context) {
 // Delete shared user from todo list
 func DeleteTodoListSharedUserHandler(c *gin.Context) {
 	operatorID := common.MustGetAccessUserID(c)
-	todoListID := common.MustGetParam(c, "id")
-	userID := common.MustGetParam(c, "user-id")
+	todoListID, err := common.GetRequiredParamID(c, "id")
+	if err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
+	userID, err := common.GetRequiredParamID(c, "user-id")
+	if err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
 
 	if err := bll.DeleteTodoListSharedUser(operatorID, userID, todoListID); err != nil {
 		common.AbortWithError(c, err)

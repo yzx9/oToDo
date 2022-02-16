@@ -11,12 +11,12 @@ import (
 // Configurable
 const fileSignedMaxExpiresIn = 6 * time.Hour
 
-func CreateFilePresignedID(userID, fileID string) (string, error) {
+func CreateFilePresignedID(userID, fileID int64) (string, error) {
 	const max = int(fileSignedMaxExpiresIn / time.Second)
 	return CreateFilePresignedIDWithExp(userID, fileID, max)
 }
 
-func CreateFilePresignedIDWithExp(userID, fileID string, exp int) (string, error) {
+func CreateFilePresignedIDWithExp(userID, fileID int64, exp int) (string, error) {
 	expiresIn := time.Duration(exp * int(time.Second))
 	if expiresIn > fileSignedMaxExpiresIn {
 		return "", util.NewErrorWithPreconditionFailed("expires is too long")
@@ -35,9 +35,9 @@ func CreateFilePresignedIDWithExp(userID, fileID string, exp int) (string, error
 	return base64.StdEncoding.EncodeToString([]byte(token)), nil
 }
 
-func ParseFileSignedID(filePresignedID string) (string, error) {
-	write := func() (string, error) {
-		return "", util.NewErrorWithPreconditionFailed("invalid presigned file id")
+func ParseFileSignedID(filePresignedID string) (int64, error) {
+	write := func() (int64, error) {
+		return 0, util.NewErrorWithPreconditionFailed("invalid presigned file id")
 	}
 
 	payload, err := base64.StdEncoding.DecodeString(filePresignedID)

@@ -10,7 +10,7 @@ func InsertTag(tag *entity.Tag) error {
 	return util.WrapGormErr(re.Error, "tag")
 }
 
-func SelectTag(userID, tagName string) (entity.Tag, error) {
+func SelectTag(userID int64, tagName string) (entity.Tag, error) {
 	var tag entity.Tag
 	re := db.Where(&entity.Tag{
 		UserID: userID,
@@ -23,7 +23,7 @@ func SelectTag(userID, tagName string) (entity.Tag, error) {
 	return tag, nil
 }
 
-func SelectTags(userID string) ([]entity.Tag, error) {
+func SelectTags(userID int64) ([]entity.Tag, error) {
 	var tags []entity.Tag
 	re := db.Where(&entity.Tag{UserID: userID}).Find(&tags)
 	if re.Error != nil {
@@ -33,7 +33,7 @@ func SelectTags(userID string) ([]entity.Tag, error) {
 	return tags, nil
 }
 
-func InsertTagTodo(userID, todoID, tagName string) error {
+func InsertTagTodo(userID, todoID int64, tagName string) error {
 	err := db.Model(&entity.Tag{}).Association("Todos").Append(&entity.Todo{
 		Entity: entity.Entity{
 			ID: todoID,
@@ -43,7 +43,7 @@ func InsertTagTodo(userID, todoID, tagName string) error {
 	return util.WrapGormErr(err, "tag todos")
 }
 
-func DeleteTagTodo(userID, todoID, tagName string) error {
+func DeleteTagTodo(userID, todoID int64, tagName string) error {
 	err := db.Model(&entity.Tag{}).Association("Todos").Delete(&entity.Todo{
 		Entity: entity.Entity{
 			ID: todoID,
@@ -53,7 +53,7 @@ func DeleteTagTodo(userID, todoID, tagName string) error {
 	return util.WrapGormErr(err, "tag todos")
 }
 
-func ExistTag(userID, tagName string) (bool, error) {
+func ExistTag(userID int64, tagName string) (bool, error) {
 	var count int64
 	re := db.Model(&entity.Tag{}).Where(&entity.Tag{
 		UserID: userID,

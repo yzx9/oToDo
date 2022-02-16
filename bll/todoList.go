@@ -8,10 +8,10 @@ import (
 	"github.com/yzx9/otodo/util"
 )
 
-func CreateTodoList(userID string, todoList *entity.TodoList) error {
+func CreateTodoList(userID int64, todoList *entity.TodoList) error {
 	todoList.Deletable = false
 	todoList.UserID = userID
-	todoList.TodoListFolderID = ""
+	todoList.TodoListFolderID = 0
 	if err := dal.InsertTodoList(todoList); err != nil {
 		return fmt.Errorf("fails to create todo list: %w", err)
 	}
@@ -19,11 +19,11 @@ func CreateTodoList(userID string, todoList *entity.TodoList) error {
 	return nil
 }
 
-func SelectTodoList(userID, todoListID string) (entity.TodoList, error) {
+func SelectTodoList(userID, todoListID int64) (entity.TodoList, error) {
 	return OwnOrSharedTodoList(userID, todoListID)
 }
 
-func SelectTodoLists(userID string) ([]entity.TodoList, error) {
+func SelectTodoLists(userID int64) ([]entity.TodoList, error) {
 	vec, err := dal.SelectTodoLists(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get user todo lists: %w", err)
@@ -38,7 +38,7 @@ func SelectTodoLists(userID string) ([]entity.TodoList, error) {
 	return vec, nil
 }
 
-func DeleteTodoList(userID, todoListID string) (entity.TodoList, error) {
+func DeleteTodoList(userID, todoListID int64) (entity.TodoList, error) {
 	// only allow delete by owner, not shared users
 	todoList, err := OwnTodoList(userID, todoListID)
 	if err != nil {
@@ -63,7 +63,7 @@ func DeleteTodoList(userID, todoListID string) (entity.TodoList, error) {
 }
 
 // owner
-func OwnTodoList(userID, todoListID string) (entity.TodoList, error) {
+func OwnTodoList(userID, todoListID int64) (entity.TodoList, error) {
 	todoList, err := dal.SelectTodoList(todoListID)
 	if err != nil {
 		return entity.TodoList{}, fmt.Errorf("fails to get todo list: %v", todoListID)

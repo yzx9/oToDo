@@ -10,7 +10,7 @@ type User struct {
 	Telephone string `json:"telephone" gorm:"size:16;"`
 	Avatar    string `json:"avatar"`
 
-	BasicTodoListID string    `json:"basicTodoListID" gorm:"type:char(36);"`
+	BasicTodoListID int64     `json:"basicTodoListID"`
 	BasicTodoList   *TodoList `json:"-"`
 
 	TodoLists []TodoList `json:"-"`

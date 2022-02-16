@@ -7,7 +7,7 @@ import (
 	"github.com/yzx9/otodo/bll"
 )
 
-func HandleGetCurrentUserTodoList(c *gin.Context, todoListID string) {
+func HandleGetCurrentUserTodoList(c *gin.Context, todoListID int64) {
 	userID := MustGetAccessUserID(c)
 	todoList, err := bll.SelectTodoList(userID, todoListID)
 	if err != nil {

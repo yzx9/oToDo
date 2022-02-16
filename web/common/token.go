@@ -41,10 +41,10 @@ func GetAccessTokenClaims(c *gin.Context) (*dto.SessionTokenClaims, error) {
 	return claims, nil
 }
 
-func GetAccessUserID(c *gin.Context) (string, error) {
+func GetAccessUserID(c *gin.Context) (int64, error) {
 	claims, err := GetAccessTokenClaims(c)
 	if err != nil {
-		return "", err
+		return 0, err
 	}
 
 	return claims.UserID, nil
@@ -62,7 +62,7 @@ func MustGetAccessTokenClaims(c *gin.Context) *dto.SessionTokenClaims {
 	return claims
 }
 
-func MustGetAccessUserID(c *gin.Context) string {
+func MustGetAccessUserID(c *gin.Context) int64 {
 	claims := MustGetAccessTokenClaims(c)
 	return claims.UserID
 }

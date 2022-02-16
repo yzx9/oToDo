@@ -9,7 +9,7 @@ import (
 	"github.com/yzx9/otodo/otodo"
 )
 
-func NewClaims(userID string, exp time.Duration) dto.TokenClaims {
+func NewClaims(userID int64, exp time.Duration) dto.TokenClaims {
 	now := time.Now().UTC()
 	return dto.TokenClaims{
 		StandardClaims: jwt.StandardClaims{

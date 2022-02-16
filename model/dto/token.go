@@ -7,5 +7,5 @@ import (
 type TokenClaims struct {
 	jwt.StandardClaims
 
-	UserID string `json:"uid"`
+	UserID int64 `json:"uid"`
 }

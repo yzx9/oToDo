@@ -10,7 +10,7 @@ func InsertTodoFile(file *entity.TodoFile) error {
 	return util.WrapGormErr(re.Error, "todo file")
 }
 
-func SelectTodoFiles(todoID string) ([]entity.TodoFile, error) {
+func SelectTodoFiles(todoID int64) ([]entity.TodoFile, error) {
 	var files []entity.TodoFile
 	re := db.Where(entity.TodoFile{TodoID: todoID}).Find(&files)
 	return files, util.WrapGormErr(re.Error, "file")

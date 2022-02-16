@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"github.com/yzx9/otodo/bll"
+	"github.com/yzx9/otodo/otodo"
 	"github.com/yzx9/otodo/web/middleware"
 )
 
@@ -84,6 +85,10 @@ func (s *Server) Listen(addr string) {
 func (s *Server) Run() {
 	if s.Error != nil {
 		return
+	}
+
+	if err := otodo.Init(); err != nil {
+
 	}
 
 	if err := bll.Init(); err != nil {

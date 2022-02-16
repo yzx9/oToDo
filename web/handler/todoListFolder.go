@@ -10,7 +10,7 @@ import (
 
 // Get todo list folder
 func GetTodoListFolderHandler(c *gin.Context) {
-	id, err := common.GetRequiredParam(c, "id")
+	id, err := common.GetRequiredParamID(c, "id")
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -28,7 +28,7 @@ func GetTodoListFolderHandler(c *gin.Context) {
 
 // Delete todo list folder
 func DeleteTodoListFolderHandler(c *gin.Context) {
-	id, err := common.GetRequiredParam(c, "id")
+	id, err := common.GetRequiredParamID(c, "id")
 	if err != nil {
 		common.AbortWithError(c, err)
 		return

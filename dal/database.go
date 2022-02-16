@@ -12,7 +12,7 @@ import (
 
 var db *gorm.DB
 
-func InitDatabase() error {
+func initDatabase() error {
 	write := func(err error) error {
 		return util.NewError(otodo.ErrDatabaseConnectFailed, "fails to connect database: %w", err)
 	}

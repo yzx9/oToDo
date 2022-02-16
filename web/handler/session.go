@@ -74,16 +74,16 @@ func PostSessionTokenHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, newToken)
 }
 
-func parseRefreshToken(c *gin.Context) (string, string, error) {
+func parseRefreshToken(c *gin.Context) (int64, string, error) {
 	obj := dto.RefreshTokenDTO{}
 	if err := c.ShouldBind(&obj); err != nil {
-		return "", "", fmt.Errorf("refresh_token required")
+		return 0, "", fmt.Errorf("refresh_token required")
 	}
 
 	token, err := bll.ParseSessionToken(obj.RefreshToken)
 	claims, ok := token.Claims.(*dto.SessionTokenClaims)
 	if err != nil || !ok || !token.Valid {
-		return "", "", fmt.Errorf("invalid token")
+		return 0, "", fmt.Errorf("invalid token")
 	}
 
 	return claims.UserID, claims.RefreshTokenID, nil

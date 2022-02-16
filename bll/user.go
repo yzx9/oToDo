@@ -3,9 +3,7 @@ package bll
 import (
 	"crypto/sha256"
 	"fmt"
-	"time"
 
-	"github.com/google/uuid"
 	"github.com/yzx9/otodo/dal"
 	"github.com/yzx9/otodo/model/dto"
 	"github.com/yzx9/otodo/model/entity"
@@ -58,18 +56,14 @@ func CreateUser(payload dto.CreateUserDTO) (entity.User, error) {
 	return user, nil
 }
 
-func GetUser(userID string) (entity.User, error) {
+func GetUser(userID int64) (entity.User, error) {
 	return dal.SelectUser(userID)
 }
 
 // Invalid User Refresh Token
 
-func CreateUserInvalidRefreshToken(userID, tokenID string) (entity.UserInvalidRefreshToken, error) {
+func CreateUserInvalidRefreshToken(userID int64, tokenID string) (entity.UserInvalidRefreshToken, error) {
 	model := entity.UserInvalidRefreshToken{
-		Entity: entity.Entity{
-			ID:        uuid.NewString(),
-			CreatedAt: time.Now(),
-		},
 		UserID:  userID,
 		TokenID: tokenID,
 	}
@@ -82,7 +76,7 @@ func CreateUserInvalidRefreshToken(userID, tokenID string) (entity.UserInvalidRe
 
 // Verify is it an valid token.
 // Note: This func don't check token expire time
-func IsValidRefreshToken(userID, tokenID string) (bool, error) {
+func IsValidRefreshToken(userID int64, tokenID string) (bool, error) {
 	valid, err := dal.ExistUserInvalidRefreshToken(userID, tokenID)
 	if err != nil {
 		return false, fmt.Errorf("fails to get user refresh token: %w", err)

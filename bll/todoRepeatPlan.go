@@ -10,11 +10,7 @@ import (
 
 func CreateTodoRepeatPlan(plan entity.TodoRepeatPlan) (entity.TodoRepeatPlan, error) {
 	if !isValidTodoRepeatPlan(plan) {
-		return entity.TodoRepeatPlan{
-			Entity: entity.Entity{
-				ID: "",
-			},
-		}, nil
+		return entity.TodoRepeatPlan{}, nil
 	}
 
 	if err := dal.InsertTodoRepeatPlan(&plan); err != nil {
@@ -26,11 +22,7 @@ func CreateTodoRepeatPlan(plan entity.TodoRepeatPlan) (entity.TodoRepeatPlan, er
 
 func UpdateTodoRepeatPlan(plan, oldPlan entity.TodoRepeatPlan) (entity.TodoRepeatPlan, error) {
 	if !isValidTodoRepeatPlan(plan) {
-		return entity.TodoRepeatPlan{
-			Entity: entity.Entity{
-				ID: "",
-			},
-		}, nil
+		return entity.TodoRepeatPlan{}, nil
 	}
 
 	if !isSameTodoRepeatPlan(plan, oldPlan) {
@@ -44,7 +36,7 @@ func UpdateTodoRepeatPlan(plan, oldPlan entity.TodoRepeatPlan) (entity.TodoRepea
 	return plan, nil
 }
 
-func GetTodoRepeatPlan(id string) (entity.TodoRepeatPlan, error) {
+func GetTodoRepeatPlan(id int64) (entity.TodoRepeatPlan, error) {
 	plan, err := dal.SelectTodoRepeatPlan(id)
 	if err != nil {
 		return entity.TodoRepeatPlan{}, fmt.Errorf("fails to get todo repeat plan: %v", err)
@@ -54,7 +46,7 @@ func GetTodoRepeatPlan(id string) (entity.TodoRepeatPlan, error) {
 }
 
 func CreateRepeatTodoIfNeed(todo entity.Todo) (bool, entity.Todo, error) {
-	if todo.TodoRepeatPlanID == "" {
+	if todo.TodoRepeatPlanID == 0 {
 		return false, entity.Todo{}, nil
 	}
 

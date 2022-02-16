@@ -16,19 +16,19 @@ type Todo struct {
 	Done       bool       `json:"done"`
 	DoneAt     *time.Time `json:"doneAt"`
 
-	UserID string `json:"userID" gorm:"type:char(36);"`
-	User   User   `json:"-"`
+	UserID int64 `json:"userID"`
+	User   User  `json:"-"`
 
-	TodoListID string   `json:"todolistID" gorm:"type:char(36);"`
+	TodoListID int64    `json:"todolistID"`
 	TodoList   TodoList `json:"-"`
 
 	Files []TodoFile `json:"files"`
 
 	Steps []TodoStep `json:"steps"`
 
-	TodoRepeatPlanID string         `json:"-" gorm:"type:char(36);"`
+	TodoRepeatPlanID int64          `json:"-"`
 	TodoRepeatPlan   TodoRepeatPlan `json:"todoRepeatPlan"`
 
-	TodoRepeatFromID *string `json:"todoRepeatFromID" gorm:"type:char(36);"` // last todo id
-	TodoRepeatFrom   *Todo   `json:"-"`
+	TodoRepeatFromID *int64 `json:"todoRepeatFromID"` // last todo id
+	TodoRepeatFrom   *Todo  `json:"-"`
 }

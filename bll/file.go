@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"mime/multipart"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/yzx9/otodo/dal"
@@ -14,7 +15,7 @@ import (
 
 const maxFileSize = 8 << 20 // 8MiB
 
-func UploadPublicFile(file *multipart.FileHeader) (string, error) {
+func UploadPublicFile(file *multipart.FileHeader) (int64, error) {
 	record := entity.File{
 		FileName:   file.Filename,
 		AccessType: string(entity.FileTypePublic),
@@ -23,7 +24,7 @@ func UploadPublicFile(file *multipart.FileHeader) (string, error) {
 	return record.ID, err
 }
 
-func UploadTodoFile(todoID string, file *multipart.FileHeader) (string, error) {
+func UploadTodoFile(todoID int64, file *multipart.FileHeader) (int64, error) {
 	record := entity.File{
 		FileName:   file.Filename,
 		AccessType: string(entity.FileTypeTodo),
@@ -31,7 +32,7 @@ func UploadTodoFile(todoID string, file *multipart.FileHeader) (string, error) {
 	}
 	err := uploadFile(file, &record)
 	if err != nil {
-		return "", err
+		return 0, err
 	}
 
 	err = dal.InsertTodoFile(&entity.TodoFile{
@@ -39,7 +40,7 @@ func UploadTodoFile(todoID string, file *multipart.FileHeader) (string, error) {
 		Todo: entity.Todo{Entity: entity.Entity{ID: record.ID}},
 	})
 	if err != nil {
-		return "", fmt.Errorf("fails to upload todo file: %w", err)
+		return 0, fmt.Errorf("fails to upload todo file: %w", err)
 	}
 
 	return record.ID, err
@@ -65,12 +66,12 @@ func uploadFile(file *multipart.FileHeader, record *entity.File) error {
 	return nil
 }
 
-func GetFile(fileID string) (*entity.File, error) {
+func GetFile(fileID int64) (*entity.File, error) {
 	file, err := dal.SelectFile(fileID)
 	return file, fmt.Errorf("fails to get file: %w", err)
 }
 
-func GetFilePath(userID, fileID string) (string, error) {
+func GetFilePath(userID, fileID int64) (string, error) {
 	file, err := OwnFile(userID, fileID)
 	if err != nil {
 		return "", err
@@ -79,7 +80,7 @@ func GetFilePath(userID, fileID string) (string, error) {
 	return getFilePath(file), nil
 }
 
-func ForceGetFilePath(fileID string) (string, error) {
+func ForceGetFilePath(fileID int64) (string, error) {
 	file, err := GetFile(fileID)
 	if err != nil {
 		return "", err
@@ -88,7 +89,7 @@ func ForceGetFilePath(fileID string) (string, error) {
 	return getFilePath(file), nil
 }
 
-func OwnFile(userID, fileID string) (*entity.File, error) {
+func OwnFile(userID, fileID int64) (*entity.File, error) {
 	write := func(err error) (*entity.File, error) {
 		return nil, err
 	}
@@ -122,7 +123,7 @@ func OwnFile(userID, fileID string) (*entity.File, error) {
 
 func applyFilePathTemplate(file *entity.File) string {
 	template := otodo.Conf.Server.FilePathTemplate
-	template = strings.ReplaceAll(template, ":id", file.ID)
+	template = strings.ReplaceAll(template, ":id", strconv.FormatInt(int64(file.ID), 10))
 	template = strings.ReplaceAll(template, ":ext", filepath.Ext(file.FileName))
 	template = strings.ReplaceAll(template, ":name", file.FileName)
 	template = strings.ReplaceAll(template, ":path", file.FilePath)

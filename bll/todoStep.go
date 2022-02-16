@@ -9,7 +9,7 @@ import (
 	"github.com/yzx9/otodo/util"
 )
 
-func CreateTodoStep(userID, todoID string, name string) (entity.TodoStep, error) {
+func CreateTodoStep(userID, todoID int64, name string) (entity.TodoStep, error) {
 	_, err := OwnTodo(userID, todoID)
 	if err != nil {
 		return entity.TodoStep{}, fmt.Errorf("todo not found: %v", todoID)
@@ -26,7 +26,7 @@ func CreateTodoStep(userID, todoID string, name string) (entity.TodoStep, error)
 	return step, nil
 }
 
-func UpdateTodoStep(userID string, step entity.TodoStep) (entity.TodoStep, error) {
+func UpdateTodoStep(userID int64, step entity.TodoStep) (entity.TodoStep, error) {
 	oldStep, err := OwnTodoStep(userID, step.ID)
 	if err != nil {
 		return entity.TodoStep{}, err
@@ -48,7 +48,7 @@ func UpdateTodoStep(userID string, step entity.TodoStep) (entity.TodoStep, error
 	return step, nil
 }
 
-func DeleteTodoStep(userID, todoID, todoStepID string) (entity.TodoStep, error) {
+func DeleteTodoStep(userID, todoID, todoStepID int64) (entity.TodoStep, error) {
 	step, err := OwnTodoStep(userID, todoStepID)
 	if err != nil {
 		return entity.TodoStep{}, err
@@ -61,7 +61,7 @@ func DeleteTodoStep(userID, todoID, todoStepID string) (entity.TodoStep, error) 
 	return step, dal.DeleteTodoStep(todoStepID)
 }
 
-func OwnTodoStep(userID, todoStepID string) (entity.TodoStep, error) {
+func OwnTodoStep(userID, todoStepID int64) (entity.TodoStep, error) {
 	step, err := dal.SelectTodoStep(todoStepID)
 	if err != nil {
 		return entity.TodoStep{}, fmt.Errorf("fails to get todo step: %v", todoStepID)

@@ -65,7 +65,7 @@ func GetCurrentUserNotNotifiedTodosHandler(c *gin.Context) {
 	handleGetCurrentUserTodos(c, bll.GetNotNotifiedTodos)
 }
 
-func handleGetCurrentUserTodos(c *gin.Context, getTodos func(string) ([]entity.Todo, error)) {
+func handleGetCurrentUserTodos(c *gin.Context, getTodos func(int64) ([]entity.Todo, error)) {
 	userID := common.MustGetAccessUserID(c)
 	todos, err := getTodos(userID)
 	if err != nil {

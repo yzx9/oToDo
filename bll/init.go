@@ -15,7 +15,7 @@ func Init() error {
 
 	hasInit = true
 
-	if err := dal.InitDatabase(); err != nil {
+	if err := dal.Init(); err != nil {
 		return fmt.Errorf("fails to init database: %w", err)
 	}
 

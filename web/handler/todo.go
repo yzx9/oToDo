@@ -28,7 +28,7 @@ func PostTodoHandler(c *gin.Context) {
 
 // Get todo
 func GetTodoHandler(c *gin.Context) {
-	todoID, err := common.GetRequiredParam(c, "id")
+	todoID, err := common.GetRequiredParamID(c, "id")
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -71,7 +71,7 @@ func PatchTodoHandler(c *gin.Context) {
 
 // Delete Todo
 func DeleteTodoHandler(c *gin.Context) {
-	todoID, err := common.GetRequiredParam(c, "id")
+	todoID, err := common.GetRequiredParamID(c, "id")
 	if err != nil {
 		common.AbortWithError(c, err)
 		return

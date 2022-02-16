@@ -10,7 +10,7 @@ func InsertFile(file *entity.File) error {
 	return util.WrapGormErr(re.Error, "file")
 }
 
-func SelectFile(id string) (*entity.File, error) {
+func SelectFile(id int64) (*entity.File, error) {
 	var file entity.File
 	re := db.Where("id = ?", id).First(&file)
 	return &file, util.WrapGormErr(re.Error, "file")

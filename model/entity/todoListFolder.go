@@ -5,8 +5,8 @@ type TodoListFolder struct {
 
 	Name string `json:"name" gorm:"size:128"`
 
-	UserID string `json:"userID" gorm:"type:char(36);"`
-	User   User   `json:"-"`
+	UserID int64 `json:"userID"`
+	User   User  `json:"-"`
 
 	TodoLists []TodoList `json:"-"`
 }

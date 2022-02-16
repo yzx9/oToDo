@@ -10,13 +10,13 @@ func InsertTodoStep(step *entity.TodoStep) error {
 	return util.WrapGormErr(re.Error, "todo step")
 }
 
-func SelectTodoStep(id string) (entity.TodoStep, error) {
+func SelectTodoStep(id int64) (entity.TodoStep, error) {
 	var step entity.TodoStep
 	re := db.Where("id = ?", id).First(&step)
 	return step, util.WrapGormErr(re.Error, "todo step")
 }
 
-func SelectTodoSteps(todoID string) ([]entity.TodoStep, error) {
+func SelectTodoSteps(todoID int64) ([]entity.TodoStep, error) {
 	var steps []entity.TodoStep
 	re := db.Where(entity.TodoStep{TodoID: todoID}).Find(&steps)
 	return steps, util.WrapGormErr(re.Error, "todo step")
@@ -27,7 +27,7 @@ func SaveTodoStep(todoStep *entity.TodoStep) error {
 	return util.WrapGormErr(re.Error, "todo step")
 }
 
-func DeleteTodoStep(id string) error {
+func DeleteTodoStep(id int64) error {
 	re := db.Delete(&entity.TodoStep{
 		Entity: entity.Entity{
 			ID: id,

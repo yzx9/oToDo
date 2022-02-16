@@ -10,7 +10,7 @@ func InsertUser(user *entity.User) error {
 	return util.WrapGormErr(re.Error, "user")
 }
 
-func SelectUser(id string) (entity.User, error) {
+func SelectUser(id int64) (entity.User, error) {
 	var user entity.User
 	re := db.Where("id = ?", id).First(&user)
 	return user, util.WrapGormErr(re.Error, "user")
@@ -22,7 +22,7 @@ func SelectUserByUserName(username string) (entity.User, error) {
 	return user, util.WrapGormErr(re.Error, "user")
 }
 
-func SelectUserByTodo(todoID string) (entity.User, error) {
+func SelectUserByTodo(todoID int64) (entity.User, error) {
 	var todo entity.Todo
 	re := db.Where("id = ?", todoID).Select("UserID").First(&todo)
 	if re.Error != nil {

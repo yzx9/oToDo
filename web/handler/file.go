@@ -38,7 +38,7 @@ func PostFileHandler(c *gin.Context) {
 
 // Upload todo file, only support single file now
 func PostTodoFileHandler(c *gin.Context) {
-	fileID, err := common.GetRequiredParam(c, "id")
+	fileID, err := common.GetRequiredParamID(c, "id")
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -61,7 +61,7 @@ func PostTodoFileHandler(c *gin.Context) {
 
 // Upload file, only support single file now
 func GetFileHandler(c *gin.Context) {
-	id, err := common.GetRequiredParam(c, "id")
+	id, err := common.GetRequiredParamID(c, "id")
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -69,7 +69,8 @@ func GetFileHandler(c *gin.Context) {
 
 	userID, err := common.GetAccessUserID(c)
 	if err != nil {
-		userID = ""
+		// TODO check if this is an bug
+		userID = 0
 	}
 
 	filepath, err := bll.GetFilePath(userID, id)
@@ -83,7 +84,7 @@ func GetFileHandler(c *gin.Context) {
 
 // Create presigned file id for open access
 func PostFilePresignHandler(c *gin.Context) {
-	id, err := common.GetRequiredParam(c, "id")
+	id, err := common.GetRequiredParamID(c, "id")
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -102,7 +103,7 @@ func PostFilePresignHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.FileDTO{FileID: presigned})
+	c.JSON(http.StatusOK, dto.FilePreSignResultDTO{FileID: presigned})
 }
 
 // Get file from presigned id

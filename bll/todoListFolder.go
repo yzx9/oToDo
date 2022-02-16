@@ -8,7 +8,7 @@ import (
 	"github.com/yzx9/otodo/util"
 )
 
-func CreateTodoListFolder(userID string, todoListFolderName string) (entity.TodoListFolder, error) {
+func CreateTodoListFolder(userID int64, todoListFolderName string) (entity.TodoListFolder, error) {
 	folder := entity.TodoListFolder{
 		Name:   todoListFolderName,
 		UserID: userID,
@@ -20,16 +20,16 @@ func CreateTodoListFolder(userID string, todoListFolderName string) (entity.Todo
 	return folder, nil
 }
 
-func GetTodoListFolder(userID, todoListFolderID string) (entity.TodoListFolder, error) {
+func GetTodoListFolder(userID, todoListFolderID int64) (entity.TodoListFolder, error) {
 	return OwnTodoListFolder(userID, todoListFolderID)
 }
 
-func GetTodoListFolders(userID string) ([]entity.TodoListFolder, error) {
+func GetTodoListFolders(userID int64) ([]entity.TodoListFolder, error) {
 	vec, err := dal.SelectTodoListFolders(userID)
 	return vec, fmt.Errorf("fails to get user: %w", err)
 }
 
-func DeleteTodoListFolder(userID, todoListFolderID string) (entity.TodoListFolder, error) {
+func DeleteTodoListFolder(userID, todoListFolderID int64) (entity.TodoListFolder, error) {
 	write := func(err error) (entity.TodoListFolder, error) {
 		return entity.TodoListFolder{}, err
 	}
@@ -53,7 +53,7 @@ func DeleteTodoListFolder(userID, todoListFolderID string) (entity.TodoListFolde
 }
 
 // Verify permission
-func OwnTodoListFolder(userID, todoListFolderID string) (entity.TodoListFolder, error) {
+func OwnTodoListFolder(userID, todoListFolderID int64) (entity.TodoListFolder, error) {
 	todoListFolder, err := dal.SelectTodoListFolder(todoListFolderID)
 	if err != nil {
 		return entity.TodoListFolder{}, fmt.Errorf("fails to get todo list folder: %v", todoListFolderID)

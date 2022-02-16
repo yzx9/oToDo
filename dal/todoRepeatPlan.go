@@ -10,7 +10,7 @@ func InsertTodoRepeatPlan(plan *entity.TodoRepeatPlan) error {
 	return util.WrapGormErr(re.Error, "todo repeat plan")
 }
 
-func SelectTodoRepeatPlan(id string) (entity.TodoRepeatPlan, error) {
+func SelectTodoRepeatPlan(id int64) (entity.TodoRepeatPlan, error) {
 	var plan entity.TodoRepeatPlan
 	re := db.Where("id = ?", id).First(&plan)
 	return plan, util.WrapGormErr(re.Error, "todo repeat plan")
@@ -21,7 +21,7 @@ func SaveTodoRepeatPlan(todoRepeatPlan *entity.TodoRepeatPlan) error {
 	return util.WrapGormErr(re.Error, "todo repeat plan")
 }
 
-func DeleteTodoRepeatPlan(id string) error {
+func DeleteTodoRepeatPlan(id int64) error {
 	re := db.Delete(&entity.TodoRepeatPlan{
 		Entity: entity.Entity{
 			ID: id,

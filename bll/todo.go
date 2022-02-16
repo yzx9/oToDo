@@ -9,7 +9,7 @@ import (
 	"github.com/yzx9/otodo/util"
 )
 
-func CreateTodo(userID string, todo *entity.Todo) error {
+func CreateTodo(userID int64, todo *entity.Todo) error {
 	_, err := OwnOrSharedTodoList(userID, todo.TodoListID)
 	if err != nil {
 		return fmt.Errorf("fails to get todo list: %w", err)
@@ -30,7 +30,7 @@ func CreateTodo(userID string, todo *entity.Todo) error {
 	return nil
 }
 
-func GetTodo(userID, todoID string) (entity.Todo, error) {
+func GetTodo(userID, todoID int64) (entity.Todo, error) {
 	todo, err := OwnTodo(userID, todoID)
 	if err != nil {
 		return entity.Todo{}, fmt.Errorf("fails to get todo: %w", err)
@@ -39,7 +39,7 @@ func GetTodo(userID, todoID string) (entity.Todo, error) {
 	return todo, nil
 }
 
-func GetTodos(userID, todoListID string) ([]entity.Todo, error) {
+func GetTodos(userID, todoListID int64) ([]entity.Todo, error) {
 	if _, err := OwnOrSharedTodoList(userID, todoListID); err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func GetTodos(userID, todoListID string) ([]entity.Todo, error) {
 	return todos, nil
 }
 
-func GetImportantTodos(userID string) ([]entity.Todo, error) {
+func GetImportantTodos(userID int64) ([]entity.Todo, error) {
 	todos, err := dal.SelectImportantTodos(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get important todos: %w", err)
@@ -61,7 +61,7 @@ func GetImportantTodos(userID string) ([]entity.Todo, error) {
 	return todos, nil
 }
 
-func GetPlannedTodos(userID string) ([]entity.Todo, error) {
+func GetPlannedTodos(userID int64) ([]entity.Todo, error) {
 	todos, err := dal.SelectPlanedTodos(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get planed todos: %w", err)
@@ -70,7 +70,7 @@ func GetPlannedTodos(userID string) ([]entity.Todo, error) {
 	return todos, nil
 }
 
-func GetNotNotifiedTodos(userID string) ([]entity.Todo, error) {
+func GetNotNotifiedTodos(userID int64) ([]entity.Todo, error) {
 	todos, err := dal.SelectNotNotifiedTodos(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get not-notified todos: %w", err)
@@ -79,7 +79,7 @@ func GetNotNotifiedTodos(userID string) ([]entity.Todo, error) {
 	return todos, nil
 }
 
-func UpdateTodo(userID string, todo *entity.Todo) error {
+func UpdateTodo(userID int64, todo *entity.Todo) error {
 	// Limits
 	oldTodo, err := OwnTodo(userID, todo.ID)
 	if err != nil {
@@ -123,7 +123,7 @@ func UpdateTodo(userID string, todo *entity.Todo) error {
 	return nil
 }
 
-func DeleteTodo(userID, todoID string) (entity.Todo, error) {
+func DeleteTodo(userID, todoID int64) (entity.Todo, error) {
 	todo, err := OwnTodo(userID, todoID)
 	if err != nil {
 		return entity.Todo{}, err
@@ -140,7 +140,7 @@ func DeleteTodo(userID, todoID string) (entity.Todo, error) {
 	return todo, nil
 }
 
-func OwnTodo(userID, todoID string) (entity.Todo, error) {
+func OwnTodo(userID, todoID int64) (entity.Todo, error) {
 	todo, err := dal.SelectTodo(todoID)
 	if err != nil {
 		return entity.Todo{}, fmt.Errorf("fails to get todo: %v", todoID)
