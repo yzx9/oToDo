@@ -81,7 +81,7 @@ func (s *Server) setupRouter() {
 		r.DELETE("/todo-lists/:id/shared-users/:user-id", handlers.DeleteTodoListSharedUserHandler)
 
 		r.POST("/todo-lists/:id/sharings", handlers.PostTodoListSharingsHandler)
-		r.GET("/todo-lists/:id/share-links", handlers.GetTodoListSharingsHandler)
+		r.GET("/todo-lists/:id/sharings", handlers.GetTodoListSharingsHandler)
 
 		r.POST("/todo-lists/:id/sharings/:token", handlers.PostTodoListSharingHandler)
 		r.DELETE("/todo-lists/:id/sharings/:token", handlers.DeleteTodoListSharingHandler)

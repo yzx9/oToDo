@@ -24,7 +24,12 @@ func CreateTodoListSharedUser(userID, todoListID string) error {
 	return nil
 }
 
-func GetTodoListSharedUsers(todoListID string) ([]entity.User, error) {
+func GetTodoListSharedUsers(userID string, todoListID string) ([]entity.User, error) {
+	_, err := OwnOrSharedTodoList(userID, todoListID)
+	if err != nil {
+		return nil, err
+	}
+
 	users, err := dal.SelectTodoListSharedUsers(todoListID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get todo list shared users: %w", err)
@@ -33,7 +38,19 @@ func GetTodoListSharedUsers(todoListID string) ([]entity.User, error) {
 	return users, nil
 }
 
-func DeleteTodoListSharedUser(userID, todoListID string) error {
+// Delete shared user from todo list,
+// can be called by owner to delete anyone,
+// or called by shared user to delete themselves
+func DeleteTodoListSharedUser(operatorID, userID, todoListID string) error {
+	todoList, err := OwnOrSharedTodoList(operatorID, todoListID)
+	if err != nil {
+		return err
+	}
+
+	if todoList.UserID != operatorID && userID != operatorID {
+		return utils.NewErrorWithForbidden("unable to delete shared user")
+	}
+
 	if err := dal.DeleteTodoListSharedUser(userID, todoListID); err != nil {
 		return fmt.Errorf("fails to delete todo list shared users: %w", err)
 	}
