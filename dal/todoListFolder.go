@@ -12,7 +12,8 @@ func InsertTodoListFolder(todoListFolder *entity.TodoListFolder) error {
 
 func SelectTodoListFolder(id int64) (entity.TodoListFolder, error) {
 	var folder entity.TodoListFolder
-	re := db.Where("ID = ?", id).First(&folder)
+	where := entity.TodoListFolder{Entity: entity.Entity{ID: id}}
+	re := db.Where(&where).First(&folder)
 	return folder, util.WrapGormErr(re.Error, "todo list folder")
 }
 
@@ -33,6 +34,7 @@ func DeleteTodoListFolder(id int64) error {
 
 func ExistTodoListFolder(id int64) (bool, error) {
 	var count int64
-	re := db.Model(&entity.TodoListFolder{}).Where("id = ?", id).Count(&count)
+	folder := entity.TodoListFolder{Entity: entity.Entity{ID: id}}
+	re := db.Model(&entity.TodoListFolder{}).Where(&folder).Count(&count)
 	return count != 0, util.WrapGormErr(re.Error, "tag")
 }

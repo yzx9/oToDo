@@ -12,7 +12,8 @@ func InsertTodoRepeatPlan(plan *entity.TodoRepeatPlan) error {
 
 func SelectTodoRepeatPlan(id int64) (entity.TodoRepeatPlan, error) {
 	var plan entity.TodoRepeatPlan
-	re := db.Where("id = ?", id).First(&plan)
+	where := entity.TodoRepeatPlan{Entity: entity.Entity{ID: id}}
+	re := db.Where(&where).First(&plan)
 	return plan, util.WrapGormErr(re.Error, "todo repeat plan")
 }
 

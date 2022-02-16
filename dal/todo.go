@@ -13,7 +13,8 @@ func InsertTodo(todo *entity.Todo) error {
 
 func SelectTodo(id int64) (entity.Todo, error) {
 	var todo entity.Todo
-	re := getTodosWithPreload().Where("id = ?", id).First(&todo)
+	where := entity.Todo{Entity: entity.Entity{ID: id}}
+	re := getTodosWithPreload().Where(&where).First(&todo)
 	return todo, util.WrapGormErr(re.Error, "todo")
 }
 

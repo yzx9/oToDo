@@ -12,7 +12,8 @@ func InsertTodoStep(step *entity.TodoStep) error {
 
 func SelectTodoStep(id int64) (entity.TodoStep, error) {
 	var step entity.TodoStep
-	re := db.Where("id = ?", id).First(&step)
+	where := entity.TodoStep{Entity: entity.Entity{ID: id}}
+	re := db.Where(&where).First(&step)
 	return step, util.WrapGormErr(re.Error, "todo step")
 }
 

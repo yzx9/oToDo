@@ -12,7 +12,8 @@ func InsertTodoList(todoList *entity.TodoList) error {
 
 func SelectTodoList(id int64) (entity.TodoList, error) {
 	var list entity.TodoList
-	re := db.Where("id = ?", id).First(&list)
+	where := entity.TodoList{Entity: entity.Entity{ID: id}}
+	re := db.Where(&where).First(&list)
 	return list, util.WrapGormErr(re.Error, "todo list")
 }
 
@@ -38,7 +39,8 @@ func DeleteTodoListsByFolder(todoListFolderID int64) (int64, error) {
 
 func ExistTodoList(id int64) (bool, error) {
 	var count int64
-	re := db.Model(&entity.TodoList{}).Where("id = ?", id).Count(&count)
+	where := entity.TodoList{Entity: entity.Entity{ID: id}}
+	re := db.Model(&entity.TodoList{}).Where(&where).Count(&count)
 	return count != 0, util.WrapGormErr(re.Error, "todo list")
 }
 
@@ -77,8 +79,9 @@ func DeleteTodoListSharedUser(userID, todoListID int64) error {
 func ExistTodoListSharing(userID, todoListID int64) (bool, error) {
 	// TODO[pref]: count in db
 	user := entity.User{Entity: entity.Entity{ID: userID}}
+	list := entity.TodoList{Entity: entity.Entity{ID: todoListID}}
 	var lists []entity.TodoList
-	if err := db.Model(&user).Association("SharedTodoLists").Find(&lists, "id = ?", todoListID); err != nil {
+	if err := db.Model(&user).Association("SharedTodoLists").Find(&lists, &list); err != nil {
 		return false, util.WrapGormErr(err, "todo list sharing")
 	}
 
