@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"github.com/yzx9/otodo/bll"
-	"github.com/yzx9/otodo/web/middlewares"
+	"github.com/yzx9/otodo/web/middleware"
 )
 
 type Server struct {
@@ -23,7 +23,7 @@ func CreateServer() *Server {
 	r.Use(
 		gin.Logger(),
 		gin.Recovery(),
-		middlewares.ErrorMiddleware())
+		middleware.ErrorMiddleware())
 
 	s := Server{
 		engine: r,

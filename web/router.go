@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/web/handler"
-	"github.com/yzx9/otodo/web/middlewares"
+	"github.com/yzx9/otodo/web/middleware"
 )
 
 func (s *Server) setupRouter() {
@@ -34,7 +34,7 @@ func (s *Server) setupRouter() {
 	}
 
 	// Authorized routes
-	r = r.Group("/", middlewares.JwtAuthMiddleware())
+	r = r.Group("/", middleware.JwtAuthMiddleware())
 	{
 		// Session
 		r.GET("/sessions", handler.GetSessionHandler)
