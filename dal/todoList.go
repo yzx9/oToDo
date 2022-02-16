@@ -22,12 +22,6 @@ func SelectTodoLists(userId string) ([]entity.TodoList, error) {
 	return lists, utils.WrapGormErr(re.Error, "todo list")
 }
 
-func SelectSharedTodoLists(userId string) ([]entity.TodoList, error) {
-	var lists []entity.TodoList
-	err := db.Model(&entity.User{}).Where(entity.TodoList{UserID: userId}).Association("SharedTodoLists").Find(&lists)
-	return lists, utils.WrapGormErr(err, "todo list")
-}
-
 func DeleteTodoList(id string) error {
 	re := db.Delete(&entity.Todo{
 		Entity: entity.Entity{
@@ -48,12 +42,44 @@ func ExistTodoList(id string) (bool, error) {
 	return count != 0, utils.WrapGormErr(re.Error, "todo list")
 }
 
+/**
+ * Sharing
+ */
+
+func InsertTodoListSharedUser(userID, todoListID string) error {
+	user := entity.User{Entity: entity.Entity{ID: userID}}
+	list := entity.TodoList{Entity: entity.Entity{ID: todoListID}}
+	err := db.Model(&user).Association("SharedTodoLists").Append(&list)
+	return utils.WrapGormErr(err, "todo list shared user")
+}
+
+func SelectSharedTodoLists(userID string) ([]entity.TodoList, error) {
+	user := entity.User{Entity: entity.Entity{ID: userID}}
+	var lists []entity.TodoList
+	err := db.Model(&user).Association("SharedTodoLists").Find(&lists)
+	return lists, utils.WrapGormErr(err, "user shared todo list")
+}
+
+func SelectTodoListSharedUsers(todoListID string) ([]entity.User, error) {
+	list := entity.TodoList{Entity: entity.Entity{ID: todoListID}}
+	var users []entity.User
+	err := db.Model(&list).Association("SharedUsers").Find(&users)
+	return users, utils.WrapGormErr(err, "todo list shared users")
+}
+
+func DeleteTodoListSharedUser(userID, todoListID string) error {
+	user := entity.User{Entity: entity.Entity{ID: userID}}
+	list := entity.TodoList{Entity: entity.Entity{ID: todoListID}}
+	err := db.Model(&list).Association("SharedUsers").Delete(&user)
+	return utils.WrapGormErr(err, "todo list shared users")
+}
+
 func ExistTodoListSharing(userID, todoListID string) (bool, error) {
-	user := entity.User{}
-	user.ID = userID
+	// TODO[pref]: count in db
+	user := entity.User{Entity: entity.Entity{ID: userID}}
 	var lists []entity.TodoList
 	if err := db.Model(&user).Association("SharedTodoLists").Find(&lists, "id = ?", todoListID); err != nil {
-		return false, utils.WrapGormErr(err, "todo list")
+		return false, utils.WrapGormErr(err, "todo list sharing")
 	}
 
 	return len(lists) != 0, nil

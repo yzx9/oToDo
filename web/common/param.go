@@ -6,6 +6,14 @@ import (
 	"github.com/yzx9/otodo/utils"
 )
 
+func MustGetParam(c *gin.Context, name string) string {
+	value, ok := c.Params.Get(name)
+	if !ok {
+		panic(name + " required")
+	}
+	return value
+}
+
 func GetRequiredParam(c *gin.Context, name string) (string, error) {
 	value, ok := c.Params.Get(name)
 	if !ok {

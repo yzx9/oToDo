@@ -22,7 +22,7 @@ func (s *Server) setupRouter() {
 		// r.MaxMultipartMemory = MaxFileSize // 限制 Gin 上传文件时最大内存 (默认 32 MiB)
 		r.POST("/files", handlers.PostFileHandler)
 		r.GET("/files/:id", handlers.GetFileHandler)
-		r.GET("/files/presigned/:id", handlers.GetFilePresignedHandler)
+		r.GET("/files/presigned/:id", handlers.GetFilePresignedHandler) // TODO[feat]: 或许不需要独立API
 
 		// Session
 		r.POST("/sessions", handlers.PostSessionHandler)
@@ -41,7 +41,7 @@ func (s *Server) setupRouter() {
 		r.DELETE("/sessions", handlers.DeleteSessionHandler)
 
 		// File
-		r.POST("/files/:id/presign", handlers.PostFilePresignHandler)
+		r.POST("/files/:id/presign", handlers.PostFilePresignHandler) // TODO[feat]: 调整API, 允许管理PreSign，允许设置有效时长
 
 		// Current User
 		r.GET("/users/current", handlers.GetCurrentUserHandler)
@@ -57,7 +57,7 @@ func (s *Server) setupRouter() {
 		r.GET("/users/current/todo-list-folders", handlers.GetCurrentUserTodoListFoldersHandler)
 
 		// Todo
-		r.POST("/todos", handlers.PostTodoHandler)
+		r.POST("/todos", handlers.PostTodoHandler) // TODO[feat]: done 属性是否需要独立API？否则无法返回重复产生的Todo
 		r.PUT("/todos/:id", handlers.PutTodoHandler)
 		r.PATCH("/todos/:id", handlers.PatchTodoHandler)
 		r.GET("/todos/:id", handlers.GetTodoHandler)
@@ -77,8 +77,20 @@ func (s *Server) setupRouter() {
 
 		r.GET("/todo-lists/:id/todos", handlers.GetTodoListTodosHandler)
 
+		r.GET("/todo-lists/:id/shared-users", handlers.GetTodoListSharedUsersHandler)
+		r.DELETE("/todo-lists/:id/shared-users/:user-id", handlers.DeleteTodoListSharedUserHandler)
+
+		r.POST("/todo-lists/:id/sharings", handlers.PostTodoListSharingsHandler)
+		r.GET("/todo-lists/:id/share-links", handlers.GetTodoListSharingsHandler)
+
+		r.POST("/todo-lists/:id/sharings/:token", handlers.PostTodoListSharingHandler)
+		r.DELETE("/todo-lists/:id/sharings/:token", handlers.DeleteTodoListSharingHandler)
+
 		// Todo List Folder
 		r.GET("/todo-list-folders/:id", handlers.GetTodoListFolderHandler)
 		r.DELETE("/todo-list-folders/:id", handlers.DeleteTodoListFolderHandler)
+
+		// Sharing
+		r.GET("/sharings/:token", handlers.GetSharingHandler)
 	}
 }
