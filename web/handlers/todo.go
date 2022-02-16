@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/bll"
-	"github.com/yzx9/otodo/entity"
+	"github.com/yzx9/otodo/model/entity"
 	"github.com/yzx9/otodo/web/common"
 )
 

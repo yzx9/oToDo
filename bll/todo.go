@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/yzx9/otodo/dal"
-	"github.com/yzx9/otodo/entity"
+	"github.com/yzx9/otodo/model/entity"
 	"github.com/yzx9/otodo/utils"
 )
 

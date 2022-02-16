@@ -9,7 +9,7 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"github.com/yzx9/otodo/dal"
-	"github.com/yzx9/otodo/entity"
+	"github.com/yzx9/otodo/model/entity"
 	"github.com/yzx9/otodo/otodo"
 )
 
