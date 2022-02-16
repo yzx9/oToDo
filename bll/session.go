@@ -9,6 +9,7 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"github.com/yzx9/otodo/dal"
+	"github.com/yzx9/otodo/model/dto"
 	"github.com/yzx9/otodo/model/entity"
 	"github.com/yzx9/otodo/otodo"
 )
@@ -18,27 +19,14 @@ var tokenType = "Bearer"
 var authorizationRegexString = "^[Bb]earer (?P<token>[\\w-]+.[\\w-]+.[\\w-]+)$"
 var authorizationRegex = regexp.MustCompile(authorizationRegexString)
 
-type AuthTokenResult struct {
-	AccessToken  string `json:"accessToken"`
-	TokenType    string `json:"tokenType"`
-	ExpiresIn    int64  `json:"expiresIn"`
-	RefreshToken string `json:"refreshToken,omitempty"`
-}
-
-type SessionTokenClaims struct {
-	TokenClaims
-	RefreshTokenID string `json:"rti,omitempty"`
-	UserNickname   string `json:"nickname,omitempty"`
-}
-
-func Login(userName, password string) (AuthTokenResult, error) {
+func Login(userName, password string) (dto.SessionDTO, error) {
 	user, err := dal.SelectUserByUserName(userName)
 	if err != nil {
-		return AuthTokenResult{}, fmt.Errorf("user not found: %v", userName)
+		return dto.SessionDTO{}, fmt.Errorf("user not found: %v", userName)
 	}
 
 	if cryptoPwd := GetCryptoPassword(password); !bytes.Equal(user.Password, cryptoPwd) {
-		return AuthTokenResult{}, fmt.Errorf("invalid credential")
+		return dto.SessionDTO{}, fmt.Errorf("invalid credential")
 	}
 
 	refreshToken, refreshTokenID := newRefreshToken(user)
@@ -52,17 +40,17 @@ func Logout(userID, refreshTokenID string) error {
 	return err
 }
 
-func NewAccessToken(userID, refreshTokenID string) (AuthTokenResult, error) {
+func NewAccessToken(userID, refreshTokenID string) (dto.SessionDTO, error) {
 	user, err := dal.SelectUser(userID)
 	if err != nil {
-		return AuthTokenResult{}, fmt.Errorf("fails to get user, %w", err)
+		return dto.SessionDTO{}, fmt.Errorf("fails to get user, %w", err)
 	}
 
 	return newAccessTokenWithResult(user, refreshTokenID), nil
 }
 
 func ParseSessionToken(token string) (*jwt.Token, error) {
-	return ParseToken(token, &SessionTokenClaims{})
+	return ParseToken(token, &dto.SessionTokenClaims{})
 }
 
 func ParseAccessToken(authorization string) (*jwt.Token, error) {
@@ -71,12 +59,12 @@ func ParseAccessToken(authorization string) (*jwt.Token, error) {
 		return nil, fmt.Errorf("unauthorized")
 	}
 
-	token, err := ParseToken(matches[1], &SessionTokenClaims{})
+	token, err := ParseToken(matches[1], &dto.SessionTokenClaims{})
 	if err != nil {
 		return nil, fmt.Errorf("fails to parse access token: %w", err)
 	}
 
-	claims, ok := token.Claims.(*SessionTokenClaims)
+	claims, ok := token.Claims.(*dto.SessionTokenClaims)
 	_, err = uuid.Parse(claims.UserID)
 	if !ok || err != nil {
 		return nil, fmt.Errorf("invalid access token")
@@ -90,7 +78,7 @@ func ShouldRefreshAccessToken(oldAccessToken *jwt.Token) bool {
 		return false
 	}
 
-	claims, ok := oldAccessToken.Claims.(*SessionTokenClaims)
+	claims, ok := oldAccessToken.Claims.(*dto.SessionTokenClaims)
 	if !ok || claims.ExpiresAt == 0 {
 		return false
 	}
@@ -100,10 +88,10 @@ func ShouldRefreshAccessToken(oldAccessToken *jwt.Token) bool {
 	return time.Now().Add(dur).Unix() > claims.ExpiresAt
 }
 
-func newAccessTokenWithResult(user entity.User, refreshTokenID string) AuthTokenResult {
+func newAccessTokenWithResult(user entity.User, refreshTokenID string) dto.SessionDTO {
 	exp := otodo.Conf.Session.AccessTokenExpiresIn
 	dur := time.Duration(exp * int(time.Second))
-	return AuthTokenResult{
+	return dto.SessionDTO{
 		AccessToken: newAccessToken(user, refreshTokenID, dur),
 		TokenType:   tokenType,
 		ExpiresIn:   int64(exp),
@@ -111,7 +99,7 @@ func newAccessTokenWithResult(user entity.User, refreshTokenID string) AuthToken
 }
 
 func newAccessToken(user entity.User, refreshTokenID string, exp time.Duration) string {
-	claims := SessionTokenClaims{
+	claims := dto.SessionTokenClaims{
 		TokenClaims:    NewClaims(user.ID, exp),
 		UserNickname:   user.Nickname,
 		RefreshTokenID: refreshTokenID,
@@ -123,7 +111,7 @@ func newRefreshToken(user entity.User) (string, string) {
 	exp := otodo.Conf.Session.RefreshTokenExpiresIn
 	dur := time.Duration(exp * int(time.Second))
 
-	claims := SessionTokenClaims{TokenClaims: NewClaims(user.ID, dur)}
+	claims := dto.SessionTokenClaims{TokenClaims: NewClaims(user.ID, dur)}
 	claims.Id = uuid.NewString()
 	return NewToken(claims), claims.Id
 }

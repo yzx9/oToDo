@@ -5,13 +5,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/yzx9/otodo/model/dto"
 	"github.com/yzx9/otodo/otodo"
 )
-
-type errorPayload struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-}
 
 func ErrorMiddleware() func(*gin.Context) {
 	return func(c *gin.Context) {
@@ -26,7 +22,7 @@ func ErrorMiddleware() func(*gin.Context) {
 				return
 			}
 
-			c.JSON(http.StatusBadRequest, errorPayload{
+			c.JSON(http.StatusBadRequest, dto.ErrorDTO{
 				Code:    getUserErrorCodeFromError(typedError),
 				Message: err.Error(),
 			})

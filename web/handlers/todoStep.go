@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/bll"
+	"github.com/yzx9/otodo/model/dto"
 	"github.com/yzx9/otodo/model/entity"
 	"github.com/yzx9/otodo/otodo"
 	"github.com/yzx9/otodo/utils"
@@ -20,9 +21,7 @@ func PostTodoStepHandler(c *gin.Context) {
 		return
 	}
 
-	payload := struct {
-		Name string `json:"name"`
-	}{}
+	payload := dto.TodoStepDTO{}
 	if c.ShouldBind(&payload) != nil {
 		common.AbortWithError(c, utils.NewError(otodo.ErrPreconditionRequired, "name required"))
 		return

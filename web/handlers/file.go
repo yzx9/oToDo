@@ -6,14 +6,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/bll"
+	"github.com/yzx9/otodo/model/dto"
 	"github.com/yzx9/otodo/otodo"
 	"github.com/yzx9/otodo/utils"
 	"github.com/yzx9/otodo/web/common"
 )
-
-type FilePayload struct {
-	FileID string `json:"fileID"`
-}
 
 var supportedFileTypeRegex = regexp.MustCompile(`.(jpg|jpeg|JPG|png|PNG|gif|GIF|ico|ICO)$`)
 
@@ -36,7 +33,7 @@ func PostFileHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, FilePayload{fileID})
+	c.JSON(http.StatusOK, dto.FileDTO{FileID: fileID})
 }
 
 // Upload todo file, only support single file now
@@ -59,7 +56,7 @@ func PostTodoFileHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, FilePayload{fileID})
+	c.JSON(http.StatusOK, dto.FileDTO{FileID: fileID})
 }
 
 // Upload file, only support single file now
@@ -92,9 +89,7 @@ func PostFilePresignHandler(c *gin.Context) {
 		return
 	}
 
-	payload := struct {
-		ExpiresIn int `json:"expiresIn"` // Unix
-	}{}
+	payload := dto.FilePreSignDTO{}
 	if err := c.ShouldBind(&payload); err != nil {
 		common.AbortWithError(c, utils.NewError(otodo.ErrPreconditionRequired, "expiresIn required"))
 		return
@@ -107,7 +102,7 @@ func PostFilePresignHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, FilePayload{presigned})
+	c.JSON(http.StatusOK, dto.FileDTO{FileID: presigned})
 }
 
 // Get file from presigned id

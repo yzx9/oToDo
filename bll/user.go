@@ -7,19 +7,13 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/yzx9/otodo/dal"
+	"github.com/yzx9/otodo/model/dto"
 	"github.com/yzx9/otodo/model/entity"
 	"github.com/yzx9/otodo/otodo"
 	"github.com/yzx9/otodo/utils"
 )
 
-// User
-type CreateUserPayload struct {
-	UserName string `json:"userName"`
-	Password string `json:"password"`
-	Nickname string `json:"nickname"`
-}
-
-func CreateUser(payload CreateUserPayload) (entity.User, error) {
+func CreateUser(payload dto.CreateUserPayload) (entity.User, error) {
 	if len(payload.UserName) < 5 {
 		return entity.User{}, fmt.Errorf("user name too short: %v", payload.UserName)
 	}

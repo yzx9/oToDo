@@ -4,17 +4,12 @@ import (
 	"encoding/base64"
 	"time"
 
+	"github.com/yzx9/otodo/model/dto"
 	"github.com/yzx9/otodo/utils"
 )
 
 // Configurable
 const fileSignedMaxExpiresIn = 6 * time.Hour
-
-type filePresignedPayload struct {
-	TokenClaims
-	UserID string `json:"uid"`
-	FileID string `json:"fileID"`
-}
 
 func CreateFilePresignedID(userID, fileID string) (string, error) {
 	const max = int(fileSignedMaxExpiresIn / time.Second)
@@ -32,7 +27,7 @@ func CreateFilePresignedIDWithExp(userID, fileID string, exp int) (string, error
 		return "", err
 	}
 
-	token := NewToken(filePresignedPayload{
+	token := NewToken(dto.FilePreSignClaims{
 		TokenClaims: NewClaims(userID, expiresIn),
 		UserID:      userID,
 		FileID:      fileID,
@@ -50,12 +45,12 @@ func ParseFileSignedID(filePresignedID string) (string, error) {
 		return write()
 	}
 
-	token, err := ParseToken(string(payload), &filePresignedPayload{})
+	token, err := ParseToken(string(payload), &dto.FilePreSignClaims{})
 	if err != nil || !token.Valid {
 		return write()
 	}
 
-	claims, ok := token.Claims.(*filePresignedPayload)
+	claims, ok := token.Claims.(*dto.FilePreSignClaims)
 	if !ok {
 		return write()
 	}
