@@ -14,9 +14,9 @@ import (
 	"github.com/yzx9/otodo/otodo"
 )
 
-// Constans
-var tokenType = "Bearer"
-var authorizationRegexString = "^[Bb]earer (?P<token>[\\w-]+.[\\w-]+.[\\w-]+)$"
+const tokenType = `Bearer`
+const authorizationRegexString = `^[Bb]earer (?P<token>[\w-]+.[\w-]+.[\w-]+)$"`
+
 var authorizationRegex = regexp.MustCompile(authorizationRegexString)
 
 func Login(userName, password string) (dto.SessionDTO, error) {
