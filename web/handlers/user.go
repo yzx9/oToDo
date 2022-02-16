@@ -11,7 +11,7 @@ import (
 
 // Register
 func PostUserHandler(c *gin.Context) {
-	payload := dto.CreateUserPayload{}
+	payload := dto.CreateUserDTO{}
 	if err := c.ShouldBind(&payload); err != nil {
 		common.AbortWithError(c, err)
 		return

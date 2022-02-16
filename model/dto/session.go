@@ -8,7 +8,7 @@ type SessionDTO struct {
 }
 
 type RefreshTokenDTO struct {
-	RefreshToken string `json:"refresh_token"`
+	RefreshToken string `json:"refreshToken"`
 }
 
 type SessionTokenClaims struct {
@@ -19,6 +19,6 @@ type SessionTokenClaims struct {
 }
 
 type LoginDTO struct {
-	UserName string `json:"user_name"`
+	UserName string `json:"userName"`
 	Password string `json:"password"`
 }

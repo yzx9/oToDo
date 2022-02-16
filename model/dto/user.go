@@ -1,6 +1,6 @@
 package dto
 
-type CreateUserPayload struct {
+type CreateUserDTO struct {
 	UserName string `json:"userName"`
 	Password string `json:"password"`
 	Nickname string `json:"nickname"`

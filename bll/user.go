@@ -13,7 +13,7 @@ import (
 	"github.com/yzx9/otodo/utils"
 )
 
-func CreateUser(payload dto.CreateUserPayload) (entity.User, error) {
+func CreateUser(payload dto.CreateUserDTO) (entity.User, error) {
 	if len(payload.UserName) < 5 {
 		return entity.User{}, fmt.Errorf("user name too short: %v", payload.UserName)
 	}
