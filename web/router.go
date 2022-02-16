@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yzx9/otodo/web/handlers"
+	"github.com/yzx9/otodo/web/handler"
 	"github.com/yzx9/otodo/web/middlewares"
 )
 
@@ -20,77 +20,77 @@ func (s *Server) setupRouter() {
 
 		// File
 		// r.MaxMultipartMemory = MaxFileSize // 限制 Gin 上传文件时最大内存 (默认 32 MiB)
-		r.POST("/files", handlers.PostFileHandler)
-		r.GET("/files/:id", handlers.GetFileHandler)
-		r.GET("/files/presigned/:id", handlers.GetFilePresignedHandler) // TODO[feat]: 或许不需要独立API
+		r.POST("/files", handler.PostFileHandler)
+		r.GET("/files/:id", handler.GetFileHandler)
+		r.GET("/files/presigned/:id", handler.GetFilePresignedHandler) // TODO[feat]: 或许不需要独立API
 
 		// Session
-		r.POST("/sessions", handlers.PostSessionHandler)
+		r.POST("/sessions", handler.PostSessionHandler)
 
-		r.POST("/sessions/current/tokens", handlers.PostSessionTokenHandler)
+		r.POST("/sessions/current/tokens", handler.PostSessionTokenHandler)
 
 		// User
-		r.POST("/users", handlers.PostUserHandler)
+		r.POST("/users", handler.PostUserHandler)
 	}
 
 	// Authorized routes
 	r = r.Group("/", middlewares.JwtAuthMiddleware())
 	{
 		// Session
-		r.GET("/sessions", handlers.GetSessionHandler)
-		r.DELETE("/sessions", handlers.DeleteSessionHandler)
+		r.GET("/sessions", handler.GetSessionHandler)
+		r.DELETE("/sessions", handler.DeleteSessionHandler)
 
 		// File
-		r.POST("/files/:id/presign", handlers.PostFilePresignHandler) // TODO[feat]: 调整API, 允许管理PreSign，允许设置有效时长
+		r.POST("/files/:id/presign", handler.PostFilePresignHandler) // TODO[feat]: 调整API, 允许管理PreSign，允许设置有效时长
 
 		// Current User
-		r.GET("/users/current", handlers.GetCurrentUserHandler)
+		r.GET("/users/current", handler.GetCurrentUserHandler)
 
-		r.GET("/users/current/todo-lists", handlers.GetCurrentUserTodoListsHandler)
-		r.GET("/users/current/todo-lists/basic", handlers.GetCurrentUserBasicTodoListHandler)
+		r.GET("/users/current/todo-lists", handler.GetCurrentUserTodoListsHandler)
+		r.GET("/users/current/todo-lists/basic", handler.GetCurrentUserBasicTodoListHandler)
 
-		r.GET("/users/current/todos/daily", handlers.GetCurrentUserDailyTodosHandler)
-		r.GET("/users/current/todos/planned", handlers.GetCurrentUserPlannedTodosHandler)
-		r.GET("/users/current/todos/important", handlers.GetCurrentUserImportantTodosHandler)
-		r.GET("/users/current/todos/not-notified", handlers.GetCurrentUserNotNotifiedTodosHandler)
+		r.GET("/users/current/todos/daily", handler.GetCurrentUserDailyTodosHandler)
+		r.GET("/users/current/todos/planned", handler.GetCurrentUserPlannedTodosHandler)
+		r.GET("/users/current/todos/important", handler.GetCurrentUserImportantTodosHandler)
+		r.GET("/users/current/todos/not-notified", handler.GetCurrentUserNotNotifiedTodosHandler)
 
-		r.GET("/users/current/todo-list-folders", handlers.GetCurrentUserTodoListFoldersHandler)
+		r.GET("/users/current/todo-list-folders", handler.GetCurrentUserTodoListFoldersHandler)
 
 		// Todo
-		r.POST("/todos", handlers.PostTodoHandler) // TODO[feat]: done 属性是否需要独立API？否则无法返回重复产生的Todo
-		r.PUT("/todos/:id", handlers.PutTodoHandler)
-		r.PATCH("/todos/:id", handlers.PatchTodoHandler)
-		r.GET("/todos/:id", handlers.GetTodoHandler)
-		r.DELETE("/todos/:id", handlers.DeleteTodoHandler)
+		r.POST("/todos", handler.PostTodoHandler) // TODO[feat]: done 属性是否需要独立API？否则无法返回重复产生的Todo
+		r.PUT("/todos/:id", handler.PutTodoHandler)
+		r.PATCH("/todos/:id", handler.PatchTodoHandler)
+		r.GET("/todos/:id", handler.GetTodoHandler)
+		r.DELETE("/todos/:id", handler.DeleteTodoHandler)
 
-		r.POST("/todos/:id/files", handlers.PostTodoFileHandler)
+		r.POST("/todos/:id/files", handler.PostTodoFileHandler)
 
-		r.POST("/todos/:id/steps", handlers.PostTodoStepHandler)
-		r.PUT("/todos/:id/steps", handlers.PutTodoStepHandler)
+		r.POST("/todos/:id/steps", handler.PostTodoStepHandler)
+		r.PUT("/todos/:id/steps", handler.PutTodoStepHandler)
 
-		r.POST("/todos/:id/steps/:step-id", handlers.DeleteTodoStepHandler)
+		r.POST("/todos/:id/steps/:step-id", handler.DeleteTodoStepHandler)
 
 		// Todo List
-		r.POST("/todo-lists", handlers.PostTodoListHandler)
-		r.GET("/todo-lists/:id", handlers.GetTodoListHandler)
-		r.DELETE("/todo-lists/:id", handlers.DeleteTodoListHandler)
+		r.POST("/todo-lists", handler.PostTodoListHandler)
+		r.GET("/todo-lists/:id", handler.GetTodoListHandler)
+		r.DELETE("/todo-lists/:id", handler.DeleteTodoListHandler)
 
-		r.GET("/todo-lists/:id/todos", handlers.GetTodoListTodosHandler)
+		r.GET("/todo-lists/:id/todos", handler.GetTodoListTodosHandler)
 
-		r.GET("/todo-lists/:id/shared-users", handlers.GetTodoListSharedUsersHandler)
-		r.DELETE("/todo-lists/:id/shared-users/:user-id", handlers.DeleteTodoListSharedUserHandler)
+		r.GET("/todo-lists/:id/shared-users", handler.GetTodoListSharedUsersHandler)
+		r.DELETE("/todo-lists/:id/shared-users/:user-id", handler.DeleteTodoListSharedUserHandler)
 
-		r.POST("/todo-lists/:id/sharings", handlers.PostTodoListSharingsHandler)
-		r.GET("/todo-lists/:id/sharings", handlers.GetTodoListSharingsHandler)
+		r.POST("/todo-lists/:id/sharings", handler.PostTodoListSharingsHandler)
+		r.GET("/todo-lists/:id/sharings", handler.GetTodoListSharingsHandler)
 
-		r.POST("/todo-lists/:id/sharings/:token", handlers.PostTodoListSharingHandler)
-		r.DELETE("/todo-lists/:id/sharings/:token", handlers.DeleteTodoListSharingHandler)
+		r.POST("/todo-lists/:id/sharings/:token", handler.PostTodoListSharingHandler)
+		r.DELETE("/todo-lists/:id/sharings/:token", handler.DeleteTodoListSharingHandler)
 
 		// Todo List Folder
-		r.GET("/todo-list-folders/:id", handlers.GetTodoListFolderHandler)
-		r.DELETE("/todo-list-folders/:id", handlers.DeleteTodoListFolderHandler)
+		r.GET("/todo-list-folders/:id", handler.GetTodoListFolderHandler)
+		r.DELETE("/todo-list-folders/:id", handler.DeleteTodoListFolderHandler)
 
 		// Sharing
-		r.GET("/sharings/:token", handlers.GetSharingHandler)
+		r.GET("/sharings/:token", handler.GetSharingHandler)
 	}
 }
