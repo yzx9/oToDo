@@ -26,7 +26,7 @@ func UploadPublicFile(file *multipart.FileHeader) (int64, error) {
 
 	record := entity.File{
 		FileName:   file.Filename,
-		AccessType: string(entity.FileTypePublic),
+		AccessType: int8(entity.FileTypePublic),
 	}
 	err := uploadFile(file, &record)
 	return record.ID, err
@@ -35,7 +35,7 @@ func UploadPublicFile(file *multipart.FileHeader) (int64, error) {
 func UploadTodoFile(todoID int64, file *multipart.FileHeader) (int64, error) {
 	record := entity.File{
 		FileName:   file.Filename,
-		AccessType: string(entity.FileTypeTodo),
+		AccessType: int8(entity.FileTypeTodo),
 		RelatedID:  todoID,
 	}
 	if err := uploadFile(file, &record); err != nil {
