@@ -32,6 +32,13 @@ func ErrorMiddleware() func(*gin.Context) {
 
 func getHttpCodeFromError(err otodo.Error) int {
 	switch err.Code {
+	// Internal Error
+	case otodo.ErrUnknown:
+		return http.StatusInternalServerError
+
+	case otodo.ErrNotImplemented:
+		return http.StatusNotImplemented
+
 	// Auth
 	case otodo.ErrUnauthorized:
 		return http.StatusUnauthorized
@@ -39,32 +46,31 @@ func getHttpCodeFromError(err otodo.Error) int {
 	case otodo.ErrForbidden:
 		return http.StatusForbidden
 
-	// Request
-	case otodo.ErrRequestEntityTooLarge:
-		return http.StatusRequestEntityTooLarge
+	// Limit
+	case otodo.ErrPreconditionRequired:
+		return http.StatusPreconditionRequired
 
 	case otodo.ErrPreconditionFailed:
 		return http.StatusPreconditionFailed
 
-	case otodo.ErrPreconditionRequired:
-		return http.StatusPreconditionRequired
+	case otodo.ErrRequestEntityTooLarge:
+		return http.StatusRequestEntityTooLarge
 
 	// Resource
+	case otodo.ErrDatabaseConnectFailed:
+		return http.StatusServiceUnavailable
+
+	case otodo.ErrDataInconsistency:
 	case otodo.ErrDuplicateID:
 		return http.StatusInternalServerError
 
 	case otodo.ErrNotFound:
 		return http.StatusNotFound
-
-	// Logic
-	case otodo.ErrAbort:
-		return http.StatusBadRequest
-
-	default:
-		return http.StatusBadRequest
 	}
+
+	return http.StatusInternalServerError
 }
 
 func getUserErrorCodeFromError(err otodo.Error) int {
-	return int(err.Code) // TODO
+	return int(err.Code) // TODO: some err should be hidden
 }

@@ -11,26 +11,31 @@ func (err Error) Error() string {
 	return err.Message
 }
 
-// TODO
+// TODO: define err code
+
+// Internal Error
 const (
-	// Request
+	ErrUnknown ErrCode = iota
+	ErrNotImplemented
+)
 
-	// Request/Auth
-	ErrUnauthorized ErrCode = 10000
-	ErrForbidden    ErrCode = 10001
+// Auth
+const (
+	ErrUnauthorized ErrCode = 10000 + iota
+	ErrForbidden
+)
 
-	// Request/Limit
-	ErrRequestEntityTooLarge ErrCode = 11000
-	ErrPreconditionFailed    ErrCode = 11001
-	ErrPreconditionRequired  ErrCode = 11002
+// Limit
+const (
+	ErrPreconditionRequired ErrCode = 20000 + iota
+	ErrPreconditionFailed
+	ErrRequestEntityTooLarge
+)
 
-	// Resource
-	ErrDatabaseConnectFailed ErrCode = 20000
-	ErrDuplicateID           ErrCode = 20001
-	ErrNotFound              ErrCode = 20002
-
-	// Logic
-	ErrUnknown        ErrCode = 30000
-	ErrNotImplemented ErrCode = 30001
-	ErrAbort          ErrCode = 30002
+// Resource
+const (
+	ErrDatabaseConnectFailed ErrCode = 30000 + iota
+	ErrDataInconsistency
+	ErrDuplicateID
+	ErrNotFound
 )
