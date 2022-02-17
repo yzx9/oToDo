@@ -22,7 +22,6 @@ func (s *Server) setupRouter() {
 		// r.MaxMultipartMemory = MaxFileSize // 限制 Gin 上传文件时最大内存 (默认 32 MiB)
 		r.POST("/files", handler.PostFileHandler)
 		r.GET("/files/:id", handler.GetFileHandler)
-		r.GET("/files/presigned/:id", handler.GetFilePresignedHandler) // TODO[feat]: 或许不需要独立API
 
 		// Session
 		r.POST("/sessions", handler.PostSessionHandler)
@@ -41,7 +40,7 @@ func (s *Server) setupRouter() {
 		r.DELETE("/sessions", handler.DeleteSessionHandler)
 
 		// File
-		r.POST("/files/:id/presign", handler.PostFilePresignHandler) // TODO[feat]: 调整API, 允许管理PreSign，允许设置有效时长
+		r.POST("/files/:id/pre-sign", handler.PostFilePreSignHandler) // TODO[feat]: 调整API, 允许管理PreSign，允许设置有效时长
 
 		// Current User
 		r.GET("/users/current", handler.GetCurrentUserHandler)

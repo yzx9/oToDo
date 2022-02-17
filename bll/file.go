@@ -21,7 +21,7 @@ var supportedFileTypeRegex = regexp.MustCompile(`.(jpg|jpeg|JPG|png|PNG|gif|GIF|
 func UploadPublicFile(file *multipart.FileHeader) (int64, error) {
 	// only support img now
 	if !supportedFileTypeRegex.MatchString(file.Filename) {
-		return 0, util.NewError(otodo.ErrPreconditionFailed, "invalid file type")
+		return 0, util.NewErrorWithForbidden("unsupported file type")
 	}
 
 	record := entity.File{
@@ -84,17 +84,14 @@ func GetFile(fileID int64) (*entity.File, error) {
 	return file, fmt.Errorf("fails to get file: %w", err)
 }
 
-func GetFilePath(userID, fileID int64) (string, error) {
-	file, err := OwnFile(userID, fileID)
+// Get file path, auto
+func GetFilePath(userID int64, fileID string) (string, error) {
+	id, err := strconv.ParseInt(fileID, 10, 64)
 	if err != nil {
-		return "", err
+		return GetPreSignFilePath(fileID)
 	}
 
-	return getFilePath(file), nil
-}
-
-func ForceGetFilePath(fileID int64) (string, error) {
-	file, err := GetFile(fileID)
+	file, err := OwnFile(userID, id)
 	if err != nil {
 		return "", err
 	}
@@ -126,7 +123,7 @@ func OwnFile(userID, fileID int64) (*entity.File, error) {
 
 func applyFilePathTemplate(file *entity.File) string {
 	template := otodo.Conf.Server.FilePathTemplate
-	template = strings.ReplaceAll(template, ":id", strconv.FormatInt(int64(file.ID), 10))
+	template = strings.ReplaceAll(template, ":id", strconv.FormatInt(file.ID, 10))
 	template = strings.ReplaceAll(template, ":ext", filepath.Ext(file.FileName))
 	template = strings.ReplaceAll(template, ":name", file.FileName)
 	template = strings.ReplaceAll(template, ":path", file.FilePath)

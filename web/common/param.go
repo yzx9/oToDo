@@ -30,3 +30,12 @@ func GetRequiredParamID(c *gin.Context, name string) (int64, error) {
 
 	return id, nil
 }
+
+func MustGetParam(c *gin.Context, name string) string {
+	value, ok := c.Params.Get(name)
+	if !ok {
+		panic(name + " required")
+	}
+
+	return value
+}

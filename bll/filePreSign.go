@@ -11,12 +11,12 @@ import (
 // Configurable
 const fileSignedMaxExpiresIn = 6 * time.Hour
 
-func CreateFilePresignedID(userID, fileID int64) (string, error) {
+func CreateFilePreSignID(userID, fileID int64) (string, error) {
 	const max = int(fileSignedMaxExpiresIn / time.Second)
-	return CreateFilePresignedIDWithExp(userID, fileID, max)
+	return CreateFilePreSignIDWithExp(userID, fileID, max)
 }
 
-func CreateFilePresignedIDWithExp(userID, fileID int64, exp int) (string, error) {
+func CreateFilePreSignIDWithExp(userID, fileID int64, exp int) (string, error) {
 	expiresIn := time.Duration(exp * int(time.Second))
 	if expiresIn > fileSignedMaxExpiresIn {
 		return "", util.NewErrorWithPreconditionFailed("expires is too long")
@@ -35,7 +35,21 @@ func CreateFilePresignedIDWithExp(userID, fileID int64, exp int) (string, error)
 	return base64.StdEncoding.EncodeToString([]byte(token)), nil
 }
 
-func ParseFileSignedID(filePresignedID string) (int64, error) {
+func GetPreSignFilePath(fileID string) (string, error) {
+	id, err := parseFilePreSignID(fileID)
+	if err != nil {
+		return "", util.NewErrorWithNotFound("file not found")
+	}
+
+	file, err := GetFile(id)
+	if err != nil {
+		return "", err
+	}
+
+	return getFilePath(file), nil
+}
+
+func parseFilePreSignID(filePresignedID string) (int64, error) {
 	write := func() (int64, error) {
 		return 0, util.NewErrorWithPreconditionFailed("invalid presigned file id")
 	}
