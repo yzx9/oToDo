@@ -35,9 +35,9 @@ func CreateServer() *Server {
 	return &s
 }
 
-func (s *Server) LoadConfig(dir string) {
+func (s *Server) LoadConfig(dir string) *Server {
 	if s.Error != nil {
-		return
+		return s
 	}
 
 	s.config = viper.New()
@@ -47,21 +47,23 @@ func (s *Server) LoadConfig(dir string) {
 	s.config.SetConfigName("config.yaml")
 	if err := s.config.ReadInConfig(); err != nil {
 		s.Error = fmt.Errorf("fails to load config.yaml: %w", err)
-		return
+		return s
 	}
 
 	s.config.SetConfigName("secret.yaml")
 	if err := s.config.MergeInConfig(); err != nil {
 		s.Error = fmt.Errorf("fails to load secret.yaml: %w", err)
-		return
+		return s
 	}
 
 	SetConfig(s.config)
+
+	return s
 }
 
-func (s *Server) LoadAndWatchConfig(dir string) {
+func (s *Server) LoadAndWatchConfig(dir string) *Server {
 	if s.Error != nil {
-		return
+		return s
 	}
 
 	s.LoadConfig(dir)
@@ -72,29 +74,34 @@ func (s *Server) LoadAndWatchConfig(dir string) {
 	})
 
 	s.config.WatchConfig()
+
+	return s
 }
 
-func (s *Server) Listen(addr string) {
+func (s *Server) Listen(addr string) *Server {
 	if s.Error != nil {
-		return
+		return s
 	}
 
 	s.addr = addr
+	return s
 }
 
-func (s *Server) Run() {
+func (s *Server) Run() *Server {
 	if s.Error != nil {
-		return
+		return s
 	}
 
 	if err := otodo.Init(); err != nil {
-
+		s.Error = err
+		return s
 	}
 
 	if err := bll.Init(); err != nil {
 		s.Error = err
-		return
+		return s
 	}
 
 	s.engine.Run(s.addr)
+	return s
 }

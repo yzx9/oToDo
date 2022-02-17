@@ -7,10 +7,10 @@ import (
 )
 
 func main() {
-	s := web.CreateServer()
-	s.LoadAndWatchConfig(".")
-	s.Listen("localhost:8080")
-	s.Run()
+	s := web.CreateServer().
+		LoadAndWatchConfig(".").
+		Listen("localhost:8080").
+		Run()
 
 	if s.Error != nil {
 		log.Fatal(s.Error)
