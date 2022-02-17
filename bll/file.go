@@ -103,13 +103,9 @@ func ForceGetFilePath(fileID int64) (string, error) {
 }
 
 func OwnFile(userID, fileID int64) (*entity.File, error) {
-	write := func(err error) (*entity.File, error) {
-		return nil, err
-	}
-
 	file, err := GetFile(fileID)
 	if err != nil {
-		return write(err)
+		return nil, err
 	}
 
 	switch entity.FileAccessType(file.AccessType) {
@@ -117,18 +113,12 @@ func OwnFile(userID, fileID int64) (*entity.File, error) {
 		break
 
 	case entity.FileTypeTodo:
-		// TODO should check right from todo list
-		user, err := dal.SelectUserByTodo(file.RelatedID)
-		if err != nil {
-			return write(fmt.Errorf("fails to get user: %w", err))
-		}
-
-		if userID != user.ID {
-			return write(util.NewErrorWithForbidden("unable to get non-owned file: %v", file.ID))
+		if _, err := OwnTodo(userID, file.RelatedID); err != nil {
+			return nil, util.NewErrorWithForbidden("unable to get non-owned file: %w", err)
 		}
 
 	default:
-		return write(fmt.Errorf("invalid file access type: %v", file.AccessType))
+		return nil, fmt.Errorf("invalid file access type: %v", file.AccessType)
 	}
 
 	return file, nil
