@@ -26,14 +26,14 @@ func CreateTodoStep(userID, todoID int64, name string) (entity.TodoStep, error) 
 	return step, nil
 }
 
-func UpdateTodoStep(userID int64, step entity.TodoStep) (entity.TodoStep, error) {
+func UpdateTodoStep(userID int64, step *entity.TodoStep) error {
 	oldStep, err := OwnTodoStep(userID, step.ID)
 	if err != nil {
-		return entity.TodoStep{}, err
+		return err
 	}
 
 	if step.TodoID != oldStep.TodoID {
-		return entity.TodoStep{}, fmt.Errorf("unable to update todo id")
+		return util.NewErrorWithForbidden("unable to update todo id")
 	}
 
 	if step.Done && !oldStep.Done {
@@ -41,11 +41,11 @@ func UpdateTodoStep(userID int64, step entity.TodoStep) (entity.TodoStep, error)
 		step.DoneAt = &t
 	}
 
-	if err = dal.SaveTodoStep(&step); err != nil {
-		return entity.TodoStep{}, fmt.Errorf("fails to update todo step")
+	if err = dal.SaveTodoStep(step); err != nil {
+		return fmt.Errorf("fails to update todo step")
 	}
 
-	return step, nil
+	return nil
 }
 
 func DeleteTodoStep(userID, todoID, todoStepID int64) (entity.TodoStep, error) {

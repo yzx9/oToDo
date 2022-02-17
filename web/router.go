@@ -65,9 +65,8 @@ func (s *Server) setupRouter() {
 		r.POST("/todos/:id/files", handler.PostTodoFileHandler)
 
 		r.POST("/todos/:id/steps", handler.PostTodoStepHandler)
-		r.PUT("/todos/:id/steps", handler.PutTodoStepHandler)
-
-		r.POST("/todos/:id/steps/:step-id", handler.DeleteTodoStepHandler)
+		r.PUT("/todos/:id/steps/:step-id", handler.PutTodoStepHandler)
+		r.DELETE("/todos/:id/steps/:step-id", handler.DeleteTodoStepHandler)
 
 		// Todo List
 		r.POST("/todo-lists", handler.PostTodoListHandler)
