@@ -23,12 +23,13 @@ func SelectTodoLists(userId int64) ([]entity.TodoList, error) {
 	return lists, util.WrapGormErr(re.Error, "todo list")
 }
 
+func SaveTodoList(todoList *entity.TodoList) error {
+	re := db.Save(&todoList)
+	return util.WrapGormErr(re.Error, "todo list")
+}
+
 func DeleteTodoList(id int64) error {
-	re := db.Delete(&entity.Todo{
-		Entity: entity.Entity{
-			ID: id,
-		},
-	})
+	re := db.Delete(&entity.Todo{Entity: entity.Entity{ID: id}})
 	return util.WrapGormErr(re.Error, "todo list")
 }
 

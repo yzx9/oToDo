@@ -9,7 +9,7 @@ import (
 )
 
 func CreateTodoList(userID int64, todoList *entity.TodoList) error {
-	todoList.Deletable = false
+	todoList.IsBasic = false
 	todoList.UserID = userID
 	todoList.TodoListFolderID = 0
 	if err := dal.InsertTodoList(todoList); err != nil {
@@ -38,6 +38,23 @@ func SelectTodoLists(userID int64) ([]entity.TodoList, error) {
 	return vec, nil
 }
 
+func UpdateTodoList(userID int64, todoList *entity.TodoList) error {
+	oldTodoList, err := OwnTodoList(userID, todoList.ID)
+	if err != nil {
+		return err
+	}
+
+	if oldTodoList.IsBasic {
+		return util.NewErrorWithForbidden("unable to update basic todo list")
+	}
+
+	if err := dal.SaveTodoList(todoList); err != nil {
+		return fmt.Errorf("fails to update todo list: %w", err)
+	}
+
+	return nil
+}
+
 func DeleteTodoList(userID, todoListID int64) (entity.TodoList, error) {
 	// only allow delete by owner, not shared users
 	todoList, err := OwnTodoList(userID, todoListID)
@@ -45,9 +62,9 @@ func DeleteTodoList(userID, todoListID int64) (entity.TodoList, error) {
 		return entity.TodoList{}, err
 	}
 
-	// check if deletable
-	if !todoList.Deletable {
-		return entity.TodoList{}, util.NewErrorWithPreconditionFailed("todo list not deletable: %v", todoListID)
+	// disable to delete basic todo list
+	if todoList.IsBasic {
+		return entity.TodoList{}, util.NewErrorWithPreconditionFailed("unable to delete basic todo list: %v", todoListID)
 	}
 
 	// cascade delete todos

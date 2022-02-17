@@ -9,6 +9,15 @@ import (
 )
 
 func CreateTodoListSharedUser(userID, todoListID int64) error {
+	todoList, err := OwnTodoList(userID, todoListID)
+	if err != nil {
+		return err
+	}
+
+	if todoList.IsBasic {
+		return fmt.Errorf("unable to share basic todo list: %v", todoListID)
+	}
+
 	exist, err := ExistTodoListSharing(userID, todoListID)
 	if err != nil {
 		return err

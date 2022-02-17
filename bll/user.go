@@ -40,9 +40,9 @@ func CreateUser(payload dto.CreateUserDTO) (entity.User, error) {
 
 	// create base todo list
 	basicTodoList := entity.TodoList{
-		Name:      "Todos", // TODO i18n
-		Deletable: false,
-		UserID:    user.ID,
+		Name:    "Todos", // TODO i18n
+		IsBasic: true,
+		UserID:  user.ID,
 	}
 	if err := dal.InsertTodoList(&basicTodoList); err != nil {
 		return entity.User{}, fmt.Errorf("fails to create user basic todo list: %w", err)
