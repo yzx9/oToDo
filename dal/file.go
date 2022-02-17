@@ -16,3 +16,8 @@ func SelectFile(id int64) (*entity.File, error) {
 	re := db.Where(&where).First(&file)
 	return &file, util.WrapGormErr(re.Error, "file")
 }
+
+func SaveFile(file *entity.File) error {
+	re := db.Save(file)
+	return util.WrapGormErr(re.Error, "file")
+}

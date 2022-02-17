@@ -38,37 +38,42 @@ func UploadTodoFile(todoID int64, file *multipart.FileHeader) (int64, error) {
 		AccessType: string(entity.FileTypeTodo),
 		RelatedID:  todoID,
 	}
-	err := uploadFile(file, &record)
-	if err != nil {
+	if err := uploadFile(file, &record); err != nil {
 		return 0, err
 	}
 
-	err = dal.InsertTodoFile(&entity.TodoFile{
+	if err := dal.InsertTodoFile(&entity.TodoFile{
 		File: record,
 		Todo: entity.Todo{Entity: entity.Entity{ID: record.ID}},
-	})
-	if err != nil {
+	}); err != nil {
 		return 0, fmt.Errorf("fails to upload todo file: %w", err)
 	}
 
-	return record.ID, err
+	return record.ID, nil
 }
 
 func uploadFile(file *multipart.FileHeader, record *entity.File) error {
+	write := func(err error) error {
+		return fmt.Errorf("fails to upload file: %w", err)
+	}
+
 	if file.Size > maxFileSize {
 		return util.NewError(otodo.ErrRequestEntityTooLarge, "file too large")
 	}
 
-	record.FileServerID = otodo.Conf.Server.ID
-	record.FilePath = applyFilePathTemplate(record)
-	err := util.SaveFile(file, record.FilePath)
-	if err != nil {
-		return fmt.Errorf("fails to upload file: %w", err)
+	if err := dal.InsertFile(record); err != nil {
+		return write(err)
 	}
 
-	err = dal.InsertFile(record)
-	if err != nil {
-		return fmt.Errorf("fails to upload file: %w", err)
+	// TODO[pref]: avoid duplicate save, remove :id in template?
+	record.FileServerID = otodo.Conf.Server.ID
+	record.FilePath = applyFilePathTemplate(record)
+	if err := util.SaveFile(file, record.FilePath); err != nil {
+		return write(err)
+	}
+
+	if err := dal.SaveFile(record); err != nil {
+		return write(err)
 	}
 
 	return nil
