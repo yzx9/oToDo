@@ -13,10 +13,10 @@ import (
 var db *gorm.DB
 
 func initDatabase() error {
+	var err error
 	write := func(err error) error {
 		return util.NewError(otodo.ErrDatabaseConnectFailed, "fails to connect database: %w", err)
 	}
-	var err error
 
 	// See https://github.com/go-sql-driver/mysql#dsn-data-source-name for details
 	c := otodo.Conf.Database
@@ -51,5 +51,7 @@ func autoMigrate() error {
 		&entity.TodoListFolder{},
 
 		&entity.Tag{},
+
+		&entity.Sharing{},
 	)
 }
