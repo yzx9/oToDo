@@ -3,11 +3,11 @@ package main
 import (
 	"log"
 
-	"github.com/yzx9/otodo/web"
+	"github.com/yzx9/otodo/api"
 )
 
 func main() {
-	s := web.CreateServer().
+	s := api.CreateServer().
 		LoadAndWatchConfig(".").
 		Listen("localhost:8080").
 		Run()

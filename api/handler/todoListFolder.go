@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/yzx9/otodo/api/common"
 	"github.com/yzx9/otodo/bll"
-	"github.com/yzx9/otodo/web/common"
 )
 
 // Get todo list folder

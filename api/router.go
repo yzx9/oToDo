@@ -1,11 +1,11 @@
-package web
+package api
 
 import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yzx9/otodo/web/handler"
-	"github.com/yzx9/otodo/web/middleware"
+	"github.com/yzx9/otodo/api/handler"
+	"github.com/yzx9/otodo/api/middleware"
 )
 
 func (s *Server) setupRouter() {

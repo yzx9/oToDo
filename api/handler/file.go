@@ -4,11 +4,11 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/yzx9/otodo/api/common"
 	"github.com/yzx9/otodo/bll"
 	"github.com/yzx9/otodo/model/dto"
 	"github.com/yzx9/otodo/otodo"
 	"github.com/yzx9/otodo/util"
-	"github.com/yzx9/otodo/web/common"
 )
 
 // Upload public file, for user avatar
