@@ -8,26 +8,27 @@ import (
 	"github.com/yzx9/otodo/util"
 )
 
-func CreateTodoListSharedUser(userID, todoListID int64) error {
-	todoList, err := OwnTodoList(userID, todoListID)
+/**
+ * oTodo List Shared Users
+ */
+func CreateTodoListSharedUser(userID int64, token string) error {
+	sharing, err := ValidSharing(token)
 	if err != nil {
 		return err
 	}
 
-	if todoList.IsBasic {
-		return fmt.Errorf("unable to share basic todo list: %v", todoListID)
-	}
-
-	exist, err := ExistTodoListSharing(userID, todoListID)
+	exist, err := ExistTodoListSharing(userID, sharing.RelatedID)
 	if err != nil {
 		return err
 	}
 
-	if !exist {
-		err = dal.InsertTodoListSharedUser(userID, todoListID)
-		if err != nil {
-			return fmt.Errorf("fails to create todo list shared user: %w", err)
-		}
+	if exist {
+		return nil
+	}
+
+	err = dal.InsertTodoListSharedUser(userID, sharing.RelatedID)
+	if err != nil {
+		return fmt.Errorf("fails to create todo list shared user: %w", err)
 	}
 
 	return nil

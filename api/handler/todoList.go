@@ -82,7 +82,7 @@ func DeleteTodoListHandler(c *gin.Context) {
 }
 
 /**
- * Todo List Sharing
+ * oTodo List Sharing
  */
 
 // Get shared users in todo list
@@ -169,8 +169,19 @@ func GetTodoListSharingsHandler(c *gin.Context) {
 
 // Join todo list by share link
 func PostTodoListSharingHandler(c *gin.Context) {
-	// TODO 加入共享列表，传入token
-	c.Status(http.StatusNotImplemented)
+	userID := common.MustGetAccessUserID(c)
+	token, err := common.GetRequiredParam(c, "token")
+	if err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
+	if err := bll.CreateTodoListSharedUser(userID, token); err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
+	c.Status(http.StatusOK)
 }
 
 // Inactive share link

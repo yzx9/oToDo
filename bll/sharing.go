@@ -14,9 +14,17 @@ import (
  * oTodo List Sharing
  */
 func CreateTodoListSharing(userID, todoListID int64) (entity.Sharing, error) {
-	// Only allow one sharing active
-	_, err := dal.DeleteSharings(userID, entity.SharingTypeTodoList)
+	todoList, err := OwnTodoList(userID, todoListID)
 	if err != nil {
+		return entity.Sharing{}, err
+	}
+
+	if todoList.IsBasic {
+		return entity.Sharing{}, fmt.Errorf("unable to share basic todo list: %v", todoListID)
+	}
+
+	// Only allow one sharing active
+	if _, err = dal.DeleteSharings(userID, entity.SharingTypeTodoList); err != nil {
 		return entity.Sharing{}, fmt.Errorf("fails to delete old sharing tokens: %w", err)
 	}
 
