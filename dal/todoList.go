@@ -1,6 +1,7 @@
 package dal
 
 import (
+	"github.com/yzx9/otodo/model/dto"
 	"github.com/yzx9/otodo/model/entity"
 	"github.com/yzx9/otodo/util"
 )
@@ -20,6 +21,17 @@ func SelectTodoList(id int64) (entity.TodoList, error) {
 func SelectTodoLists(userId int64) ([]entity.TodoList, error) {
 	var lists []entity.TodoList
 	re := db.Where(entity.TodoList{UserID: userId}).Find(&lists)
+	return lists, util.WrapGormErr(re.Error, "todo list")
+}
+
+func SelectTodoListsWithMenuFormat(userID int64) ([]dto.TodoListMenuItemRaw, error) {
+	var lists []dto.TodoListMenuItemRaw
+	re := db.
+		Model(entity.TodoList{}).
+		Where(entity.TodoList{UserID: userID}).
+		Not(entity.TodoList{IsBasic: true}). // Skip basic todo list
+		Select("id", "name", "todo_list_folder_id", "(SELECT count(todos.id) FROM todos WHERE todos.todo_list_id = todo_lists.id) as count").
+		Find(&lists)
 	return lists, util.WrapGormErr(re.Error, "todo list")
 }
 
