@@ -15,7 +15,7 @@ import (
 )
 
 const tokenType = `Bearer`
-const authorizationRegexString = `^[Bb]earer (?P<token>[\w-]+.[\w-]+.[\w-]+)$"`
+const authorizationRegexString = `^[Bb]earer (?P<token>[\w-]+.[\w-]+.[\w-]+)$`
 
 var authorizationRegex = regexp.MustCompile(authorizationRegexString)
 
