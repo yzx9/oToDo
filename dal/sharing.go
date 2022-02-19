@@ -16,7 +16,7 @@ func SelectSharing(token string) (entity.Sharing, error) {
 	return sharing, util.WrapGormErr(re.Error, "sharing")
 }
 
-func SelectSharings(userID string, sharingType entity.SharingType) ([]entity.Sharing, error) {
+func SelectSharings(userID int64, sharingType entity.SharingType) ([]entity.Sharing, error) {
 	var sharings []entity.Sharing
 	re := db.Where(&entity.Sharing{
 		UserID: userID,
@@ -25,7 +25,7 @@ func SelectSharings(userID string, sharingType entity.SharingType) ([]entity.Sha
 	return sharings, util.WrapGormErr(re.Error, "sharing")
 }
 
-func SelectActiveSharings(userID string, sharingType entity.SharingType) ([]entity.Sharing, error) {
+func SelectActiveSharings(userID int64, sharingType entity.SharingType) ([]entity.Sharing, error) {
 	var sharings []entity.Sharing
 	re := db.Where(&entity.Sharing{
 		UserID: userID,
@@ -40,7 +40,7 @@ func SaveSharing(sharing *entity.Sharing) error {
 	return util.WrapGormErr(re.Error, "sharing")
 }
 
-func ExistActiveSharing(userID string, sharingType entity.SharingType) (bool, error) {
+func ExistActiveSharing(userID int64, sharingType entity.SharingType) (bool, error) {
 	var count int64
 	re := db.Where(&entity.Sharing{
 		UserID: userID,
@@ -48,4 +48,14 @@ func ExistActiveSharing(userID string, sharingType entity.SharingType) (bool, er
 		Active: true,
 	}).Count(&count)
 	return count != 0, util.WrapGormErr(re.Error, "sharing")
+}
+
+func DeleteSharings(userID int64, sharingType entity.SharingType) (int64, error) {
+	// Here we inactive sharing instead of not delete
+	re := db.Where(entity.Sharing{
+		UserID: userID,
+		Type:   sharingType,
+		Active: true,
+	}).Update("active", false)
+	return re.RowsAffected, util.WrapGormErr(re.Error, "sharing")
 }

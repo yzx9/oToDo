@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/api/common"
 	"github.com/yzx9/otodo/bll"
+	"github.com/yzx9/otodo/model/dto"
 	"github.com/yzx9/otodo/model/entity"
 )
 
@@ -129,14 +130,41 @@ func DeleteTodoListSharedUserHandler(c *gin.Context) {
 
 // Create share link for todo list
 func PostTodoListSharingsHandler(c *gin.Context) {
-	// TODO 创建分享链接，会使之前的失效
-	c.Status(http.StatusNotImplemented)
+	userID := common.MustGetAccessUserID(c)
+	todoListID, err := common.GetRequiredParamID(c, "id")
+	if err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
+	sharing, err := bll.CreateTodoListSharing(userID, todoListID)
+	if err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.Sharing{
+		Token:     sharing.Token,
+		CreatedAt: sharing.CreatedAt,
+	})
 }
 
 // Get current share link
 func GetTodoListSharingsHandler(c *gin.Context) {
-	// TODO 获取分享连接
-	c.Status(http.StatusNotImplemented)
+	userID := common.MustGetAccessUserID(c)
+	todoListID, err := common.GetRequiredParamID(c, "id")
+	if err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
+	sharings, err := bll.GetActiveTodoListSharings(userID, todoListID)
+	if err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, sharings)
 }
 
 // Join todo list by share link
@@ -147,6 +175,17 @@ func PostTodoListSharingHandler(c *gin.Context) {
 
 // Inactive share link
 func DeleteTodoListSharingHandler(c *gin.Context) {
-	// TODO 删除分享链接
-	c.Status(http.StatusNotImplemented)
+	userID := common.MustGetAccessUserID(c)
+	token, err := common.GetRequiredParam(c, "token")
+	if err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
+	if err := bll.DeleteTodoListSharing(userID, token); err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
+	c.Status(http.StatusOK)
 }

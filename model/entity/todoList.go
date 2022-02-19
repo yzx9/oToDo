@@ -3,8 +3,9 @@ package entity
 type TodoList struct {
 	Entity
 
-	Name    string `json:"name" gorm:"size:128"`
-	IsBasic bool   `json:"-"`
+	Name      string `json:"name" gorm:"size:128"`
+	IsBasic   bool   `json:"-"`
+	IsSharing bool   `json:"isSharing"`
 
 	UserID int64 `json:"userID"`
 	User   User  `json:"-"`
