@@ -45,6 +45,8 @@ func (s *Server) setupRouter() {
 		// Current User
 		r.GET("/users/current", handler.GetCurrentUserHandler)
 
+		r.GET("/users/current/menu", handler.GetCurrentUserMenu)
+
 		r.GET("/users/current/todo-lists", handler.GetCurrentUserTodoListsHandler)
 		r.GET("/users/current/todo-lists/basic", handler.GetCurrentUserBasicTodoListHandler)
 

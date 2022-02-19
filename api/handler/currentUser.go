@@ -21,10 +21,22 @@ func GetCurrentUserHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+// Get menu
+func GetCurrentUserMenu(c *gin.Context) {
+	userID := common.MustGetAccessUserID(c)
+	menu, err := bll.GetTodoListMenu(userID)
+	if err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, menu)
+}
+
 // Get todo lists for current user
 func GetCurrentUserTodoListsHandler(c *gin.Context) {
 	userID := common.MustGetAccessUserID(c)
-	todos, err := bll.SelectTodoLists(userID)
+	todos, err := bll.GetTodoLists(userID)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return

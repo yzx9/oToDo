@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/yzx9/otodo/dal"
+	"github.com/yzx9/otodo/model/dto"
 	"github.com/yzx9/otodo/model/entity"
 	"github.com/yzx9/otodo/util"
 )
@@ -64,4 +65,50 @@ func OwnTodoListFolder(userID, todoListFolderID int64) (entity.TodoListFolder, e
 	}
 
 	return todoListFolder, nil
+}
+
+// Get Menu, folder+list tree
+func GetTodoListMenu(userID int64) ([]dto.TodoListMenu, error) {
+	folders, err := GetTodoListFolders(userID)
+	if err != nil {
+		return nil, fmt.Errorf("fails to get user menu: %w", err)
+	}
+
+	lists, err := GetTodoLists(userID)
+	if err != nil {
+		return nil, fmt.Errorf("fails to get user menu: %w", err)
+	}
+
+	// TODO[feat]: Sortable
+	menu := make([]dto.TodoListMenu, len(folders))
+	for i := range folders {
+		menu = append(menu, dto.TodoListMenu{
+			ID:       folders[i].ID,
+			Name:     folders[i].Name,
+			IsLeaf:   false,
+			Children: make([]dto.TodoListMenu, 0),
+		})
+	}
+
+	for i := range lists {
+		item := dto.TodoListMenu{
+			ID:     lists[i].ID,
+			Name:   lists[i].Name,
+			IsLeaf: true,
+		}
+
+		if lists[i].TodoListFolderID == 0 {
+			menu = append(menu, item)
+			continue
+		}
+
+		for j := range menu {
+			if menu[j].ID == lists[i].TodoListFolderID {
+				menu[i].Children = append(menu[i].Children, item)
+			}
+		}
+		// TODO[bug]: need log if data inconsistency
+	}
+
+	return menu, nil
 }

@@ -19,11 +19,11 @@ func CreateTodoList(userID int64, todoList *entity.TodoList) error {
 	return nil
 }
 
-func SelectTodoList(userID, todoListID int64) (entity.TodoList, error) {
+func GetTodoList(userID, todoListID int64) (entity.TodoList, error) {
 	return OwnOrSharedTodoList(userID, todoListID)
 }
 
-func SelectTodoLists(userID int64) ([]entity.TodoList, error) {
+func GetTodoLists(userID int64) ([]entity.TodoList, error) {
 	vec, err := dal.SelectTodoLists(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get user todo lists: %w", err)
