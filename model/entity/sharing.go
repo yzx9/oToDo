@@ -9,11 +9,11 @@ const (
 type Sharing struct {
 	Entity
 
-	Token     string `json:"token" gorm:"size:128;uniqueIndex"`
+	Token     string `json:"-" gorm:"size:128;uniqueIndex"`
 	Active    bool   `json:"active"`
-	Type      int8   `json:"type"`      // SharingType
-	RelatedID int64  `json:"relatedID"` // Depends on Type
+	Type      int8   `json:"type"` // SharingType
+	RelatedID int64  `json:"-"`    // Depends on Type
 
-	UserID int64 `json:"userID"`
+	UserID int64 `json:"-"`
 	User   User  `json:"-"`
 }
