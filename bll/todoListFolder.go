@@ -27,7 +27,11 @@ func GetTodoListFolder(userID, todoListFolderID int64) (entity.TodoListFolder, e
 
 func GetTodoListFolders(userID int64) ([]entity.TodoListFolder, error) {
 	vec, err := dal.SelectTodoListFolders(userID)
-	return vec, fmt.Errorf("fails to get user: %w", err)
+	if err != nil {
+		return nil, fmt.Errorf("fails to get user: %w", err)
+	}
+
+	return vec, nil
 }
 
 func DeleteTodoListFolder(userID, todoListFolderID int64) (entity.TodoListFolder, error) {
