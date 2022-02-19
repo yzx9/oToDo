@@ -67,7 +67,7 @@ func CreateUserInvalidRefreshToken(userID int64, tokenID string) (entity.UserInv
 		UserID:  userID,
 		TokenID: tokenID,
 	}
-	if err := dal.InsertUserInvalidRefreshToken(model); err != nil {
+	if err := dal.InsertUserInvalidRefreshToken(&model); err != nil {
 		return entity.UserInvalidRefreshToken{}, fmt.Errorf("fails to make user refresh token invalid: %w", err)
 	}
 

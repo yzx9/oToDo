@@ -5,7 +5,7 @@ import (
 	"github.com/yzx9/otodo/util"
 )
 
-func InsertUserInvalidRefreshToken(entity entity.UserInvalidRefreshToken) error {
+func InsertUserInvalidRefreshToken(entity *entity.UserInvalidRefreshToken) error {
 	re := db.Create(entity)
 	if re.Error != nil {
 		return util.WrapGormErr(re.Error, "user invalid refresh token")
