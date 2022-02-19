@@ -73,6 +73,11 @@ func OwnTodoListFolder(userID, todoListFolderID int64) (entity.TodoListFolder, e
 
 // Get Menu, folder+list tree
 func GetTodoListMenu(userID int64) ([]dto.TodoListMenu, error) {
+	user, err := GetUser(userID)
+	if err != nil {
+		return nil, fmt.Errorf("fails to get user menu: %w", err)
+	}
+
 	folders, err := GetTodoListFolders(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get user menu: %w", err)
@@ -95,6 +100,10 @@ func GetTodoListMenu(userID int64) ([]dto.TodoListMenu, error) {
 	}
 
 	for i := range lists {
+		if lists[i].ID == user.BasicTodoListID {
+			continue // Skip basic todo list
+		}
+
 		item := dto.TodoListMenu{
 			ID:     lists[i].ID,
 			Name:   lists[i].Name,
