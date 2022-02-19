@@ -23,6 +23,15 @@ func GetTodoList(userID, todoListID int64) (entity.TodoList, error) {
 	return OwnOrSharedTodoList(userID, todoListID)
 }
 
+func ForceGetTodoList(todoListID int64) (entity.TodoList, error) {
+	list, err := dal.SelectTodoList(todoListID)
+	if err != nil {
+		return entity.TodoList{}, fmt.Errorf("fails to get todo list: %w", err)
+	}
+
+	return list, nil
+}
+
 func GetTodoLists(userID int64) ([]entity.TodoList, error) {
 	vec, err := dal.SelectTodoLists(userID)
 	if err != nil {

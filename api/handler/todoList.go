@@ -143,7 +143,7 @@ func PostTodoListSharingsHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.Sharing{
+	c.JSON(http.StatusOK, dto.SharingToken{
 		Token:     sharing.Token,
 		CreatedAt: sharing.CreatedAt,
 	})
@@ -167,7 +167,7 @@ func GetTodoListSharingsHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, sharings)
 }
 
-// Join todo list by share link
+// Join todo list by share token
 func PostTodoListSharingHandler(c *gin.Context) {
 	userID := common.MustGetAccessUserID(c)
 	token, err := common.GetRequiredParam(c, "token")

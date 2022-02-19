@@ -93,5 +93,6 @@ func (s *Server) setupRouter() {
 
 		// Sharing
 		r.GET("/sharings/:token", handler.GetSharingHandler)
+		r.GET("/sharings/:token/todo-list", handler.GetSharingTodoListHandler)
 	}
 }
