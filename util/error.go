@@ -7,8 +7,8 @@ import (
 )
 
 func NewError(code otodo.ErrCode, format string, values ...interface{}) *otodo.Error {
-	message := fmt.Sprintf(format, values...)
-	return &otodo.Error{Code: code, Message: message}
+	err := fmt.Errorf(format, values...)
+	return &otodo.Error{Code: code, Message: err.Error()}
 }
 
 func NewErrorWithForbidden(format string, values ...interface{}) *otodo.Error {
