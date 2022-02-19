@@ -45,8 +45,8 @@ func GetCurrentUserTodoListsHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, todos)
 }
 
-// Get basic todo lists for current user
-func GetCurrentUserBasicTodoListHandler(c *gin.Context) {
+// Get basic todo list todos for current user
+func GetCurrentUserBasicTodoListTodosHandler(c *gin.Context) {
 	userID := common.MustGetAccessUserID(c)
 	user, err := bll.GetUser(userID)
 	if err != nil {
@@ -54,7 +54,13 @@ func GetCurrentUserBasicTodoListHandler(c *gin.Context) {
 		return
 	}
 
-	common.HandleGetCurrentUserTodoList(c, user.BasicTodoListID)
+	todos, err := bll.ForceGetTodos(user.BasicTodoListID)
+	if err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, todos)
 }
 
 // Get daily todos for current user
@@ -77,7 +83,7 @@ func GetCurrentUserNotNotifiedTodosHandler(c *gin.Context) {
 	handleGetCurrentUserTodos(c, bll.GetNotNotifiedTodos)
 }
 
-func handleGetCurrentUserTodos(c *gin.Context, getTodos func(int64) ([]entity.Todo, error)) {
+func handleGetCurrentUserTodos(c *gin.Context, getTodos func(userID int64) ([]entity.Todo, error)) {
 	userID := common.MustGetAccessUserID(c)
 	todos, err := getTodos(userID)
 	if err != nil {

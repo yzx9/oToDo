@@ -48,8 +48,8 @@ func (s *Server) setupRouter() {
 		r.GET("/users/current/menu", handler.GetCurrentUserMenu)
 
 		r.GET("/users/current/todo-lists", handler.GetCurrentUserTodoListsHandler)
-		r.GET("/users/current/todo-lists/basic", handler.GetCurrentUserBasicTodoListHandler)
 
+		r.GET("/users/current/todos/basic", handler.GetCurrentUserBasicTodoListTodosHandler)
 		r.GET("/users/current/todos/daily", handler.GetCurrentUserDailyTodosHandler)
 		r.GET("/users/current/todos/planned", handler.GetCurrentUserPlannedTodosHandler)
 		r.GET("/users/current/todos/important", handler.GetCurrentUserImportantTodosHandler)

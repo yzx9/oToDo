@@ -28,13 +28,20 @@ func PostTodoListHandler(c *gin.Context) {
 
 // Get todo list
 func GetTodoListHandler(c *gin.Context) {
-	id, err := common.GetRequiredParamID(c, "id")
+	todoListID, err := common.GetRequiredParamID(c, "id")
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
 
-	common.HandleGetCurrentUserTodoList(c, id)
+	userID := common.MustGetAccessUserID(c)
+	todoList, err := bll.GetTodoList(userID, todoListID)
+	if err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, todoList)
 }
 
 // Get todos in todo list

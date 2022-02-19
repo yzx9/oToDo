@@ -44,6 +44,10 @@ func GetTodos(userID, todoListID int64) ([]entity.Todo, error) {
 		return nil, err
 	}
 
+	return ForceGetTodos(todoListID)
+}
+
+func ForceGetTodos(todoListID int64) ([]entity.Todo, error) {
 	todos, err := dal.SelectTodos(todoListID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get todos: %w", err)
