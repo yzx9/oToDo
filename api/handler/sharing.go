@@ -23,7 +23,11 @@ func GetSharingHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, sharing)
+	c.JSON(http.StatusOK, dto.SharingToken{
+		Token:     sharing.Token,
+		Type:      sharing.Type,
+		CreatedAt: sharing.CreatedAt,
+	})
 }
 
 // Get todo list info by share token

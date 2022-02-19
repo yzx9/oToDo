@@ -30,6 +30,10 @@ func (s *Server) setupRouter() {
 
 		// User
 		r.POST("/users", handler.PostUserHandler)
+
+		// Sharing
+		r.GET("/sharings/:token", handler.GetSharingHandler)
+		r.GET("/sharings/:token/todo-list", handler.GetSharingTodoListHandler)
 	}
 
 	// Authorized routes
@@ -90,9 +94,5 @@ func (s *Server) setupRouter() {
 		r.POST("/todo-list-folders", handler.PostTodoListFolderHandler)
 		r.GET("/todo-list-folders/:id", handler.GetTodoListFolderHandler)
 		r.DELETE("/todo-list-folders/:id", handler.DeleteTodoListFolderHandler)
-
-		// Sharing
-		r.GET("/sharings/:token", handler.GetSharingHandler)
-		r.GET("/sharings/:token/todo-list", handler.GetSharingTodoListHandler)
 	}
 }

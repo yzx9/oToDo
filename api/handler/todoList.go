@@ -145,6 +145,7 @@ func PostTodoListSharingsHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, dto.SharingToken{
 		Token:     sharing.Token,
+		Type:      sharing.Type,
 		CreatedAt: sharing.CreatedAt,
 	})
 }
@@ -164,7 +165,16 @@ func GetTodoListSharingsHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, sharings)
+	vec := make([]dto.SharingToken, 0)
+	for i := range sharings {
+		vec = append(vec, dto.SharingToken{
+			Token:     sharings[i].Token,
+			Type:      sharings[i].Type,
+			CreatedAt: sharings[i].CreatedAt,
+		})
+	}
+
+	c.JSON(http.StatusOK, vec)
 }
 
 // Join todo list by share token

@@ -4,6 +4,7 @@ import "time"
 
 type SharingToken struct {
 	Token     string    `json:"token"`
+	Type      int8      `json:"type"`
 	CreatedAt time.Time `json:"createdAt"`
 }
 
