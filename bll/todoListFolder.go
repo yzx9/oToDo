@@ -89,7 +89,7 @@ func GetTodoListMenu(userID int64) ([]dto.TodoListMenu, error) {
 	}
 
 	// TODO[feat]: Sortable
-	menu := make([]dto.TodoListMenu, len(folders))
+	menu := make([]dto.TodoListMenu, 0)
 	for i := range folders {
 		menu = append(menu, dto.TodoListMenu{
 			ID:       folders[i].ID,
@@ -117,7 +117,7 @@ func GetTodoListMenu(userID int64) ([]dto.TodoListMenu, error) {
 
 		for j := range menu {
 			if menu[j].ID == lists[i].TodoListFolderID {
-				menu[i].Children = append(menu[i].Children, item)
+				menu[j].Children = append(menu[j].Children, item)
 			}
 		}
 		// TODO[bug]: need log if data inconsistency
