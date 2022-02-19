@@ -172,7 +172,7 @@ const injectEntity = `
   createdAt: string
   updatedAt: string`
 
-var jsonComment = regexp.MustCompile("json:\"(?P<name>[a-zA-Z0-9-]+)(;|\")")
+var jsonComment = regexp.MustCompile("json:\"(?P<name>[\\w-]+)(;|\")")
 
 func generator(s customStruct) error {
 	content := "interface " + s.Name + " {"
@@ -184,7 +184,6 @@ func generator(s customStruct) error {
 	for i := range s.Fields {
 		if c := s.Fields[i].Comment; c != "" && jsonComment.MatchString(c) {
 			matches := jsonComment.FindStringSubmatch(c)
-			fmt.Println(matches[1])
 			if matches[1] == "-" {
 				continue
 			}
