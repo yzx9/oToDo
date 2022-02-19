@@ -6,7 +6,25 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/api/common"
 	"github.com/yzx9/otodo/bll"
+	"github.com/yzx9/otodo/model/entity"
 )
+
+// Create todo list folder
+func PostTodoListFolderHandler(c *gin.Context) {
+	folder := entity.TodoListFolder{}
+	if err := c.ShouldBind(&folder); err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
+	userID := common.MustGetAccessUserID(c)
+	if err := bll.CreateTodoListFolder(userID, &folder); err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, folder)
+}
 
 // Get todo list folder
 func GetTodoListFolderHandler(c *gin.Context) {

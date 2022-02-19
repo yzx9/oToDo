@@ -8,16 +8,13 @@ import (
 	"github.com/yzx9/otodo/util"
 )
 
-func CreateTodoListFolder(userID int64, todoListFolderName string) (entity.TodoListFolder, error) {
-	folder := entity.TodoListFolder{
-		Name:   todoListFolderName,
-		UserID: userID,
-	}
-	if err := dal.InsertTodoListFolder(&folder); err != nil {
-		return entity.TodoListFolder{}, err
+func CreateTodoListFolder(userID int64, folder *entity.TodoListFolder) error {
+	folder.UserID = userID
+	if err := dal.InsertTodoListFolder(folder); err != nil {
+		return fmt.Errorf("fails to create todo list folder: %w", err)
 	}
 
-	return folder, nil
+	return nil
 }
 
 func GetTodoListFolder(userID, todoListFolderID int64) (entity.TodoListFolder, error) {
@@ -27,7 +24,7 @@ func GetTodoListFolder(userID, todoListFolderID int64) (entity.TodoListFolder, e
 func GetTodoListFolders(userID int64) ([]entity.TodoListFolder, error) {
 	vec, err := dal.SelectTodoListFolders(userID)
 	if err != nil {
-		return nil, fmt.Errorf("fails to get user: %w", err)
+		return nil, fmt.Errorf("fails to get todo list folder: %w", err)
 	}
 
 	return vec, nil

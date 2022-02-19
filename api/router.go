@@ -87,6 +87,7 @@ func (s *Server) setupRouter() {
 		r.DELETE("/todo-lists/:id/sharings/:token", handler.DeleteTodoListSharingHandler)
 
 		// Todo List Folder
+		r.POST("/todo-list-folders", handler.PostTodoListFolderHandler)
 		r.GET("/todo-list-folders/:id", handler.GetTodoListFolderHandler)
 		r.DELETE("/todo-list-folders/:id", handler.DeleteTodoListFolderHandler)
 
