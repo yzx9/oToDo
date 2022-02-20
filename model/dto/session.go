@@ -15,7 +15,6 @@ type SessionTokenClaims struct {
 	TokenClaims
 
 	RefreshTokenID string `json:"rti,omitempty"`
-	UserNickname   string `json:"nickname,omitempty"`
 }
 
 type LoginDTO struct {

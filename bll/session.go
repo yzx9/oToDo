@@ -112,7 +112,6 @@ func newAccessToken(user entity.User, refreshTokenID string) dto.SessionToken {
 
 	claims := dto.SessionTokenClaims{
 		TokenClaims:    NewClaims(user.ID, dur),
-		UserNickname:   user.Nickname,
 		RefreshTokenID: refreshTokenID,
 	}
 	token := NewToken(claims)

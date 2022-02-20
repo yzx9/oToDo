@@ -12,8 +12,7 @@ import (
 
 // Ping Test
 func GetSessionHandler(c *gin.Context) {
-	claims := common.MustGetAccessTokenClaims(c)
-	c.JSON(http.StatusOK, gin.H{"message": fmt.Sprintf("hello, %v", claims.UserNickname)})
+	c.JSON(http.StatusOK, gin.H{"message": "software is eating the world"})
 }
 
 // Login
