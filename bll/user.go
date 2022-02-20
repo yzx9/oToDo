@@ -90,3 +90,11 @@ func GetCryptoPassword(password string) []byte {
 	pwd := sha256.Sum256(append([]byte(password), otodo.Conf.Secret.PasswordNonce...))
 	return pwd[:]
 }
+
+/**
+ * OAuth
+ */
+
+func getOrRegisterUserByGithub(profile dto.GithubUserPublicProfile) (entity.User, error) {
+	return entity.User{}, util.NewError(otodo.ErrNotImplemented, "TODO")
+}

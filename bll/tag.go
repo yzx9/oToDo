@@ -11,7 +11,7 @@ import (
 )
 
 // Update tag, should be called with `go UpdateTagAsync()`
-func UpdateTagAsync(todo *entity.Todo, oldTodoTitle string) error {
+func UpdateTag(todo *entity.Todo, oldTodoTitle string) error {
 	// TODO[bug]: handle error
 	if todo.Title == oldTodoTitle {
 		return nil
@@ -63,6 +63,13 @@ func UpdateTagAsync(todo *entity.Todo, oldTodoTitle string) error {
 	}
 
 	return nil
+}
+
+func UpdateTagAsync(todo *entity.Todo, oldTodoTitle string) {
+	if err := UpdateTag(todo, oldTodoTitle); err != nil {
+		// TODO[bug]: handle error
+		fmt.Println(err)
+	}
 }
 
 var tagRegex = regexp.MustCompile(`^#(?P<tag>\\S{1,16}) `)

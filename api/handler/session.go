@@ -94,7 +94,7 @@ func parseRefreshToken(c *gin.Context) (int64, string, error) {
  */
 
 func GetSessionOAuthGithub(c *gin.Context) {
-	uri, err := bll.CreateGithubOAuth()
+	uri, err := bll.CreateGithubOAuthURI()
 	if err != nil {
 		common.AbortWithError(c, err)
 		return

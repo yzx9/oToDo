@@ -8,7 +8,6 @@ session:
   access_token_refresh_threshold: 300 #  5 min
 
 github:
-  oauth_authorize_url: https://github.com/login/oauth/authorize
+  client_id: 67d44b6101f98c012bd7
   oauth_redirect_uri: http://localhost:3000
-  oauth_access_token_uri: https://github.com/login/oauth/access_token
   oauth_state_exp: 600 # 10min

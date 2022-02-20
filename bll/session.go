@@ -15,7 +15,7 @@ import (
 	"github.com/yzx9/otodo/util"
 )
 
-const tokenType = `Bearer`
+const tokenType = `bearer`
 const authorizationRegexString = `^[Bb]earer (?P<token>[\w-]+.[\w-]+.[\w-]+)$`
 
 var authorizationRegex = regexp.MustCompile(authorizationRegexString)
@@ -42,7 +42,21 @@ func LoginByGithubOAuth(code, state string) (dto.SessionDTO, error) {
 		return dto.SessionDTO{}, fmt.Errorf("fails to login: %w", err)
 	}
 
-	println(token)
+	profile, err := FetchGithubUserPublicProfile(token.Token)
+	if err != nil {
+		return dto.SessionDTO{}, fmt.Errorf("fails to fetch github user: %w", err)
+	}
+
+	user, err := getOrRegisterUserByGithub(profile)
+	if err != nil {
+		return dto.SessionDTO{}, fmt.Errorf("fails to get user: %w", err)
+	}
+
+	go UpdateThirdPartyOAuthTokenAsync(&token)
+
+	refreshToken, refreshTokenID := newRefreshToken(user)
+	re := newAccessTokenWithResult(user, refreshTokenID)
+	re.RefreshToken = refreshToken
 
 	return dto.SessionDTO{}, util.NewError(otodo.ErrNotImplemented, "TODO")
 }

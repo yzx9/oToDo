@@ -39,8 +39,6 @@ type ConfigSecret struct {
 type ConfigGithub struct {
 	ClientID            string
 	ClientSecret        string
-	OAuthAuthorizeURI   string
 	OAuthRedirectURI    string
-	OAuthAccessTokenURI string
 	OAuthStateExpiresIn int
 }

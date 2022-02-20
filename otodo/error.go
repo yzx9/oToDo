@@ -40,3 +40,10 @@ const (
 	ErrDuplicateID
 	ErrNotFound
 )
+
+// Third Party
+const (
+	ErrThirdPartyUnknown ErrCode = 40000 + iota
+	ErrThirdPartyUnauthorized
+	ErrThirdPartyForbidden
+)

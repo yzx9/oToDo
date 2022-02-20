@@ -68,6 +68,16 @@ func getHttpCodeFromError(err otodo.Error) int {
 
 	case otodo.ErrNotFound:
 		return http.StatusNotFound
+
+	// Third Party
+	case otodo.ErrThirdPartyUnknown:
+		return http.StatusBadRequest
+
+	case otodo.ErrThirdPartyUnauthorized:
+		return http.StatusBadRequest
+
+	case otodo.ErrThirdPartyForbidden:
+		return http.StatusBadRequest
 	}
 
 	return http.StatusInternalServerError

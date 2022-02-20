@@ -2,27 +2,29 @@ package bll
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
 
-	"github.com/yzx9/otodo/dal"
+	"github.com/yzx9/otodo/model/dto"
 	"github.com/yzx9/otodo/model/entity"
 	"github.com/yzx9/otodo/otodo"
 	"github.com/yzx9/otodo/util"
 )
 
 const githubOAuthStateLen = 10
+const githubOAuthAuthorizeURI = "https://github.com/login/oauth/authorize"
+const githubOAuthAccessTokenURI = "https://github.com/login/oauth/access_token"
+const githubUserURI = "https://github.com/user"
 
 // TODO[perf]: redis
 var githubOAuthStates = make(map[string]time.Time)
 
-func CreateGithubOAuth() (string, error) {
+func CreateGithubOAuthURI() (string, error) {
 	c := otodo.Conf.Github
-	uri := c.OAuthAuthorizeURI
+	uri := githubOAuthAuthorizeURI
 
 	uri += "?client_id=" + c.ClientID
 	uri += "&redirect_uri=" + c.OAuthRedirectURI
@@ -34,10 +36,10 @@ func CreateGithubOAuth() (string, error) {
 	return uri, nil
 }
 
-func FetchGithubOAuthToken(code, state string) (entity.ThirdPartyToken, error) {
+func FetchGithubOAuthToken(code, state string) (entity.ThirdPartyOAuthToken, error) {
 	c := otodo.Conf.Github
-	write := func(err error) (entity.ThirdPartyToken, error) {
-		return entity.ThirdPartyToken{}, err
+	write := func(err error) (entity.ThirdPartyOAuthToken, error) {
+		return entity.ThirdPartyOAuthToken{}, err
 	}
 
 	// Check state
@@ -55,7 +57,7 @@ func FetchGithubOAuthToken(code, state string) (entity.ThirdPartyToken, error) {
 	vals.Add("code", code)
 	vals.Add("redirect_uri", c.OAuthRedirectURI)
 
-	req, err := http.NewRequest("POST", c.OAuthAccessTokenURI, strings.NewReader(vals.Encode()))
+	req, err := http.NewRequest(http.MethodPost, githubOAuthAccessTokenURI, strings.NewReader(vals.Encode()))
 	if err != nil {
 		return write(util.NewErrorWithUnknown("fails to new request"))
 	}
@@ -78,27 +80,56 @@ func FetchGithubOAuthToken(code, state string) (entity.ThirdPartyToken, error) {
 		return write(util.NewErrorWithUnknown("fails to fetch github access token"))
 	}
 
-	type Payload struct {
-		AccessToken string `json:"access_token"`
-		Scope       string `json:"scope"`
-		TokenType   string `json:"token_type"`
+	payload := dto.GithubOAuthAccessToken{}
+	if err := json.Unmarshal(body, &payload); err != nil || payload.TokenType != "bearer" {
+		// TODO[feat]: this is a fatal error as it usually means GitHub API changes
+		return write(util.NewErrorWithUnknown("fails to parse github access token"))
 	}
-	payload := Payload{}
+
+	return entity.ThirdPartyOAuthToken{
+		Active: true,
+		Type:   int8(entity.ThirdPartyTokenTypeGithubAccessToken),
+		Token:  payload.AccessToken,
+		Scope:  payload.Scope,
+	}, nil
+}
+
+func FetchGithubUserPublicProfile(token string) (dto.GithubUserPublicProfile, error) {
+	write := func(err error) (dto.GithubUserPublicProfile, error) {
+		return dto.GithubUserPublicProfile{}, err
+	}
+
+	req, err := http.NewRequest(http.MethodGet, githubUserURI, strings.NewReader(""))
+	if err != nil {
+		return write(util.NewErrorWithUnknown("fails to new request"))
+	}
+
+	req.Header.Set("Authorization", "token "+token)
+	req.Header.Set("Accept", "application/json")
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return write(util.NewErrorWithUnknown("fails to fetch github user public profile"))
+	}
+
+	if res.StatusCode == http.StatusForbidden {
+		// TODO[feat]: should we inactive token?
+		return write(util.NewError(otodo.ErrThirdPartyForbidden, "github access token has been invalid"))
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return write(util.NewError(otodo.ErrThirdPartyUnknown, "fails to fetch github user public profile"))
+	}
+
+	defer res.Body.Close()
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return write(util.NewErrorWithUnknown("fails to fetch github access token"))
+	}
+
+	payload := dto.GithubUserPublicProfile{}
 	if err := json.Unmarshal(body, &payload); err != nil {
 		return write(util.NewErrorWithUnknown("fails to parse github access token"))
 	}
 
-	// Save access token
-	token := entity.ThirdPartyToken{
-		Active:    true,
-		Type:      int8(entity.ThirdPartyTokenTypeGithubAccessToken),
-		Token:     payload.AccessToken,
-		TokenType: payload.TokenType,
-		Scope:     payload.Scope,
-	}
-	if err := dal.InsertThirdPartyToken(&token); err != nil {
-		return write(fmt.Errorf("fails to save token: %w", err))
-	}
-
-	return token, nil
+	return payload, nil
 }

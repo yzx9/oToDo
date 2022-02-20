@@ -5,23 +5,34 @@ import (
 	"github.com/yzx9/otodo/util"
 )
 
-func InsertThirdPartyToken(entity *entity.ThirdPartyToken) error {
+func InsertThirdPartyOAuthToken(entity *entity.ThirdPartyOAuthToken) error {
 	re := db.Create(entity)
-	if re.Error != nil {
-		return util.WrapGormErr(re.Error, "third party token")
-	}
-
-	return nil
+	return util.WrapGormErr(re.Error, "third party token")
 }
 
-func ExistThirdPartyToken(userID int64, tokenID string) (bool, error) {
+func UpdateThirdPartyOAuthToken(new *entity.ThirdPartyOAuthToken) error {
+	re := db.
+		Where(&entity.ThirdPartyOAuthToken{
+			UserID: new.UserID,
+			Type:   new.Type,
+			Active: true,
+		}).
+		Save(new)
+
+	return util.WrapGormErr(re.Error, "third party token")
+}
+
+func ExistActiveThirdPartyOAuthToken(userID int64, tokenType entity.ThirdPartyTokenType) (bool, error) {
 	var count int64
-	re := db.Where(&entity.UserInvalidRefreshToken{
-		UserID:  userID,
-		TokenID: tokenID,
-	}).Count(&count)
+	re := db.
+		Where(&entity.ThirdPartyOAuthToken{
+			UserID: userID,
+			Type:   int8(tokenType),
+			Active: true,
+		}).
+		Count(&count)
 	if re.Error != nil {
-		return false, util.WrapGormErr(re.Error, "user invalid refresh token")
+		return false, util.WrapGormErr(re.Error, "third party token")
 	}
 
 	return count != 0, nil
