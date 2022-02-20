@@ -21,8 +21,8 @@ func (s *Server) setupRouter() {
 		// Session
 		r.POST("/sessions", handler.PostSessionHandler)
 
-		r.GET("/sessions/oauth", handler.GetSessionOAuthGithub)
-		r.POST("/sessions/oauth", handler.PostSessionOAuthGithub)
+		r.GET("/sessions/oauth/github", handler.GetSessionOAuthGithub)
+		r.POST("/sessions/oauth/github", handler.PostSessionOAuthGithub)
 
 		r.POST("/sessions/current/tokens", handler.PostSessionTokenHandler)
 
