@@ -19,18 +19,19 @@ func PostFileHandler(c *gin.Context) {
 		return
 	}
 
-	fileID, err := bll.UploadPublicFile(file)
+	record, err := bll.UploadPublicFile(file)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.FileDTO{FileID: fileID})
+	c.JSON(http.StatusOK, dto.FileDTO{FileID: record.ID})
 }
 
 // Upload todo file, only support single file now
 func PostTodoFileHandler(c *gin.Context) {
-	fileID, err := common.GetRequiredParamID(c, "id")
+	userID := common.MustGetAccessUserID(c)
+	todoID, err := common.GetRequiredParamID(c, "id")
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -42,13 +43,13 @@ func PostTodoFileHandler(c *gin.Context) {
 		return
 	}
 
-	fileID, err = bll.UploadTodoFile(fileID, file)
+	record, err := bll.UploadTodoFile(userID, todoID, file)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.FileDTO{FileID: fileID})
+	c.JSON(http.StatusOK, dto.FileDTO{FileID: record.ID})
 }
 
 // Upload file, only support single file now

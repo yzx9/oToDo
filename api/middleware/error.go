@@ -61,6 +61,8 @@ func getHttpCodeFromError(err otodo.Error) int {
 		return http.StatusServiceUnavailable
 
 	case otodo.ErrDataInconsistency:
+		return http.StatusInternalServerError
+
 	case otodo.ErrDuplicateID:
 		return http.StatusInternalServerError
 

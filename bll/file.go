@@ -18,10 +18,10 @@ const maxFileSize = 8 << 20 // 8MiB
 
 var supportedFileTypeRegex = regexp.MustCompile(`.(jpg|jpeg|JPG|png|PNG|gif|GIF|ico|ICO)$`)
 
-func UploadPublicFile(file *multipart.FileHeader) (int64, error) {
+func UploadPublicFile(file *multipart.FileHeader) (entity.File, error) {
 	// only support img now
 	if !supportedFileTypeRegex.MatchString(file.Filename) {
-		return 0, util.NewErrorWithForbidden("unsupported file type")
+		return entity.File{}, util.NewErrorWithForbidden("unsupported file type")
 	}
 
 	record := entity.File{
@@ -29,27 +29,32 @@ func UploadPublicFile(file *multipart.FileHeader) (int64, error) {
 		AccessType: int8(entity.FileTypePublic),
 	}
 	err := uploadFile(file, &record)
-	return record.ID, err
+	return record, err
 }
 
-func UploadTodoFile(todoID int64, file *multipart.FileHeader) (int64, error) {
+func UploadTodoFile(userID, todoID int64, file *multipart.FileHeader) (entity.File, error) {
+	_, err := OwnTodo(userID, todoID)
+	if err != nil {
+		return entity.File{}, err
+	}
+
 	record := entity.File{
 		FileName:   file.Filename,
 		AccessType: int8(entity.FileTypeTodo),
 		RelatedID:  todoID,
 	}
 	if err := uploadFile(file, &record); err != nil {
-		return 0, err
+		return entity.File{}, err
 	}
 
 	if err := dal.InsertTodoFile(&entity.TodoFile{
-		File: record,
-		Todo: entity.Todo{Entity: entity.Entity{ID: record.ID}},
+		FileID: record.ID,
+		TodoID: todoID,
 	}); err != nil {
-		return 0, fmt.Errorf("fails to upload todo file: %w", err)
+		return entity.File{}, fmt.Errorf("fails to upload todo file: %w", err)
 	}
 
-	return record.ID, nil
+	return record, nil
 }
 
 func uploadFile(file *multipart.FileHeader, record *entity.File) error {
