@@ -21,11 +21,7 @@ func CreateTodoRepeatPlan(plan entity.TodoRepeatPlan) (entity.TodoRepeatPlan, er
 }
 
 func UpdateTodoRepeatPlan(plan, oldPlan entity.TodoRepeatPlan) (entity.TodoRepeatPlan, error) {
-	if !isValidTodoRepeatPlan(plan) {
-		return entity.TodoRepeatPlan{}, nil
-	}
-
-	if !isSameTodoRepeatPlan(plan, oldPlan) {
+	if !isValidTodoRepeatPlan(plan) || isSameTodoRepeatPlan(plan, oldPlan) {
 		return oldPlan, nil
 	}
 

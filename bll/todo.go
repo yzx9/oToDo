@@ -90,14 +90,27 @@ func UpdateTodo(userID int64, todo *entity.Todo) error {
 		return err
 	}
 
-	if oldTodo.UserID != todo.UserID {
-		return util.NewErrorWithPreconditionFailed("unable to update todo owner")
-	}
+	todo.CreatedAt = oldTodo.CreatedAt
+	todo.UserID = oldTodo.UserID
+	todo.Files = oldTodo.Files
+	todo.Steps = oldTodo.Steps
+	todo.NextID = oldTodo.NextID
 
-	// Update values
-	if todo.Done && todo.DoneAt.IsZero() {
+	if !oldTodo.Done && todo.Done {
 		t := time.Now()
 		todo.DoneAt = &t
+
+		// Create Repeat Todo If Need
+		if todo.NextID == nil {
+			created, next, err := CreateRepeatTodoIfNeed(*todo)
+			if err != nil {
+				return err
+			}
+
+			if created {
+				todo.NextID = &next.ID
+			}
+		}
 	}
 
 	plan, err := UpdateTodoRepeatPlan(todo.TodoRepeatPlan, oldTodo.TodoRepeatPlan)
@@ -111,18 +124,7 @@ func UpdateTodo(userID int64, todo *entity.Todo) error {
 		return err
 	}
 
-	// Events
-	// TODO[perf] Following events can be async
-	if err = UpdateTag(todo, oldTodo.Title); err != nil {
-		return err
-	}
-
-	if !oldTodo.Done && todo.Done {
-		// TODO[feat] Notify new todo
-		if _, _, err = CreateRepeatTodoIfNeed(*todo); err != nil {
-			return err
-		}
-	}
+	go UpdateTagAsync(todo, oldTodo.Title)
 
 	return nil
 }
@@ -134,12 +136,10 @@ func DeleteTodo(userID, todoID int64) (entity.Todo, error) {
 	}
 
 	if err = dal.DeleteTodo(todoID); err != nil {
-		return entity.Todo{}, fmt.Errorf("fails to delete todo: %v", todoID)
+		return entity.Todo{}, fmt.Errorf("fails to delete todo: %w", err)
 	}
 
-	if err = UpdateTag(&todo, ""); err != nil {
-		return entity.Todo{}, err
-	}
+	go UpdateTagAsync(&todo, "")
 
 	return todo, nil
 }
@@ -147,7 +147,7 @@ func DeleteTodo(userID, todoID int64) (entity.Todo, error) {
 func OwnTodo(userID, todoID int64) (entity.Todo, error) {
 	todo, err := dal.SelectTodo(todoID)
 	if err != nil {
-		return entity.Todo{}, fmt.Errorf("fails to get todo: %v", todoID)
+		return entity.Todo{}, fmt.Errorf("fails to get todo: %w", err)
 	}
 
 	if _, err = OwnOrSharedTodoList(userID, todo.TodoListID); err != nil {

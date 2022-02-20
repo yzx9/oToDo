@@ -29,6 +29,6 @@ type Todo struct {
 	TodoRepeatPlanID int64          `json:"-"`
 	TodoRepeatPlan   TodoRepeatPlan `json:"todoRepeatPlan"`
 
-	TodoRepeatFromID *int64 `json:"todoRepeatFromID"` // last todo id
-	TodoRepeatFrom   *Todo  `json:"-"`
+	NextID *int64 `json:"nextID"` // next todo id if repeat
+	Next   *Todo  `json:"-"`
 }

@@ -10,7 +10,9 @@ import (
 	"github.com/yzx9/otodo/util"
 )
 
-func UpdateTag(todo *entity.Todo, oldTodoTitle string) error {
+// Update tag, should be called with `go UpdateTagAsync()`
+func UpdateTagAsync(todo *entity.Todo, oldTodoTitle string) error {
+	// TODO[bug]: handle error
 	if todo.Title == oldTodoTitle {
 		return nil
 	}

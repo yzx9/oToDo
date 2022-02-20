@@ -12,7 +12,7 @@ import (
 func CreateTodoStep(userID, todoID int64, name string) (entity.TodoStep, error) {
 	_, err := OwnTodo(userID, todoID)
 	if err != nil {
-		return entity.TodoStep{}, fmt.Errorf("todo not found: %v", todoID)
+		return entity.TodoStep{}, util.NewErrorWithNotFound("todo not found: %v", todoID)
 	}
 
 	step := entity.TodoStep{
@@ -20,7 +20,7 @@ func CreateTodoStep(userID, todoID int64, name string) (entity.TodoStep, error) 
 		TodoID: todoID,
 	}
 	if err = dal.InsertTodoStep(&step); err != nil {
-		return entity.TodoStep{}, fmt.Errorf("fails to create todo step")
+		return entity.TodoStep{}, util.NewErrorWithUnknown("fails to create todo step")
 	}
 
 	return step, nil
@@ -32,9 +32,8 @@ func UpdateTodoStep(userID int64, step *entity.TodoStep) error {
 		return err
 	}
 
-	if step.TodoID != oldStep.TodoID {
-		return util.NewErrorWithForbidden("unable to update todo id")
-	}
+	step.CreatedAt = oldStep.CreatedAt
+	step.TodoID = oldStep.TodoID
 
 	if step.Done && !oldStep.Done {
 		t := time.Now()
@@ -42,7 +41,7 @@ func UpdateTodoStep(userID int64, step *entity.TodoStep) error {
 	}
 
 	if err = dal.SaveTodoStep(step); err != nil {
-		return fmt.Errorf("fails to update todo step")
+		return util.NewErrorWithUnknown("fails to update todo step")
 	}
 
 	return nil
@@ -55,7 +54,7 @@ func DeleteTodoStep(userID, todoID, todoStepID int64) (entity.TodoStep, error) {
 	}
 
 	if step.TodoID != todoID {
-		return entity.TodoStep{}, fmt.Errorf("todo step not found in todo: %v", todoStepID)
+		return entity.TodoStep{}, util.NewErrorWithNotFound("todo step not found in todo: %v", todoStepID)
 	}
 
 	return step, dal.DeleteTodoStep(todoStepID)
@@ -64,7 +63,7 @@ func DeleteTodoStep(userID, todoID, todoStepID int64) (entity.TodoStep, error) {
 func OwnTodoStep(userID, todoStepID int64) (entity.TodoStep, error) {
 	step, err := dal.SelectTodoStep(todoStepID)
 	if err != nil {
-		return entity.TodoStep{}, fmt.Errorf("fails to get todo step: %v", todoStepID)
+		return entity.TodoStep{}, fmt.Errorf("fails to get todo step: %w", err)
 	}
 
 	_, err = OwnTodo(userID, step.TodoID)
