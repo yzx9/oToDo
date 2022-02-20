@@ -20,45 +20,42 @@ const authorizationRegexString = `^[Bb]earer (?P<token>[\w-]+.[\w-]+.[\w-]+)$`
 
 var authorizationRegex = regexp.MustCompile(authorizationRegexString)
 
-func Login(userName, password string) (dto.SessionDTO, error) {
+func Login(userName, password string) (dto.SessionToken, error) {
+	write := func() (dto.SessionToken, error) {
+		return dto.SessionToken{}, util.NewErrorWithBadRequest("invalid credential")
+	}
+
 	user, err := dal.SelectUserByUserName(userName)
-	if err != nil {
-		return dto.SessionDTO{}, util.NewErrorWithBadRequest("invalid credential")
+	if err != nil || user.Password == nil {
+		return write()
 	}
 
 	if cryptoPwd := GetCryptoPassword(password); !bytes.Equal(user.Password, cryptoPwd) {
-		return dto.SessionDTO{}, util.NewErrorWithBadRequest("invalid credential")
+		return write()
 	}
 
-	refreshToken, refreshTokenID := newRefreshToken(user)
-	re := newAccessTokenWithResult(user, refreshTokenID)
-	re.RefreshToken = refreshToken
-	return re, nil
+	return newSessionToken(user), nil
 }
 
-func LoginByGithubOAuth(code, state string) (dto.SessionDTO, error) {
+func LoginByGithubOAuth(code, state string) (dto.SessionToken, error) {
 	token, err := FetchGithubOAuthToken(code, state)
 	if err != nil {
-		return dto.SessionDTO{}, fmt.Errorf("fails to login: %w", err)
+		return dto.SessionToken{}, fmt.Errorf("fails to login: %w", err)
 	}
 
 	profile, err := FetchGithubUserPublicProfile(token.Token)
 	if err != nil {
-		return dto.SessionDTO{}, fmt.Errorf("fails to fetch github user: %w", err)
+		return dto.SessionToken{}, fmt.Errorf("fails to fetch github user: %w", err)
 	}
 
 	user, err := getOrRegisterUserByGithub(profile)
 	if err != nil {
-		return dto.SessionDTO{}, fmt.Errorf("fails to get user: %w", err)
+		return dto.SessionToken{}, fmt.Errorf("fails to get user: %w", err)
 	}
 
 	go UpdateThirdPartyOAuthTokenAsync(&token)
 
-	refreshToken, refreshTokenID := newRefreshToken(user)
-	re := newAccessTokenWithResult(user, refreshTokenID)
-	re.RefreshToken = refreshToken
-
-	return dto.SessionDTO{}, util.NewError(otodo.ErrNotImplemented, "TODO")
+	return newSessionToken(user), nil
 }
 
 func Logout(userID int64, refreshTokenID string) error {
@@ -66,13 +63,13 @@ func Logout(userID int64, refreshTokenID string) error {
 	return err
 }
 
-func NewAccessToken(userID int64, refreshTokenID string) (dto.SessionDTO, error) {
+func NewAccessToken(userID int64, refreshTokenID string) (dto.SessionToken, error) {
 	user, err := dal.SelectUser(userID)
 	if err != nil {
-		return dto.SessionDTO{}, fmt.Errorf("fails to get user, %w", err)
+		return dto.SessionToken{}, fmt.Errorf("fails to get user, %w", err)
 	}
 
-	return newAccessTokenWithResult(user, refreshTokenID), nil
+	return newAccessToken(user, refreshTokenID), nil
 }
 
 func ParseSessionToken(token string) (*jwt.Token, error) {
@@ -108,30 +105,39 @@ func ShouldRefreshAccessToken(oldAccessToken *jwt.Token) bool {
 	return time.Now().Add(dur).Unix() > claims.ExpiresAt
 }
 
-func newAccessTokenWithResult(user entity.User, refreshTokenID string) dto.SessionDTO {
+// access token only
+func newAccessToken(user entity.User, refreshTokenID string) dto.SessionToken {
 	exp := otodo.Conf.Session.AccessTokenExpiresIn
 	dur := time.Duration(exp * int(time.Second))
-	return dto.SessionDTO{
-		AccessToken: newAccessToken(user, refreshTokenID, dur),
+
+	claims := dto.SessionTokenClaims{
+		TokenClaims:    NewClaims(user.ID, dur),
+		UserNickname:   user.Nickname,
+		RefreshTokenID: refreshTokenID,
+	}
+	token := NewToken(claims)
+
+	return dto.SessionToken{
+		AccessToken: token,
 		TokenType:   tokenType,
 		ExpiresIn:   int64(exp),
 	}
 }
 
-func newAccessToken(user entity.User, refreshTokenID string, exp time.Duration) string {
-	claims := dto.SessionTokenClaims{
-		TokenClaims:    NewClaims(user.ID, exp),
-		UserNickname:   user.Nickname,
-		RefreshTokenID: refreshTokenID,
-	}
-	return NewToken(claims)
-}
-
-func newRefreshToken(user entity.User) (string, string) {
+// access token + refresh token
+func newSessionToken(user entity.User) dto.SessionToken {
+	// refresh token
 	exp := otodo.Conf.Session.RefreshTokenExpiresIn
 	dur := time.Duration(exp * int(time.Second))
 
 	claims := dto.SessionTokenClaims{TokenClaims: NewClaims(user.ID, dur)}
 	claims.Id = uuid.NewString()
-	return NewToken(claims), claims.Id
+	refreshToken := NewToken(claims)
+	refreshTokenID := claims.Id
+
+	// access token
+	re := newAccessToken(user, refreshTokenID)
+
+	re.RefreshToken = refreshToken
+	return re
 }

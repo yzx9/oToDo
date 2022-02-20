@@ -1,6 +1,6 @@
 package dto
 
-type SessionDTO struct {
+type SessionToken struct {
 	AccessToken  string `json:"accessToken"`
 	TokenType    string `json:"tokenType"`
 	ExpiresIn    int64  `json:"expiresIn"`

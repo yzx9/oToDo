@@ -10,7 +10,7 @@ type GithubOAuthAccessToken struct {
 
 type GithubUserPublicProfile struct {
 	Login             string    `json:"login"`
-	ID                int       `json:"id"`
+	ID                int64     `json:"id"`
 	NodeID            string    `json:"node_id"`
 	AvatarURL         string    `json:"avatar_url"`
 	GravatarID        string    `json:"gravatar_id"`

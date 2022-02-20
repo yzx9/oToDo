@@ -34,23 +34,8 @@ func CreateUser(payload dto.CreateUserDTO) (entity.User, error) {
 		Nickname: payload.Nickname,
 		Password: GetCryptoPassword(payload.Password),
 	}
-	if err := dal.InsertUser(&user); err != nil {
+	if err := createUser(&user); err != nil {
 		return entity.User{}, fmt.Errorf("fails to create user: %w", err)
-	}
-
-	// create base todo list
-	basicTodoList := entity.TodoList{
-		Name:    "Todos", // TODO i18n
-		IsBasic: true,
-		UserID:  user.ID,
-	}
-	if err := dal.InsertTodoList(&basicTodoList); err != nil {
-		return entity.User{}, fmt.Errorf("fails to create user basic todo list: %w", err)
-	}
-
-	user.BasicTodoListID = basicTodoList.ID
-	if err := dal.SaveUser(&user); err != nil {
-		return entity.User{}, fmt.Errorf("fails to save user basic todo list: %w", err)
 	}
 
 	return user, nil
@@ -60,7 +45,9 @@ func GetUser(userID int64) (entity.User, error) {
 	return dal.SelectUser(userID)
 }
 
-// Invalid User Refresh Token
+/**
+ * Invalid User Refresh Token
+ */
 
 func CreateUserInvalidRefreshToken(userID int64, tokenID string) (entity.UserInvalidRefreshToken, error) {
 	model := entity.UserInvalidRefreshToken{
@@ -96,5 +83,66 @@ func GetCryptoPassword(password string) []byte {
  */
 
 func getOrRegisterUserByGithub(profile dto.GithubUserPublicProfile) (entity.User, error) {
-	return entity.User{}, util.NewError(otodo.ErrNotImplemented, "TODO")
+	exist, err := dal.ExistUserByGithubID(profile.ID)
+	if err != nil {
+		return entity.User{}, util.NewErrorWithUnknown("fails to register user: %w", err)
+	}
+
+	if exist {
+		user, err := dal.SelectUserByGithubID(profile.ID)
+		if err != nil {
+			return entity.User{}, util.NewErrorWithUnknown("fails to get user: %w", err)
+		}
+
+		return user, nil
+	}
+
+	// Register new user
+	// TODO[feat]: download user avatar
+	user := entity.User{
+		Name:     profile.Email,
+		Nickname: profile.Name,
+		Email:    profile.Email,
+		GithubID: profile.ID,
+	}
+	if err := createUser(&user); err != nil {
+		return entity.User{}, fmt.Errorf("fails to create user: %w", err)
+	}
+
+	return user, util.NewError(otodo.ErrNotImplemented, "TODO")
+}
+
+/**
+ * Helpers
+ */
+
+func createUser(user *entity.User) error {
+	if err := dal.InsertUser(user); err != nil {
+		return fmt.Errorf("fails to create user: %w", err)
+	}
+
+	// create base todo list
+	if _, err := createBasicTodoList(user); err != nil {
+		return fmt.Errorf("fails to create user basic todo list: %w", err)
+	}
+
+	return nil
+}
+
+func createBasicTodoList(user *entity.User) (entity.TodoList, error) {
+	basicTodoList := entity.TodoList{
+		Name:    "Todos", // TODO i18n
+		IsBasic: true,
+		UserID:  user.ID,
+	}
+	if err := dal.InsertTodoList(&basicTodoList); err != nil {
+		return entity.TodoList{}, fmt.Errorf("fails to create user basic todo list: %w", err)
+	}
+
+	user.BasicTodoListID = basicTodoList.ID
+	if err := dal.SaveUser(user); err != nil {
+		return entity.TodoList{}, fmt.Errorf("fails to create user basic todo list: %w", err)
+	}
+
+	return basicTodoList, nil
 }

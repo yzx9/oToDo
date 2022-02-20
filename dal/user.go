@@ -23,6 +23,12 @@ func SelectUserByUserName(username string) (entity.User, error) {
 	return user, util.WrapGormErr(re.Error, "user")
 }
 
+func SelectUserByGithubID(githubID int64) (entity.User, error) {
+	var user entity.User
+	re := db.Where(entity.User{GithubID: githubID}).First(&user)
+	return user, util.WrapGormErr(re.Error, "user")
+}
+
 func SelectUserByTodo(todoID int64) (entity.User, error) {
 	var todo entity.Todo
 	where := entity.Todo{Entity: entity.Entity{ID: todoID}}
@@ -42,5 +48,11 @@ func SaveUser(user *entity.User) error {
 func ExistUserByUserName(username string) (bool, error) {
 	var count int64
 	re := db.Model(&entity.User{}).Where(entity.User{Name: username}).Count(&count)
+	return count != 0, util.WrapGormErr(re.Error, "user")
+}
+
+func ExistUserByGithubID(githubID int64) (bool, error) {
+	var count int64
+	re := db.Model(&entity.User{}).Where(entity.User{GithubID: githubID}).Count(&count)
 	return count != 0, util.WrapGormErr(re.Error, "user")
 }

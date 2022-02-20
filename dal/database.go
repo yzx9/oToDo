@@ -52,5 +52,7 @@ func autoMigrate() error {
 		&entity.Tag{},
 
 		&entity.Sharing{},
+
+		&entity.ThirdPartyOAuthToken{},
 	)
 }
