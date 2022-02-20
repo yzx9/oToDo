@@ -43,7 +43,6 @@ func autoMigrate() error {
 		&entity.UserInvalidRefreshToken{},
 
 		&entity.Todo{},
-		&entity.TodoFile{},
 		&entity.TodoStep{},
 		&entity.TodoRepeatPlan{},
 

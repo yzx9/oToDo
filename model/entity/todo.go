@@ -22,7 +22,7 @@ type Todo struct {
 	TodoListID int64    `json:"todolistID"`
 	TodoList   TodoList `json:"-"`
 
-	Files []TodoFile `json:"files"`
+	Files []File `json:"files" gorm:"many2many:todo_files"`
 
 	Steps []TodoStep `json:"steps"`
 
