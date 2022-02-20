@@ -88,3 +88,39 @@ func parseRefreshToken(c *gin.Context) (int64, string, error) {
 
 	return claims.UserID, claims.RefreshTokenID, nil
 }
+
+/**
+ * OAuth
+ */
+
+func GetSessionOAuthGithub(c *gin.Context) {
+	uri, err := bll.CreateGithubOAuth()
+	if err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.OAuthRedirector{RedirectURI: uri})
+}
+
+func PostSessionOAuthGithub(c *gin.Context) {
+	code, err := common.GetRequiredParam(c, "code")
+	if err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
+	state, err := common.GetRequiredParam(c, "state")
+	if err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
+	tokens, err := bll.LoginByGithubOAuth(code, state)
+	if err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, tokens)
+}

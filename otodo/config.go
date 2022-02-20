@@ -7,6 +7,7 @@ type Config struct {
 	Database ConfigDatabase
 	Session  ConfigSession
 	Secret   ConfigSecret
+	Github   ConfigGithub
 }
 
 type ConfigServer struct {
@@ -33,4 +34,13 @@ type ConfigSecret struct {
 	TokenIssuer     string
 	TokenHmacSecret []byte
 	PasswordNonce   []byte
+}
+
+type ConfigGithub struct {
+	ClientID            string
+	ClientSecret        string
+	OAuthAuthorizeURI   string
+	OAuthRedirectURI    string
+	OAuthAccessTokenURI string
+	OAuthStateExpiresIn int
 }

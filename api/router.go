@@ -18,15 +18,18 @@ func (s *Server) setupRouter() {
 			c.String(http.StatusOK, "pong")
 		})
 
+		// Session
+		r.POST("/sessions", handler.PostSessionHandler)
+
+		r.GET("/sessions/oauth", handler.GetSessionOAuthGithub)
+		r.POST("/sessions/oauth", handler.PostSessionOAuthGithub)
+
+		r.POST("/sessions/current/tokens", handler.PostSessionTokenHandler)
+
 		// File
 		// r.MaxMultipartMemory = MaxFileSize // 限制 Gin 上传文件时最大内存 (默认 32 MiB)
 		r.POST("/files", handler.PostFileHandler)
 		r.GET("/files/:id", handler.GetFileHandler)
-
-		// Session
-		r.POST("/sessions", handler.PostSessionHandler)
-
-		r.POST("/sessions/current/tokens", handler.PostSessionTokenHandler)
 
 		// User
 		r.POST("/users", handler.PostUserHandler)

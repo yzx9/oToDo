@@ -43,4 +43,16 @@ func SetConfig(config *viper.Viper) {
 			PasswordNonce:   []byte(c.GetString("password_nonce")),
 		}
 	}
+
+	{
+		c := config.Sub("github")
+		otodo.Conf.Github = otodo.ConfigGithub{
+			ClientID:            c.GetString("client_id"),
+			ClientSecret:        c.GetString("client_secret"),
+			OAuthAuthorizeURI:   c.GetString("oauth_authorize_url"),
+			OAuthRedirectURI:    c.GetString("oauth_redirect_uri"),
+			OAuthAccessTokenURI: c.GetString("oauth_access_token_uri"),
+			OAuthStateExpiresIn: c.GetInt("oauth_state_exp"),
+		}
+	}
 }

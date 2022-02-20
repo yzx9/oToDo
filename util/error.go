@@ -11,6 +11,10 @@ func NewError(code otodo.ErrCode, format string, values ...interface{}) *otodo.E
 	return &otodo.Error{Code: code, Message: err.Error()}
 }
 
+func NewErrorWithBadRequest(format string, values ...interface{}) *otodo.Error {
+	return NewError(otodo.ErrBadRequest, format, values...)
+}
+
 func NewErrorWithForbidden(format string, values ...interface{}) *otodo.Error {
 	return NewError(otodo.ErrForbidden, format, values...)
 }

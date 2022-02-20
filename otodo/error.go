@@ -30,6 +30,7 @@ const (
 	ErrPreconditionRequired ErrCode = 20000 + iota
 	ErrPreconditionFailed
 	ErrRequestEntityTooLarge
+	ErrBadRequest
 )
 
 // Resource

@@ -12,6 +12,7 @@ import (
 	"github.com/yzx9/otodo/model/dto"
 	"github.com/yzx9/otodo/model/entity"
 	"github.com/yzx9/otodo/otodo"
+	"github.com/yzx9/otodo/util"
 )
 
 const tokenType = `Bearer`
@@ -22,17 +23,28 @@ var authorizationRegex = regexp.MustCompile(authorizationRegexString)
 func Login(userName, password string) (dto.SessionDTO, error) {
 	user, err := dal.SelectUserByUserName(userName)
 	if err != nil {
-		return dto.SessionDTO{}, fmt.Errorf("user not found: %v", userName)
+		return dto.SessionDTO{}, util.NewErrorWithBadRequest("invalid credential")
 	}
 
 	if cryptoPwd := GetCryptoPassword(password); !bytes.Equal(user.Password, cryptoPwd) {
-		return dto.SessionDTO{}, fmt.Errorf("invalid credential")
+		return dto.SessionDTO{}, util.NewErrorWithBadRequest("invalid credential")
 	}
 
 	refreshToken, refreshTokenID := newRefreshToken(user)
 	re := newAccessTokenWithResult(user, refreshTokenID)
 	re.RefreshToken = refreshToken
 	return re, nil
+}
+
+func LoginByGithubOAuth(code, state string) (dto.SessionDTO, error) {
+	token, err := FetchGithubOAuthToken(code, state)
+	if err != nil {
+		return dto.SessionDTO{}, fmt.Errorf("fails to login: %w", err)
+	}
+
+	println(token)
+
+	return dto.SessionDTO{}, util.NewError(otodo.ErrNotImplemented, "TODO")
 }
 
 func Logout(userID int64, refreshTokenID string) error {
