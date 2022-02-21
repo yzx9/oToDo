@@ -15,7 +15,6 @@ func UpdateThirdPartyOAuthToken(new *entity.ThirdPartyOAuthToken) error {
 		Where(&entity.ThirdPartyOAuthToken{
 			UserID: new.UserID,
 			Type:   new.Type,
-			Active: true,
 		}).
 		Save(new)
 
@@ -25,12 +24,14 @@ func UpdateThirdPartyOAuthToken(new *entity.ThirdPartyOAuthToken) error {
 func ExistActiveThirdPartyOAuthToken(userID int64, tokenType entity.ThirdPartyTokenType) (bool, error) {
 	var count int64
 	re := db.
-		Where(&entity.ThirdPartyOAuthToken{
+		Model(entity.ThirdPartyOAuthToken{}).
+		Where(entity.ThirdPartyOAuthToken{
 			UserID: userID,
 			Type:   int8(tokenType),
 			Active: true,
 		}).
 		Count(&count)
+
 	if re.Error != nil {
 		return false, util.WrapGormErr(re.Error, "third party token")
 	}
