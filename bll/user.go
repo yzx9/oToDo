@@ -109,7 +109,7 @@ func getOrRegisterUserByGithub(profile dto.GithubUserPublicProfile) (entity.User
 		return entity.User{}, fmt.Errorf("fails to create user: %w", err)
 	}
 
-	return user, util.NewError(otodo.ErrNotImplemented, "TODO")
+	return user, nil
 }
 
 /**

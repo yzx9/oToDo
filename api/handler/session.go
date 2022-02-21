@@ -8,6 +8,8 @@ import (
 	"github.com/yzx9/otodo/api/common"
 	"github.com/yzx9/otodo/bll"
 	"github.com/yzx9/otodo/model/dto"
+	"github.com/yzx9/otodo/otodo"
+	"github.com/yzx9/otodo/util"
 )
 
 // Ping Test
@@ -103,19 +105,13 @@ func GetSessionOAuthGithub(c *gin.Context) {
 }
 
 func PostSessionOAuthGithub(c *gin.Context) {
-	code, err := common.GetRequiredParam(c, "code")
-	if err != nil {
-		common.AbortWithError(c, err)
+	var payload dto.OAuthPayload
+	if err := c.ShouldBind(&payload); err != nil {
+		common.AbortWithError(c, util.NewError(otodo.ErrPreconditionRequired, "code, state required"))
 		return
 	}
 
-	state, err := common.GetRequiredParam(c, "state")
-	if err != nil {
-		common.AbortWithError(c, err)
-		return
-	}
-
-	tokens, err := bll.LoginByGithubOAuth(code, state)
+	tokens, err := bll.LoginByGithubOAuth(payload.Code, payload.State)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return

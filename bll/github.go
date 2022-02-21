@@ -17,7 +17,7 @@ import (
 const githubOAuthStateLen = 10
 const githubOAuthAuthorizeURI = "https://github.com/login/oauth/authorize"
 const githubOAuthAccessTokenURI = "https://github.com/login/oauth/access_token"
-const githubUserURI = "https://github.com/user"
+const githubUserURI = "https://api.github.com/user"
 
 // TODO[perf]: redis
 var githubOAuthStates = make(map[string]time.Time)
@@ -44,7 +44,7 @@ func FetchGithubOAuthToken(code, state string) (entity.ThirdPartyOAuthToken, err
 
 	// Check state
 	createAt, ok := githubOAuthStates[state]
-	if !ok || createAt.Add(time.Duration(c.OAuthStateExpiresIn*int(time.Second))).After(time.Now()) {
+	if !ok || createAt.Add(time.Duration(c.OAuthStateExpiresIn*int(time.Second))).Before(time.Now()) {
 		// TODO[feat]: log
 		return write(util.NewErrorWithForbidden("invalid state"))
 	}
@@ -123,12 +123,12 @@ func FetchGithubUserPublicProfile(token string) (dto.GithubUserPublicProfile, er
 	defer res.Body.Close()
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		return write(util.NewErrorWithUnknown("fails to fetch github access token"))
+		return write(util.NewErrorWithUnknown("fails to fetch github user public profile"))
 	}
 
 	payload := dto.GithubUserPublicProfile{}
 	if err := json.Unmarshal(body, &payload); err != nil {
-		return write(util.NewErrorWithUnknown("fails to parse github access token"))
+		return write(util.NewErrorWithUnknown("fails to parse github user public profile"))
 	}
 
 	return payload, nil

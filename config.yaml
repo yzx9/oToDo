@@ -9,5 +9,5 @@ session:
 
 github:
   client_id: 67d44b6101f98c012bd7
-  oauth_redirect_uri: http://localhost:3000
+  oauth_redirect_uri: http://localhost:3000/login
   oauth_state_exp: 600 # 10min
