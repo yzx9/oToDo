@@ -12,8 +12,8 @@ platform:
 steps:
 - name: Run Commands
   commands:
-    - export ALL_PROXY=http://127.0.0.1:10809
+    - su ss
     - cd /home/ss/src/oToDo
-    - sudo git pull
-    - sudo killall otodo
-    - sudo nohup go run ./
+    - git pull
+    - killall otodo
+    - nohup go run ./
