@@ -1,0 +1,19 @@
+kind: pipeline
+type: exec
+name: default
+
+clone:
+  disable: true
+
+platform:
+  os: linux
+  arсh: amd64
+
+steps:
+- name: Run Commands
+  commands:
+    - export ALL_PROXY=http://127.0.0.1:10809
+    - cd /home/ss/src/oToDo
+    - git pull
+    - killall otodo
+    - nohup go run ./
