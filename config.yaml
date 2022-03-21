@@ -1,6 +1,8 @@
 server:
   id: dev
   file_path_template: tmp/files/:date/:id:ext
+  port: 8080
+  host: localhost
 
 session:
   access_token_exp: 900 # 15 min
