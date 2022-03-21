@@ -12,7 +12,7 @@ platform:
 steps:
 - name: Run Commands
   commands:
-    - cd /home/ss/src
+    - cd /home/ss/src/oToDo
     - git pull
     - killall otodo
     - nohup go run ./
