@@ -19,7 +19,7 @@ type Server struct {
 	addr   string
 }
 
-func CreateServer() *Server {
+func NewServer() *Server {
 	r := gin.New()
 	r.Use(
 		gin.Logger(),
@@ -78,15 +78,6 @@ func (s *Server) LoadAndWatchConfig(dir string) *Server {
 	return s
 }
 
-func (s *Server) Listen(addr string) *Server {
-	if s.Error != nil {
-		return s
-	}
-
-	s.addr = addr
-	return s
-}
-
 func (s *Server) Run() *Server {
 	if s.Error != nil {
 		return s
@@ -101,6 +92,14 @@ func (s *Server) Run() *Server {
 		s.Error = err
 		return s
 	}
+
+	port := otodo.Conf.Server.Port
+	if port == 0 {
+		port = 8080
+	}
+	host := otodo.Conf.Server.Host
+
+	s.addr = fmt.Sprintf("%v:%v", host, port)
 
 	s.engine.Run(s.addr)
 	return s
