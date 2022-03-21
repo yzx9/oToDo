@@ -13,6 +13,6 @@ steps:
 - name: Run Commands
   commands:
     - cd /home/ss/src/oToDo
-    - git pull
+    - git pull origin main
     - killall otodo
     - nohup go run ./
