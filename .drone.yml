@@ -10,7 +10,7 @@ platform:
   arсh: amd64
 
 steps:
-- name: Run Commands
+- name: Reload oToDo
   commands:
     - cd /home/ss/src/oToDo
     - git pull origin main
