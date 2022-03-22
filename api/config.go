@@ -11,6 +11,8 @@ func SetConfig(config *viper.Viper) {
 		otodo.Conf.Server = otodo.ConfigServer{
 			ID:               c.GetString("id"),
 			FilePathTemplate: c.GetString("file_path_template"),
+			Port:             c.GetInt("port"),
+			Host:             c.GetString("host"),
 		}
 	}
 

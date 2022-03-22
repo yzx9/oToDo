@@ -13,6 +13,8 @@ type Config struct {
 type ConfigServer struct {
 	ID               string
 	FilePathTemplate string // Support :id, :ext, :name, :path, :date
+	Port             int
+	Host             string
 }
 
 type ConfigDatabase struct {
