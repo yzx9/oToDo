@@ -24,6 +24,7 @@ func NewServer() *Server {
 	r.Use(
 		gin.Logger(),
 		gin.Recovery(),
+		middleware.CORSMiddleware(),
 		middleware.ErrorMiddleware())
 
 	s := Server{
