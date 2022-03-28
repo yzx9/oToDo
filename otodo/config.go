@@ -1,6 +1,6 @@
 package otodo
 
-var Conf = Config{}
+var Conf = new(Config)
 
 type Config struct {
 	Server   ConfigServer
@@ -8,6 +8,7 @@ type Config struct {
 	Session  ConfigSession
 	Secret   ConfigSecret
 	Github   ConfigGithub
+	Sms      ConfigSms
 }
 
 type ConfigServer struct {
@@ -41,4 +42,11 @@ type ConfigGithub struct {
 	ClientSecret        string
 	OAuthRedirectURI    string
 	OAuthStateExpiresIn int
+}
+type ConfigSms struct {
+	RegionID     string
+	AppKey       string
+	Appsecret    string
+	SignName     string
+	TemplateCode string
 }

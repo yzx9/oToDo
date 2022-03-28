@@ -11,3 +11,11 @@ github:
   client_id: 67d44b6101f98c012bd7
   oauth_redirect_uri: http://localhost:3000/login
   oauth_state_exp: 600 # 10min
+
+sms:
+  sign_name: 阿里云短信测试
+  template_code: SMS_154950909
+  app_key: LTAI5tR3J6TGs9ueDGNMejBo
+  app_secret: BFPxNvr6DZBgYvqiWEzVPSBx5U95fz
+  region_id: cn-hangzhou
+  

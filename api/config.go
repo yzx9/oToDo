@@ -53,4 +53,14 @@ func SetConfig(config *viper.Viper) {
 			OAuthStateExpiresIn: c.GetInt("oauth_state_exp"),
 		}
 	}
+	{
+		c := config.Sub("sms")
+		otodo.Conf.Sms = otodo.ConfigSms{
+			RegionID:     c.GetString("region_id"),
+			AppKey:       c.GetString("app_key"),
+			Appsecret:    c.GetString("app_serect"),
+			SignName:     c.GetString("sign_name"),
+			TemplateCode: c.GetString("template_code"),
+		}
+	}
 }
