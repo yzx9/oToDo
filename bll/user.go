@@ -42,7 +42,12 @@ func CreateUser(payload dto.CreateUserDTO) (entity.User, error) {
 }
 
 func GetUser(userID int64) (entity.User, error) {
-	return dal.SelectUser(userID)
+	user, err := dal.SelectUser(userID)
+	if err != nil {
+		return entity.User{}, fmt.Errorf("fails to get user: %w", err)
+	}
+
+	return user, nil
 }
 
 /**
