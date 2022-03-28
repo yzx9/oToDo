@@ -7,9 +7,8 @@ import (
 )
 
 func main() {
-	s := api.CreateServer().
+	s := api.NewServer().
 		LoadAndWatchConfig(".").
-		Listen("localhost:8080").
 		Run()
 
 	if s.Error != nil {

@@ -9,8 +9,11 @@ func SetConfig(config *viper.Viper) {
 	{
 		c := config.Sub("server")
 		otodo.Conf.Server = otodo.ConfigServer{
-			ID:               c.GetString("id"),
-			FilePathTemplate: c.GetString("file_path_template"),
+			ID:                       c.GetString("id"),
+			Port:                     c.GetInt("port"),
+			Host:                     c.GetString("host"),
+			AccessControlAllowOrigin: c.GetString("access_control_allow_origin"),
+			FilePathTemplate:         c.GetString("file_path_template"),
 		}
 	}
 
