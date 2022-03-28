@@ -8,6 +8,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/fsnotify/fsnotify"
+	"github.com/spf13/viper"
+
 	"github.com/yzx9/otodo/dal"
 	"github.com/yzx9/otodo/model/entity"
 	"github.com/yzx9/otodo/otodo"
@@ -136,4 +139,23 @@ func applyFilePathTemplate(file *entity.File) string {
 func getFilePath(file *entity.File) string {
 	// TODO[feat]: If exist multi servers, how to get file? maybe we need redirect
 	return file.FilePath
+}
+
+func ParseConfigFile(path string) (config otodo.ConfigSms, err error) {
+	viper.SetConfigFile(path)
+	err = viper.ReadInConfig()
+	if err != nil {
+		panic(fmt.Errorf("Fatal error config file: %s \n", err))
+	}
+	if err := viper.Unmarshal(config); err != nil {
+		panic(fmt.Errorf("unmarshall conf failed:%s \n", err))
+	}
+	viper.WatchConfig()
+	viper.OnConfigChange(func(in fsnotify.Event) {
+		fmt.Println("配置文件被人修改了。。")
+		if err := viper.Unmarshal(config); err != nil {
+			panic(fmt.Errorf("Unmarshal config file failed: %s", err))
+		}
+	})
+	return config, err
 }

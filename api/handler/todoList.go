@@ -177,6 +177,30 @@ func GetTodoListSharingsHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, vec)
 }
 
+// Close todo list sharing
+func DeleteTodoListISSharingsHandler(c *gin.Context) {
+	// TODO: Implement this
+	operatorID := common.MustGetAccessUserID(c)
+	todoListID, err := common.GetRequiredParamID(c, "id")
+	if err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
+	userID, err := common.GetRequiredParamID(c, "user-id")
+	if err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
+	if err := bll.DeleteTodoListSharedUser(operatorID, userID, todoListID); err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+
+	c.Status(http.StatusOK)
+}
+
 // Join todo list by share token
 func PostTodoListSharingHandler(c *gin.Context) {
 	userID := common.MustGetAccessUserID(c)

@@ -23,6 +23,9 @@ func CreateTodoListSharing(userID, todoListID int64) (entity.Sharing, error) {
 		return entity.Sharing{}, fmt.Errorf("unable to share basic todo list: %v", todoListID)
 	}
 
+	todoList.IsSharing = true
+	dal.SaveTodoList(&todoList)
+
 	// Only allow one sharing active
 	if _, err = dal.DeleteSharings(userID, entity.SharingTypeTodoList); err != nil {
 		return entity.Sharing{}, fmt.Errorf("fails to delete old sharing tokens: %w", err)
@@ -73,6 +76,15 @@ func DeleteTodoListSharing(userID int64, token string) error {
 	}
 
 	sharing.Active = false
+
+	todoList, erro := OwnTodoList(userID, sharing.RelatedID)
+
+	if erro != nil {
+		return erro
+	}
+	todoList.IsSharing = false
+	dal.SaveTodoList(&todoList)
+
 	if err := dal.SaveSharing(&sharing); err != nil {
 		return fmt.Errorf("fails to delete sharing: %w", err)
 	}
@@ -88,6 +100,13 @@ func ValidSharing(token string) (entity.Sharing, error) {
 
 	if !sharing.Active {
 		return entity.Sharing{}, util.NewErrorWithForbidden("sharing token has been inactive: %v", token)
+	}
+	todoList, erro := OwnTodoList(sharing.UserID, sharing.RelatedID)
+	if erro != nil {
+		return entity.Sharing{}, erro
+	}
+	if !todoList.IsSharing {
+		return entity.Sharing{}, util.NewErrorWithForbidden("sharing token have been closed: %v", token)
 	}
 
 	return sharing, nil

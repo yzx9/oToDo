@@ -12,7 +12,7 @@ import (
 
 var db *gorm.DB
 
-func initDatabase() error {
+func InitDatabase() error {
 	var err error
 	write := func(err error) error {
 		return util.NewError(otodo.ErrDatabaseConnectFailed, "fails to connect database: %w", err)
@@ -54,5 +54,7 @@ func autoMigrate() error {
 		&entity.Sharing{},
 
 		&entity.ThirdPartyOAuthToken{},
+
+		&entity.SmsCode{},
 	)
 }
