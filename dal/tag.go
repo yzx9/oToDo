@@ -7,27 +7,41 @@ import (
 )
 
 func InsertTag(tag *entity.Tag) error {
-	re := db.Create(tag)
-	return util.WrapGormErr(re.Error, "tag")
+	err := db.Create(tag).Error
+	return util.WrapGormErr(err, "tag")
 }
 
 func SelectTag(userID int64, tagName string) (entity.Tag, error) {
 	var tag entity.Tag
-	re := db.Scopes(tagScope(userID, tagName)).First(&tag)
-	return tag, util.WrapGormErr(re.Error, "tag")
+	err := db.
+		Scopes(tagScope(userID, tagName)).
+		First(&tag).
+		Error
+
+	return tag, util.WrapGormErr(err, "tag")
 }
 
 func SelectTags(userID int64) ([]entity.Tag, error) {
 	var tags []entity.Tag
-	re := db.Where(entity.Tag{UserID: userID}).Find(&tags)
-	return tags, util.WrapGormErr(re.Error, "tag")
+	err := db.
+		Where(entity.Tag{
+			UserID: userID,
+		}).
+		Find(&tags).
+		Error
+
+	return tags, util.WrapGormErr(err, "tag")
 }
 
 func InsertTagTodo(userID, todoID int64, tagName string) error {
 	err := db.
 		Scopes(tagScope(userID, tagName)).
 		Association("Todos").
-		Append(&entity.Todo{Entity: entity.Entity{ID: todoID}})
+		Append(&entity.Todo{
+			Entity: entity.Entity{
+				ID: todoID,
+			},
+		})
 
 	return util.WrapGormErr(err, "tag todos")
 }
@@ -36,16 +50,24 @@ func DeleteTagTodo(userID, todoID int64, tagName string) error {
 	err := db.
 		Scopes(tagScope(userID, tagName)).
 		Association("Todos").
-		Delete(&entity.Todo{Entity: entity.Entity{ID: todoID}})
+		Delete(&entity.Todo{
+			Entity: entity.Entity{
+				ID: todoID,
+			},
+		})
 
 	return util.WrapGormErr(err, "tag todos")
 }
 
 func ExistTag(userID int64, tagName string) (bool, error) {
 	var count int64
-	re := db.Scopes(tagScope(userID, tagName)).Count(&count)
-	if re.Error != nil {
-		return false, util.WrapGormErr(re.Error, "tag")
+	err := db.
+		Scopes(tagScope(userID, tagName)).
+		Count(&count).
+		Error
+
+	if err != nil {
+		return false, util.WrapGormErr(err, "tag")
 	}
 
 	return count != 0, nil

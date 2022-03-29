@@ -6,18 +6,25 @@ import (
 )
 
 func InsertFile(file *entity.File) error {
-	re := db.Create(file)
-	return util.WrapGormErr(re.Error, "file")
+	err := db.Create(file).Error
+	return util.WrapGormErr(err, "file")
 }
 
 func SelectFile(id int64) (*entity.File, error) {
 	var file entity.File
-	where := entity.File{Entity: entity.Entity{ID: id}}
-	re := db.Where(&where).First(&file)
-	return &file, util.WrapGormErr(re.Error, "file")
+	err := db.
+		Where(&entity.File{
+			Entity: entity.Entity{
+				ID: id,
+			},
+		}).
+		First(&file).
+		Error
+
+	return &file, util.WrapGormErr(err, "file")
 }
 
 func SaveFile(file *entity.File) error {
-	re := db.Save(file)
-	return util.WrapGormErr(re.Error, "file")
+	err := db.Save(file).Error
+	return util.WrapGormErr(err, "file")
 }

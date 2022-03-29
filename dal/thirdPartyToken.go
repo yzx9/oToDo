@@ -6,34 +6,36 @@ import (
 )
 
 func InsertThirdPartyOAuthToken(entity *entity.ThirdPartyOAuthToken) error {
-	re := db.Create(entity)
-	return util.WrapGormErr(re.Error, "third party token")
+	err := db.Create(entity).Error
+	return util.WrapGormErr(err, "third party token")
 }
 
 func UpdateThirdPartyOAuthToken(new *entity.ThirdPartyOAuthToken) error {
-	re := db.
+	err := db.
 		Where(&entity.ThirdPartyOAuthToken{
 			UserID: new.UserID,
 			Type:   new.Type,
 		}).
-		Save(new)
+		Save(new).
+		Error
 
-	return util.WrapGormErr(re.Error, "third party token")
+	return util.WrapGormErr(err, "third party token")
 }
 
 func ExistActiveThirdPartyOAuthToken(userID int64, tokenType entity.ThirdPartyTokenType) (bool, error) {
 	var count int64
-	re := db.
+	err := db.
 		Model(entity.ThirdPartyOAuthToken{}).
 		Where(entity.ThirdPartyOAuthToken{
 			UserID: userID,
 			Type:   int8(tokenType),
 			Active: true,
 		}).
-		Count(&count)
+		Count(&count).
+		Error
 
-	if re.Error != nil {
-		return false, util.WrapGormErr(re.Error, "third party token")
+	if err != nil {
+		return false, util.WrapGormErr(err, "third party token")
 	}
 
 	return count != 0, nil

@@ -6,12 +6,8 @@ import (
 )
 
 func InsertUserInvalidRefreshToken(entity *entity.UserInvalidRefreshToken) error {
-	re := db.Create(entity)
-	if re.Error != nil {
-		return util.WrapGormErr(re.Error, "user invalid refresh token")
-	}
-
-	return nil
+	err := db.Create(entity).Error
+	return util.WrapGormErr(err, "user invalid refresh token")
 }
 
 func ExistUserInvalidRefreshToken(userID int64, tokenID string) (bool, error) {
@@ -20,7 +16,8 @@ func ExistUserInvalidRefreshToken(userID int64, tokenID string) (bool, error) {
 		Model(entity.UserInvalidRefreshToken{}).
 		Where(&entity.UserInvalidRefreshToken{
 			UserID:  userID,
-			TokenID: tokenID}).
+			TokenID: tokenID,
+		}).
 		Count(&count).
 		Error
 

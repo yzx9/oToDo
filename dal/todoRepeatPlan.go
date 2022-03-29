@@ -6,27 +6,37 @@ import (
 )
 
 func InsertTodoRepeatPlan(plan *entity.TodoRepeatPlan) error {
-	re := db.Create(plan)
-	return util.WrapGormErr(re.Error, "todo repeat plan")
+	err := db.Create(plan).Error
+	return util.WrapGormErr(err, "todo repeat plan")
 }
 
 func SelectTodoRepeatPlan(id int64) (entity.TodoRepeatPlan, error) {
 	var plan entity.TodoRepeatPlan
-	where := entity.TodoRepeatPlan{Entity: entity.Entity{ID: id}}
-	re := db.Where(&where).First(&plan)
-	return plan, util.WrapGormErr(re.Error, "todo repeat plan")
+	err := db.
+		Where(&entity.TodoRepeatPlan{
+			Entity: entity.Entity{
+				ID: id,
+			},
+		}).
+		First(&plan).
+		Error
+
+	return plan, util.WrapGormErr(err, "todo repeat plan")
 }
 
 func SaveTodoRepeatPlan(todoRepeatPlan *entity.TodoRepeatPlan) error {
-	re := db.Save(&todoRepeatPlan)
-	return util.WrapGormErr(re.Error, "todo repeat plan")
+	err := db.Save(&todoRepeatPlan).Error
+	return util.WrapGormErr(err, "todo repeat plan")
 }
 
 func DeleteTodoRepeatPlan(id int64) error {
-	re := db.Delete(&entity.TodoRepeatPlan{
-		Entity: entity.Entity{
-			ID: id,
-		},
-	})
-	return util.WrapGormErr(re.Error, "todo repeat plan")
+	err := db.
+		Delete(&entity.TodoRepeatPlan{
+			Entity: entity.Entity{
+				ID: id,
+			},
+		}).
+		Error
+
+	return util.WrapGormErr(err, "todo repeat plan")
 }
