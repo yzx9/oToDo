@@ -16,12 +16,16 @@ func InsertUserInvalidRefreshToken(entity *entity.UserInvalidRefreshToken) error
 
 func ExistUserInvalidRefreshToken(userID int64, tokenID string) (bool, error) {
 	var count int64
-	re := db.Where(&entity.UserInvalidRefreshToken{
-		UserID:  userID,
-		TokenID: tokenID,
-	}).Count(&count)
-	if re.Error != nil {
-		return false, util.WrapGormErr(re.Error, "user invalid refresh token")
+	err := db.
+		Model(entity.UserInvalidRefreshToken{}).
+		Where(&entity.UserInvalidRefreshToken{
+			UserID:  userID,
+			TokenID: tokenID}).
+		Count(&count).
+		Error
+
+	if err != nil {
+		return false, util.WrapGormErr(err, "user invalid refresh token")
 	}
 
 	return count != 0, nil

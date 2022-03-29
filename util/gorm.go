@@ -1,6 +1,8 @@
 package util
 
 import (
+	"errors"
+
 	"github.com/yzx9/otodo/otodo"
 	"gorm.io/gorm"
 )
@@ -10,11 +12,11 @@ func WrapGormErr(err error, resource string) error {
 		return nil
 	}
 
-	if err != gorm.ErrRecordNotFound {
+	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return NewErrorWithNotFound("%v not found", resource)
 	}
 
-	if err != gorm.ErrNotImplemented {
+	if errors.Is(err, gorm.ErrNotImplemented) {
 		return NewError(otodo.ErrNotImplemented, "handle %v not implemented", resource)
 	}
 
