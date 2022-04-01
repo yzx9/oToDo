@@ -168,7 +168,7 @@ func readLines(filepath string) ([]string, error) {
 }
 
 const injectEntity = `
-  id: number
+  id: bigint
   createdAt: string
   updatedAt: string`
 
@@ -243,7 +243,7 @@ func transformType(goType string) (string, error) {
 		return "number", nil
 
 	case "int64":
-		return "number", nil
+		return "bigint", nil
 
 	case "float32":
 		return "number", nil
