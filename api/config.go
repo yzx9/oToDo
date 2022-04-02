@@ -32,9 +32,11 @@ func SetConfig(config *viper.Viper) {
 	{
 		c := config.Sub("session")
 		otodo.Conf.Session = otodo.ConfigSession{
-			AccessTokenExpiresIn:        c.GetInt("access_token_exp"),
-			RefreshTokenExpiresIn:       c.GetInt("refresh_token_exp"),
-			AccessTokenRefreshThreshold: c.GetInt("access_token_refresh_threshold"),
+			AccessTokenExpiresIn:         c.GetInt("access_token_exp"),
+			RefreshTokenExpiresInDefault: c.GetInt("refresh_token_exp_default"),
+			RefreshTokenExpiresInMax:     c.GetInt("refresh_token_exp_max"),
+			RefreshTokenExpiresInOAuth:   c.GetInt("refresh_token_exp_oauth"),
+			AccessTokenRefreshThreshold:  c.GetInt("access_token_refresh_threshold"),
 		}
 	}
 

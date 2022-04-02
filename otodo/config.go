@@ -28,9 +28,11 @@ type ConfigDatabase struct {
 }
 
 type ConfigSession struct {
-	AccessTokenExpiresIn        int
-	RefreshTokenExpiresIn       int
-	AccessTokenRefreshThreshold int
+	AccessTokenExpiresIn         int // second
+	RefreshTokenExpiresInDefault int // second
+	RefreshTokenExpiresInMax     int // second
+	RefreshTokenExpiresInOAuth   int // second
+	AccessTokenRefreshThreshold  int // second
 }
 
 type ConfigSecret struct {

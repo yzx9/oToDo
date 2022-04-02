@@ -25,7 +25,7 @@ func PostSessionHandler(c *gin.Context) {
 		return
 	}
 
-	tokens, err := bll.Login(payload.UserName, payload.Password)
+	tokens, err := bll.Login(payload)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return

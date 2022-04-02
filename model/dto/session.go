@@ -18,6 +18,7 @@ type SessionTokenClaims struct {
 }
 
 type LoginDTO struct {
-	UserName string `json:"userName"`
-	Password string `json:"password"`
+	UserName              string `json:"userName"`
+	Password              string `json:"password"`
+	RefreshTokenExpiresIn int    `json:"refreshTokenExp"`
 }
