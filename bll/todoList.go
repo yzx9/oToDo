@@ -10,6 +10,7 @@ import (
 
 func CreateTodoList(userID int64, todoList *entity.TodoList) error {
 	todoList.IsBasic = false
+	todoList.IsSharing = false
 	todoList.UserID = userID
 	todoList.TodoListFolderID = 0
 	if err := dal.InsertTodoList(todoList); err != nil {
