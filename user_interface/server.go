@@ -1,4 +1,4 @@
-package api
+package user_interface
 
 import (
 	"fmt"
@@ -6,9 +6,9 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
-	"github.com/yzx9/otodo/api/middleware"
 	"github.com/yzx9/otodo/bll"
 	"github.com/yzx9/otodo/otodo"
+	"github.com/yzx9/otodo/user_interface/middleware"
 )
 
 type Server struct {

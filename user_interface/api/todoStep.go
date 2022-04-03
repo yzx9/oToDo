@@ -1,14 +1,14 @@
-package handler
+package api
 
 import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yzx9/otodo/api/common"
 	"github.com/yzx9/otodo/bll"
 	"github.com/yzx9/otodo/model/dto"
 	"github.com/yzx9/otodo/model/entity"
 	"github.com/yzx9/otodo/otodo"
+	"github.com/yzx9/otodo/user_interface/common"
 	"github.com/yzx9/otodo/util"
 )
 

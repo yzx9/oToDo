@@ -1,4 +1,4 @@
-package api
+package user_interface
 
 import (
 	"github.com/spf13/viper"

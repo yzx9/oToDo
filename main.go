@@ -3,11 +3,11 @@ package main
 import (
 	"log"
 
-	"github.com/yzx9/otodo/api"
+	ui "github.com/yzx9/otodo/user_interface"
 )
 
 func main() {
-	s := api.NewServer().
+	s := ui.NewServer().
 		LoadAndWatchConfig(".").
 		Run()
 

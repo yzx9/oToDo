@@ -2,9 +2,9 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/yzx9/otodo/api/common"
 	"github.com/yzx9/otodo/bll"
 	"github.com/yzx9/otodo/otodo"
+	"github.com/yzx9/otodo/user_interface/common"
 	"github.com/yzx9/otodo/util"
 )
 

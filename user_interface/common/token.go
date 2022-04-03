@@ -12,10 +12,6 @@ import (
 const AuthorizationHeaderKey = "Authorization"
 const contextAccessTokenKey = "access_token"
 
-func setAccessToken(c *gin.Context, token *jwt.Token) {
-	c.Set(contextAccessTokenKey, token)
-}
-
 func GetAccessToken(c *gin.Context) (*jwt.Token, error) {
 	authorization := c.Request.Header.Get(AuthorizationHeaderKey)
 	token, err := bll.ParseAccessToken(authorization)
@@ -23,7 +19,7 @@ func GetAccessToken(c *gin.Context) (*jwt.Token, error) {
 		return nil, util.NewError(otodo.ErrUnauthorized, "invalid token: %w", err)
 	}
 
-	setAccessToken(c, token)
+	c.Set(contextAccessTokenKey, token)
 	return token, nil
 }
 
