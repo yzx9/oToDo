@@ -1,4 +1,6 @@
-package otodo
+package errors
+
+// TODO: remove
 
 type ErrCode int
 

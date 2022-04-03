@@ -5,11 +5,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/bll"
+	"github.com/yzx9/otodo/infrastructure/errors"
+	"github.com/yzx9/otodo/infrastructure/util"
 	"github.com/yzx9/otodo/model/dto"
 	"github.com/yzx9/otodo/model/entity"
-	"github.com/yzx9/otodo/otodo"
 	"github.com/yzx9/otodo/user_interface/common"
-	"github.com/yzx9/otodo/util"
 )
 
 // Create todo step
@@ -22,7 +22,7 @@ func PostTodoStepHandler(c *gin.Context) {
 
 	payload := dto.TodoStepDTO{}
 	if c.ShouldBind(&payload) != nil {
-		common.AbortWithError(c, util.NewError(otodo.ErrPreconditionRequired, "name required"))
+		common.AbortWithError(c, util.NewError(errors.ErrPreconditionRequired, "name required"))
 		return
 	}
 

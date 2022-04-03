@@ -4,8 +4,8 @@ import (
 	"encoding/base64"
 	"time"
 
+	"github.com/yzx9/otodo/infrastructure/util"
 	"github.com/yzx9/otodo/model/dto"
-	"github.com/yzx9/otodo/util"
 )
 
 // Configurable

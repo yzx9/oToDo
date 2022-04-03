@@ -4,9 +4,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 	"github.com/yzx9/otodo/bll"
+	"github.com/yzx9/otodo/infrastructure/errors"
+	"github.com/yzx9/otodo/infrastructure/util"
 	"github.com/yzx9/otodo/model/dto"
-	"github.com/yzx9/otodo/otodo"
-	"github.com/yzx9/otodo/util"
 )
 
 const AuthorizationHeaderKey = "Authorization"
@@ -16,7 +16,7 @@ func GetAccessToken(c *gin.Context) (*jwt.Token, error) {
 	authorization := c.Request.Header.Get(AuthorizationHeaderKey)
 	token, err := bll.ParseAccessToken(authorization)
 	if err != nil {
-		return nil, util.NewError(otodo.ErrUnauthorized, "invalid token: %w", err)
+		return nil, util.NewError(errors.ErrUnauthorized, "invalid token: %w", err)
 	}
 
 	c.Set(contextAccessTokenKey, token)
@@ -31,7 +31,7 @@ func GetAccessTokenClaims(c *gin.Context) (*dto.SessionTokenClaims, error) {
 
 	claims, ok := token.Claims.(*dto.SessionTokenClaims)
 	if !ok {
-		return nil, util.NewError(otodo.ErrUnauthorized, "invalid token")
+		return nil, util.NewError(errors.ErrUnauthorized, "invalid token")
 	}
 
 	return claims, nil

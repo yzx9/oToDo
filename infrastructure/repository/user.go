@@ -1,8 +1,8 @@
 package repository
 
 import (
+	"github.com/yzx9/otodo/infrastructure/util"
 	"github.com/yzx9/otodo/model/entity"
-	"github.com/yzx9/otodo/util"
 )
 
 func InsertUser(user *entity.User) error {

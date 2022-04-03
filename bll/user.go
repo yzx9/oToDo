@@ -5,11 +5,11 @@ import (
 	"fmt"
 
 	"github.com/yzx9/otodo/infrastructure/config"
+	"github.com/yzx9/otodo/infrastructure/errors"
 	"github.com/yzx9/otodo/infrastructure/repository"
+	"github.com/yzx9/otodo/infrastructure/util"
 	"github.com/yzx9/otodo/model/dto"
 	"github.com/yzx9/otodo/model/entity"
-	"github.com/yzx9/otodo/otodo"
-	"github.com/yzx9/otodo/util"
 )
 
 func CreateUser(payload dto.CreateUserDTO) (entity.User, error) {
@@ -27,7 +27,7 @@ func CreateUser(payload dto.CreateUserDTO) (entity.User, error) {
 	}
 
 	if exist {
-		return entity.User{}, util.NewError(otodo.ErrDuplicateID, "user name has been used: %v", payload.UserName)
+		return entity.User{}, util.NewError(errors.ErrDuplicateID, "user name has been used: %v", payload.UserName)
 	}
 
 	user := entity.User{

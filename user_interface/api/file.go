@@ -5,17 +5,17 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/bll"
+	"github.com/yzx9/otodo/infrastructure/errors"
+	"github.com/yzx9/otodo/infrastructure/util"
 	"github.com/yzx9/otodo/model/dto"
-	"github.com/yzx9/otodo/otodo"
 	"github.com/yzx9/otodo/user_interface/common"
-	"github.com/yzx9/otodo/util"
 )
 
 // Upload public file, for user avatar
 func PostFileHandler(c *gin.Context) {
 	file, err := c.FormFile("file")
 	if err != nil {
-		common.AbortWithError(c, util.NewError(otodo.ErrPreconditionRequired, "file required"))
+		common.AbortWithError(c, util.NewError(errors.ErrPreconditionRequired, "file required"))
 		return
 	}
 
@@ -39,7 +39,7 @@ func PostTodoFileHandler(c *gin.Context) {
 
 	file, err := c.FormFile("file")
 	if err != nil {
-		common.AbortWithError(c, util.NewError(otodo.ErrPreconditionRequired, "file required"))
+		common.AbortWithError(c, util.NewError(errors.ErrPreconditionRequired, "file required"))
 		return
 	}
 
@@ -79,7 +79,7 @@ func PostFilePreSignHandler(c *gin.Context) {
 
 	payload := dto.FilePreSignDTO{}
 	if err := c.ShouldBind(&payload); err != nil {
-		common.AbortWithError(c, util.NewError(otodo.ErrPreconditionRequired, "expiresIn required"))
+		common.AbortWithError(c, util.NewError(errors.ErrPreconditionRequired, "expiresIn required"))
 		return
 	}
 

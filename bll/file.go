@@ -9,10 +9,10 @@ import (
 	"strings"
 
 	"github.com/yzx9/otodo/infrastructure/config"
+	"github.com/yzx9/otodo/infrastructure/errors"
 	"github.com/yzx9/otodo/infrastructure/repository"
+	"github.com/yzx9/otodo/infrastructure/util"
 	"github.com/yzx9/otodo/model/entity"
-	"github.com/yzx9/otodo/otodo"
-	"github.com/yzx9/otodo/util"
 )
 
 const maxFileSize = 8 << 20 // 8MiB
@@ -61,7 +61,7 @@ func uploadFile(file *multipart.FileHeader, record *entity.File) error {
 	}
 
 	if file.Size > maxFileSize {
-		return util.NewError(otodo.ErrRequestEntityTooLarge, "file too large")
+		return util.NewError(errors.ErrRequestEntityTooLarge, "file too large")
 	}
 
 	if err := repository.InsertFile(record); err != nil {

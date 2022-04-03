@@ -3,7 +3,6 @@ package entity
 import (
 	"time"
 
-	"github.com/yzx9/otodo/otodo"
 	"gorm.io/gorm"
 )
 
@@ -15,6 +14,6 @@ type Entity struct {
 }
 
 func (e *Entity) BeforeCreate(tx *gorm.DB) (err error) {
-	e.ID = otodo.NewID()
+	e.ID = NewID()
 	return
 }

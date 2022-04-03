@@ -10,9 +10,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/yzx9/otodo/infrastructure/config"
 	"github.com/yzx9/otodo/infrastructure/repository"
+	"github.com/yzx9/otodo/infrastructure/util"
 	"github.com/yzx9/otodo/model/dto"
 	"github.com/yzx9/otodo/model/entity"
-	"github.com/yzx9/otodo/util"
 )
 
 const tokenType = `bearer`

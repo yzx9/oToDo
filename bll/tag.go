@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/yzx9/otodo/infrastructure/repository"
+	"github.com/yzx9/otodo/infrastructure/util"
 	"github.com/yzx9/otodo/model/entity"
-	"github.com/yzx9/otodo/util"
 )
 
 // Update tag, should be called with `go UpdateTagAsync()`

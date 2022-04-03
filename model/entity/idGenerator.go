@@ -1,4 +1,4 @@
-package otodo
+package entity
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 
 var NewID func() int64
 
-func initIDGenerator() error {
+func startUpIDGenerator() error {
 	node, err := snowflake.NewNode(1)
 	if err != nil {
 		return fmt.Errorf("fails to create id generator")

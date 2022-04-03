@@ -6,10 +6,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/bll"
+	"github.com/yzx9/otodo/infrastructure/errors"
+	"github.com/yzx9/otodo/infrastructure/util"
 	"github.com/yzx9/otodo/model/dto"
-	"github.com/yzx9/otodo/otodo"
 	"github.com/yzx9/otodo/user_interface/common"
-	"github.com/yzx9/otodo/util"
 )
 
 // Ping Test
@@ -107,7 +107,7 @@ func GetSessionOAuthGithub(c *gin.Context) {
 func PostSessionOAuthGithub(c *gin.Context) {
 	var payload dto.OAuthPayload
 	if err := c.ShouldBind(&payload); err != nil {
-		common.AbortWithError(c, util.NewError(otodo.ErrPreconditionRequired, "code, state required"))
+		common.AbortWithError(c, util.NewError(errors.ErrPreconditionRequired, "code, state required"))
 		return
 	}
 

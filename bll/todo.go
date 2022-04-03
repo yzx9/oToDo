@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/yzx9/otodo/infrastructure/repository"
+	"github.com/yzx9/otodo/infrastructure/util"
 	"github.com/yzx9/otodo/model/entity"
-	"github.com/yzx9/otodo/util"
 )
 
 func CreateTodo(userID int64, todo *entity.Todo) error {

@@ -9,10 +9,10 @@ import (
 	"time"
 
 	"github.com/yzx9/otodo/infrastructure/config"
+	"github.com/yzx9/otodo/infrastructure/errors"
+	"github.com/yzx9/otodo/infrastructure/util"
 	"github.com/yzx9/otodo/model/dto"
 	"github.com/yzx9/otodo/model/entity"
-	"github.com/yzx9/otodo/otodo"
-	"github.com/yzx9/otodo/util"
 )
 
 const githubOAuthStateLen = 10
@@ -114,11 +114,11 @@ func FetchGithubUserPublicProfile(token string) (dto.GithubUserPublicProfile, er
 
 	if res.StatusCode == http.StatusForbidden {
 		// TODO[feat]: should we inactive token?
-		return write(util.NewError(otodo.ErrThirdPartyForbidden, "github access token has been invalid"))
+		return write(util.NewError(errors.ErrThirdPartyForbidden, "github access token has been invalid"))
 	}
 
 	if res.StatusCode != http.StatusOK {
-		return write(util.NewError(otodo.ErrThirdPartyUnknown, "fails to fetch github user public profile"))
+		return write(util.NewError(errors.ErrThirdPartyUnknown, "fails to fetch github user public profile"))
 	}
 
 	defer res.Body.Close()

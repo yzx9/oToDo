@@ -6,8 +6,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/yzx9/otodo/infrastructure/repository"
+	"github.com/yzx9/otodo/infrastructure/util"
 	"github.com/yzx9/otodo/model/entity"
-	"github.com/yzx9/otodo/util"
 )
 
 /**

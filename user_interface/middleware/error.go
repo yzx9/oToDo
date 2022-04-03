@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	otodoErrors "github.com/yzx9/otodo/infrastructure/errors"
 	"github.com/yzx9/otodo/model/dto"
-	"github.com/yzx9/otodo/otodo"
 )
 
 func ErrorMiddleware() func(*gin.Context) {
@@ -15,7 +15,7 @@ func ErrorMiddleware() func(*gin.Context) {
 
 		if c.IsAborted() {
 			err := c.Errors.Last()
-			typedError := otodo.Error{}
+			typedError := otodoErrors.Error{}
 			if errors.As(err, &typedError) {
 				code := getHttpCodeFromError(typedError)
 				c.AbortWithError(code, typedError)
@@ -30,59 +30,59 @@ func ErrorMiddleware() func(*gin.Context) {
 	}
 }
 
-func getHttpCodeFromError(err otodo.Error) int {
+func getHttpCodeFromError(err otodoErrors.Error) int {
 	switch err.Code {
 	// Internal Error
-	case otodo.ErrUnknown:
+	case otodoErrors.ErrUnknown:
 		return http.StatusInternalServerError
 
-	case otodo.ErrNotImplemented:
+	case otodoErrors.ErrNotImplemented:
 		return http.StatusNotImplemented
 
 	// Auth
-	case otodo.ErrUnauthorized:
+	case otodoErrors.ErrUnauthorized:
 		return http.StatusUnauthorized
 
-	case otodo.ErrForbidden:
+	case otodoErrors.ErrForbidden:
 		return http.StatusForbidden
 
 	// Limit
-	case otodo.ErrPreconditionRequired:
+	case otodoErrors.ErrPreconditionRequired:
 		return http.StatusPreconditionRequired
 
-	case otodo.ErrPreconditionFailed:
+	case otodoErrors.ErrPreconditionFailed:
 		return http.StatusPreconditionFailed
 
-	case otodo.ErrRequestEntityTooLarge:
+	case otodoErrors.ErrRequestEntityTooLarge:
 		return http.StatusRequestEntityTooLarge
 
 	// Resource
-	case otodo.ErrDatabaseConnectFailed:
+	case otodoErrors.ErrDatabaseConnectFailed:
 		return http.StatusServiceUnavailable
 
-	case otodo.ErrDataInconsistency:
+	case otodoErrors.ErrDataInconsistency:
 		return http.StatusInternalServerError
 
-	case otodo.ErrDuplicateID:
+	case otodoErrors.ErrDuplicateID:
 		return http.StatusInternalServerError
 
-	case otodo.ErrNotFound:
+	case otodoErrors.ErrNotFound:
 		return http.StatusNotFound
 
 	// Third Party
-	case otodo.ErrThirdPartyUnknown:
+	case otodoErrors.ErrThirdPartyUnknown:
 		return http.StatusBadRequest
 
-	case otodo.ErrThirdPartyUnauthorized:
+	case otodoErrors.ErrThirdPartyUnauthorized:
 		return http.StatusBadRequest
 
-	case otodo.ErrThirdPartyForbidden:
+	case otodoErrors.ErrThirdPartyForbidden:
 		return http.StatusBadRequest
 	}
 
 	return http.StatusInternalServerError
 }
 
-func getUserErrorCodeFromError(err otodo.Error) int {
+func getUserErrorCodeFromError(err otodoErrors.Error) int {
 	return int(err.Code) // TODO: some err should be hidden
 }

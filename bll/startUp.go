@@ -3,19 +3,19 @@ package bll
 import (
 	"fmt"
 
-	"github.com/yzx9/otodo/infrastructure/repository"
+	"github.com/yzx9/otodo/model/entity"
 )
 
 var hasInit = false
 
-func Init() error {
+func StartUp() error {
 	if hasInit {
 		return nil
 	}
 
 	hasInit = true
 
-	if err := repository.Init(); err != nil {
+	if err := entity.StartUp(); err != nil {
 		return fmt.Errorf("fails to init database: %w", err)
 	}
 

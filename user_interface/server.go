@@ -7,8 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"github.com/yzx9/otodo/bll"
+	"github.com/yzx9/otodo/infrastructure"
 	"github.com/yzx9/otodo/infrastructure/config"
-	"github.com/yzx9/otodo/otodo"
 	"github.com/yzx9/otodo/user_interface/middleware"
 )
 
@@ -85,12 +85,12 @@ func (s *Server) Run() *Server {
 		return s
 	}
 
-	if err := otodo.Init(); err != nil {
+	if err := infrastructure.StartUp(); err != nil {
 		s.Error = err
 		return s
 	}
 
-	if err := bll.Init(); err != nil {
+	if err := bll.StartUp(); err != nil {
 		s.Error = err
 		return s
 	}
