@@ -2,7 +2,6 @@ package repository
 
 import (
 	"github.com/yzx9/otodo/infrastructure/util"
-	"github.com/yzx9/otodo/model/dto"
 )
 
 type TodoList struct {
@@ -19,6 +18,13 @@ type TodoList struct {
 	TodoListFolder   TodoListFolder `json:"-"`
 
 	SharedUsers []*User `json:"-" gorm:"many2many:todo_list_shared_users"`
+}
+
+type TodoListMenuItem struct {
+	ID               int64  `json:"id"`
+	Name             string `json:"name"`
+	Count            int    `json:"count"`
+	TodoListFolderID int64  `json:"-"`
 }
 
 func InsertTodoList(todoList *TodoList) error {
@@ -55,8 +61,8 @@ func SelectTodoLists(userId int64) ([]TodoList, error) {
 	return lists, util.WrapGormErr(err, "todo list")
 }
 
-func SelectTodoListsWithMenuFormat(userID int64) ([]dto.TodoListMenuItemRaw, error) {
-	var lists []dto.TodoListMenuItemRaw
+func SelectTodoListsWithMenuFormat(userID int64) ([]TodoListMenuItem, error) {
+	var lists []TodoListMenuItem
 	err := db.
 		Model(TodoList{}).
 		Where(TodoList{

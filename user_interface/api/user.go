@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/yzx9/otodo/application/dto"
 	"github.com/yzx9/otodo/bll"
-	"github.com/yzx9/otodo/model/dto"
 	"github.com/yzx9/otodo/user_interface/common"
 )
 

@@ -4,11 +4,18 @@ import (
 	"fmt"
 
 	"github.com/yzx9/otodo/infrastructure/repository"
-	"github.com/yzx9/otodo/model/dto"
 )
 
+// TODO
+type TodoListMenuItem struct {
+	repository.TodoListMenuItem
+
+	IsLeaf   bool               `json:"isLeaf"`
+	Children []TodoListMenuItem `json:"children"`
+}
+
 // Get Menu, folder+list tree
-func GetTodoListMenu(userID int64) ([]dto.TodoListMenuItem, error) {
+func GetTodoListMenu(userID int64) ([]TodoListMenuItem, error) {
 	folders, err := GetTodoListFolders(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get user menu: %w", err)
@@ -20,23 +27,23 @@ func GetTodoListMenu(userID int64) ([]dto.TodoListMenuItem, error) {
 	}
 
 	// TODO[feat]: Sortable
-	menu := make([]dto.TodoListMenuItem, 0)
+	menu := make([]TodoListMenuItem, 0)
 	for i := range folders {
-		menu = append(menu, dto.TodoListMenuItem{
-			TodoListMenuItemRaw: dto.TodoListMenuItemRaw{
+		menu = append(menu, TodoListMenuItem{
+			TodoListMenuItem: repository.TodoListMenuItem{
 				ID:    folders[i].ID,
 				Name:  folders[i].Name,
 				Count: 0,
 			},
 			IsLeaf:   false,
-			Children: make([]dto.TodoListMenuItem, 0),
+			Children: make([]TodoListMenuItem, 0),
 		})
 	}
 
 	for i := range lists {
-		item := dto.TodoListMenuItem{
-			TodoListMenuItemRaw: lists[i],
-			IsLeaf:              true,
+		item := TodoListMenuItem{
+			TodoListMenuItem: lists[i],
+			IsLeaf:           true,
 		}
 
 		if lists[i].TodoListFolderID == 0 {

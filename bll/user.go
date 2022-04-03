@@ -4,11 +4,11 @@ import (
 	"crypto/sha256"
 	"fmt"
 
+	"github.com/yzx9/otodo/application/dto"
 	"github.com/yzx9/otodo/infrastructure/config"
 	"github.com/yzx9/otodo/infrastructure/errors"
 	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/infrastructure/util"
-	"github.com/yzx9/otodo/model/dto"
 )
 
 func CreateUser(payload dto.CreateUserDTO) (repository.User, error) {

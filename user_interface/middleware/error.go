@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/yzx9/otodo/application/dto"
 	otodoErrors "github.com/yzx9/otodo/infrastructure/errors"
-	"github.com/yzx9/otodo/model/dto"
 )
 
 func ErrorMiddleware() func(*gin.Context) {

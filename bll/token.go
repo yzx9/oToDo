@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/yzx9/otodo/application/dto"
 	"github.com/yzx9/otodo/infrastructure/config"
-	"github.com/yzx9/otodo/model/dto"
 )
 
 func NewClaims(userID int64, exp time.Duration) dto.TokenClaims {
