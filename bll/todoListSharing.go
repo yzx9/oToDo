@@ -3,7 +3,7 @@ package bll
 import (
 	"fmt"
 
-	"github.com/yzx9/otodo/dal"
+	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/model/entity"
 	"github.com/yzx9/otodo/util"
 )
@@ -26,7 +26,7 @@ func CreateTodoListSharedUser(userID int64, token string) error {
 		return nil
 	}
 
-	err = dal.InsertTodoListSharedUser(userID, sharing.RelatedID)
+	err = repository.InsertTodoListSharedUser(userID, sharing.RelatedID)
 	if err != nil {
 		return fmt.Errorf("fails to create todo list shared user: %w", err)
 	}
@@ -40,7 +40,7 @@ func GetTodoListSharedUsers(userID, todoListID int64) ([]entity.User, error) {
 		return nil, err
 	}
 
-	users, err := dal.SelectTodoListSharedUsers(todoListID)
+	users, err := repository.SelectTodoListSharedUsers(todoListID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get todo list shared users: %w", err)
 	}
@@ -61,7 +61,7 @@ func DeleteTodoListSharedUser(operatorID, userID, todoListID int64) error {
 		return util.NewErrorWithForbidden("unable to delete shared user")
 	}
 
-	if err := dal.DeleteTodoListSharedUser(userID, todoListID); err != nil {
+	if err := repository.DeleteTodoListSharedUser(userID, todoListID); err != nil {
 		return fmt.Errorf("fails to delete todo list shared users: %w", err)
 	}
 
@@ -69,7 +69,7 @@ func DeleteTodoListSharedUser(operatorID, userID, todoListID int64) error {
 }
 
 func ExistTodoListSharing(userID, todoListID int64) (bool, error) {
-	exist, err := dal.ExistTodoListSharing(userID, todoListID)
+	exist, err := repository.ExistTodoListSharing(userID, todoListID)
 	if err != nil {
 		return false, fmt.Errorf("fails to valid sharing: %w", err)
 	}
@@ -79,7 +79,7 @@ func ExistTodoListSharing(userID, todoListID int64) (bool, error) {
 
 // owner or shared user
 func OwnOrSharedTodoList(userID, todoListID int64) (entity.TodoList, error) {
-	todoList, err := dal.SelectTodoList(todoListID)
+	todoList, err := repository.SelectTodoList(todoListID)
 	if err != nil {
 		return entity.TodoList{}, fmt.Errorf("fails to get todo list: %v", todoListID)
 	}

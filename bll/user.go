@@ -4,7 +4,7 @@ import (
 	"crypto/sha256"
 	"fmt"
 
-	"github.com/yzx9/otodo/dal"
+	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/model/dto"
 	"github.com/yzx9/otodo/model/entity"
 	"github.com/yzx9/otodo/otodo"
@@ -20,7 +20,7 @@ func CreateUser(payload dto.CreateUserDTO) (entity.User, error) {
 		return entity.User{}, fmt.Errorf("password too short")
 	}
 
-	exist, err := dal.ExistUserByUserName(payload.UserName)
+	exist, err := repository.ExistUserByUserName(payload.UserName)
 	if err != nil {
 		return entity.User{}, fmt.Errorf("fails to valid user name: %w", err)
 	}
@@ -42,7 +42,7 @@ func CreateUser(payload dto.CreateUserDTO) (entity.User, error) {
 }
 
 func GetUser(userID int64) (entity.User, error) {
-	user, err := dal.SelectUser(userID)
+	user, err := repository.SelectUser(userID)
 	if err != nil {
 		return entity.User{}, fmt.Errorf("fails to get user: %w", err)
 	}
@@ -59,7 +59,7 @@ func CreateUserInvalidRefreshToken(userID int64, tokenID string) (entity.UserInv
 		UserID:  userID,
 		TokenID: tokenID,
 	}
-	if err := dal.InsertUserInvalidRefreshToken(&model); err != nil {
+	if err := repository.InsertUserInvalidRefreshToken(&model); err != nil {
 		return entity.UserInvalidRefreshToken{}, fmt.Errorf("fails to make user refresh token invalid: %w", err)
 	}
 
@@ -69,7 +69,7 @@ func CreateUserInvalidRefreshToken(userID int64, tokenID string) (entity.UserInv
 // Verify is it an valid token.
 // Note: This func don't check token expire time
 func IsValidRefreshToken(userID int64, tokenID string) (bool, error) {
-	valid, err := dal.ExistUserInvalidRefreshToken(userID, tokenID)
+	valid, err := repository.ExistUserInvalidRefreshToken(userID, tokenID)
 	if err != nil {
 		return false, fmt.Errorf("fails to get user refresh token: %w", err)
 	}
@@ -88,13 +88,13 @@ func GetCryptoPassword(password string) []byte {
  */
 
 func getOrRegisterUserByGithub(profile dto.GithubUserPublicProfile) (entity.User, error) {
-	exist, err := dal.ExistUserByGithubID(profile.ID)
+	exist, err := repository.ExistUserByGithubID(profile.ID)
 	if err != nil {
 		return entity.User{}, util.NewErrorWithUnknown("fails to register user: %w", err)
 	}
 
 	if exist {
-		user, err := dal.SelectUserByGithubID(profile.ID)
+		user, err := repository.SelectUserByGithubID(profile.ID)
 		if err != nil {
 			return entity.User{}, util.NewErrorWithUnknown("fails to get user: %w", err)
 		}
@@ -122,7 +122,7 @@ func getOrRegisterUserByGithub(profile dto.GithubUserPublicProfile) (entity.User
  */
 
 func createUser(user *entity.User) error {
-	if err := dal.InsertUser(user); err != nil {
+	if err := repository.InsertUser(user); err != nil {
 		return fmt.Errorf("fails to create user: %w", err)
 	}
 
@@ -140,12 +140,12 @@ func createBasicTodoList(user *entity.User) (entity.TodoList, error) {
 		IsBasic: true,
 		UserID:  user.ID,
 	}
-	if err := dal.InsertTodoList(&basicTodoList); err != nil {
+	if err := repository.InsertTodoList(&basicTodoList); err != nil {
 		return entity.TodoList{}, fmt.Errorf("fails to create user basic todo list: %w", err)
 	}
 
 	user.BasicTodoListID = basicTodoList.ID
-	if err := dal.SaveUser(user); err != nil {
+	if err := repository.SaveUser(user); err != nil {
 		return entity.TodoList{}, fmt.Errorf("fails to create user basic todo list: %w", err)
 	}
 

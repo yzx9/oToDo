@@ -3,7 +3,7 @@ package bll
 import (
 	"fmt"
 
-	"github.com/yzx9/otodo/dal"
+	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/model/entity"
 	"github.com/yzx9/otodo/util"
 )
@@ -12,7 +12,7 @@ func CreateTodoList(userID int64, todoList *entity.TodoList) error {
 	todoList.IsBasic = false
 	todoList.UserID = userID
 	todoList.TodoListFolderID = 0
-	if err := dal.InsertTodoList(todoList); err != nil {
+	if err := repository.InsertTodoList(todoList); err != nil {
 		return fmt.Errorf("fails to create todo list: %w", err)
 	}
 
@@ -24,7 +24,7 @@ func GetTodoList(userID, todoListID int64) (entity.TodoList, error) {
 }
 
 func ForceGetTodoList(todoListID int64) (entity.TodoList, error) {
-	list, err := dal.SelectTodoList(todoListID)
+	list, err := repository.SelectTodoList(todoListID)
 	if err != nil {
 		return entity.TodoList{}, fmt.Errorf("fails to get todo list: %w", err)
 	}
@@ -33,12 +33,12 @@ func ForceGetTodoList(todoListID int64) (entity.TodoList, error) {
 }
 
 func GetTodoLists(userID int64) ([]entity.TodoList, error) {
-	vec, err := dal.SelectTodoLists(userID)
+	vec, err := repository.SelectTodoLists(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get user todo lists: %w", err)
 	}
 
-	shared, err := dal.SelectSharedTodoLists(userID)
+	shared, err := repository.SelectSharedTodoLists(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get user shared todo lists: %w", err)
 	}
@@ -57,7 +57,7 @@ func UpdateTodoList(userID int64, todoList *entity.TodoList) error {
 		return util.NewErrorWithForbidden("unable to update basic todo list")
 	}
 
-	if err := dal.SaveTodoList(todoList); err != nil {
+	if err := repository.SaveTodoList(todoList); err != nil {
 		return fmt.Errorf("fails to update todo list: %w", err)
 	}
 
@@ -77,11 +77,11 @@ func DeleteTodoList(userID, todoListID int64) (entity.TodoList, error) {
 	}
 
 	// cascade delete todos
-	if _, err = dal.DeleteTodos(todoListID); err != nil {
+	if _, err = repository.DeleteTodos(todoListID); err != nil {
 		return entity.TodoList{}, fmt.Errorf("fails to cascade delete todos: %w", err)
 	}
 
-	if err = dal.DeleteTodoList(todoListID); err != nil {
+	if err = repository.DeleteTodoList(todoListID); err != nil {
 		return entity.TodoList{}, fmt.Errorf("fails to delete todo list: %w", err)
 	}
 
@@ -90,7 +90,7 @@ func DeleteTodoList(userID, todoListID int64) (entity.TodoList, error) {
 
 // owner
 func OwnTodoList(userID, todoListID int64) (entity.TodoList, error) {
-	todoList, err := dal.SelectTodoList(todoListID)
+	todoList, err := repository.SelectTodoList(todoListID)
 	if err != nil {
 		return entity.TodoList{}, fmt.Errorf("fails to get todo list: %v", todoListID)
 	}

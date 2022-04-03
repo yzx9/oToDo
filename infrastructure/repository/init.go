@@ -1,4 +1,4 @@
-package dal
+package repository
 
 func Init() error {
 	return initDatabase()

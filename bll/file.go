@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yzx9/otodo/dal"
+	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/model/entity"
 	"github.com/yzx9/otodo/otodo"
 	"github.com/yzx9/otodo/util"
@@ -47,7 +47,7 @@ func UploadTodoFile(userID, todoID int64, file *multipart.FileHeader) (entity.Fi
 		return entity.File{}, err
 	}
 
-	if err := dal.InsertTodoFile(todoID, record.ID); err != nil {
+	if err := repository.InsertTodoFile(todoID, record.ID); err != nil {
 		return entity.File{}, fmt.Errorf("fails to upload todo file: %w", err)
 	}
 
@@ -63,7 +63,7 @@ func uploadFile(file *multipart.FileHeader, record *entity.File) error {
 		return util.NewError(otodo.ErrRequestEntityTooLarge, "file too large")
 	}
 
-	if err := dal.InsertFile(record); err != nil {
+	if err := repository.InsertFile(record); err != nil {
 		return write(err)
 	}
 
@@ -74,7 +74,7 @@ func uploadFile(file *multipart.FileHeader, record *entity.File) error {
 		return write(err)
 	}
 
-	if err := dal.SaveFile(record); err != nil {
+	if err := repository.SaveFile(record); err != nil {
 		return write(err)
 	}
 
@@ -82,7 +82,7 @@ func uploadFile(file *multipart.FileHeader, record *entity.File) error {
 }
 
 func GetFile(fileID int64) (*entity.File, error) {
-	file, err := dal.SelectFile(fileID)
+	file, err := repository.SelectFile(fileID)
 	return file, fmt.Errorf("fails to get file: %w", err)
 }
 

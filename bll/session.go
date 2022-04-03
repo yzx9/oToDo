@@ -8,7 +8,7 @@ import (
 
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
-	"github.com/yzx9/otodo/dal"
+	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/model/dto"
 	"github.com/yzx9/otodo/model/entity"
 	"github.com/yzx9/otodo/otodo"
@@ -25,7 +25,7 @@ func Login(payload dto.LoginDTO) (dto.SessionToken, error) {
 		return dto.SessionToken{}, util.NewErrorWithBadRequest("invalid credential")
 	}
 
-	user, err := dal.SelectUserByUserName(payload.UserName)
+	user, err := repository.SelectUserByUserName(payload.UserName)
 	if err != nil || user.Password == nil {
 		return write()
 	}
@@ -71,7 +71,7 @@ func Logout(userID int64, refreshTokenID string) error {
 }
 
 func NewAccessToken(userID int64, refreshTokenID string) (dto.SessionToken, error) {
-	user, err := dal.SelectUser(userID)
+	user, err := repository.SelectUser(userID)
 	if err != nil {
 		return dto.SessionToken{}, fmt.Errorf("fails to get user, %w", err)
 	}

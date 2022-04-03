@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/yzx9/otodo/dal"
+	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/model/entity"
 	"github.com/yzx9/otodo/util"
 )
@@ -23,7 +23,7 @@ func CreateTodo(userID int64, todo *entity.Todo) error {
 	}
 	todo.TodoRepeatPlanID = plan.ID
 
-	if err := dal.InsertTodo(todo); err != nil {
+	if err := repository.InsertTodo(todo); err != nil {
 		return fmt.Errorf("fails to create todo: %w", err)
 	}
 
@@ -48,7 +48,7 @@ func GetTodos(userID, todoListID int64) ([]entity.Todo, error) {
 }
 
 func ForceGetTodos(todoListID int64) ([]entity.Todo, error) {
-	todos, err := dal.SelectTodos(todoListID)
+	todos, err := repository.SelectTodos(todoListID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get todos: %w", err)
 	}
@@ -57,7 +57,7 @@ func ForceGetTodos(todoListID int64) ([]entity.Todo, error) {
 }
 
 func GetImportantTodos(userID int64) ([]entity.Todo, error) {
-	todos, err := dal.SelectImportantTodos(userID)
+	todos, err := repository.SelectImportantTodos(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get important todos: %w", err)
 	}
@@ -66,7 +66,7 @@ func GetImportantTodos(userID int64) ([]entity.Todo, error) {
 }
 
 func GetPlannedTodos(userID int64) ([]entity.Todo, error) {
-	todos, err := dal.SelectPlanedTodos(userID)
+	todos, err := repository.SelectPlanedTodos(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get planed todos: %w", err)
 	}
@@ -75,7 +75,7 @@ func GetPlannedTodos(userID int64) ([]entity.Todo, error) {
 }
 
 func GetNotNotifiedTodos(userID int64) ([]entity.Todo, error) {
-	todos, err := dal.SelectNotNotifiedTodos(userID)
+	todos, err := repository.SelectNotNotifiedTodos(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get not-notified todos: %w", err)
 	}
@@ -120,7 +120,7 @@ func UpdateTodo(userID int64, todo *entity.Todo) error {
 	todo.TodoRepeatPlanID = plan.ID
 
 	// Save
-	if err = dal.SaveTodo(todo); err != nil {
+	if err = repository.SaveTodo(todo); err != nil {
 		return err
 	}
 
@@ -135,7 +135,7 @@ func DeleteTodo(userID, todoID int64) (entity.Todo, error) {
 		return entity.Todo{}, err
 	}
 
-	if err = dal.DeleteTodo(todoID); err != nil {
+	if err = repository.DeleteTodo(todoID); err != nil {
 		return entity.Todo{}, fmt.Errorf("fails to delete todo: %w", err)
 	}
 
@@ -145,7 +145,7 @@ func DeleteTodo(userID, todoID int64) (entity.Todo, error) {
 }
 
 func OwnTodo(userID, todoID int64) (entity.Todo, error) {
-	todo, err := dal.SelectTodo(todoID)
+	todo, err := repository.SelectTodo(todoID)
 	if err != nil {
 		return entity.Todo{}, fmt.Errorf("fails to get todo: %w", err)
 	}

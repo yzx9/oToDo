@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/yzx9/otodo/dal"
+	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/model/entity"
 	"github.com/yzx9/otodo/util"
 )
@@ -35,7 +35,7 @@ func UpdateTag(todo *entity.Todo, oldTodoTitle string) error {
 	for tagName, op := range tags {
 		if op {
 			// Insert new tag
-			exist, err := dal.ExistTag(userID, tagName)
+			exist, err := repository.ExistTag(userID, tagName)
 			if err != nil {
 				return util.NewErrorWithUnknown("unknown error: %w", err)
 			}
@@ -46,17 +46,17 @@ func UpdateTag(todo *entity.Todo, oldTodoTitle string) error {
 					UserID: userID,
 					Todos:  make([]entity.Todo, 0),
 				}
-				if err := dal.InsertTag(&tag); err != nil {
+				if err := repository.InsertTag(&tag); err != nil {
 					return fmt.Errorf("fails to create tag: %w", err)
 				}
 			}
 
-			if err := dal.InsertTagTodo(userID, todo.ID, tagName); err != nil {
+			if err := repository.InsertTagTodo(userID, todo.ID, tagName); err != nil {
 				return fmt.Errorf("fails to update tag: %w", err)
 			}
 		} else {
 			// Remove old tag
-			if err := dal.DeleteTagTodo(userID, todo.ID, tagName); err != nil {
+			if err := repository.DeleteTagTodo(userID, todo.ID, tagName); err != nil {
 				return fmt.Errorf("fails to update tag: %w", err)
 			}
 		}

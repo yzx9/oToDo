@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/yzx9/otodo/dal"
+	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/model/entity"
 	"github.com/yzx9/otodo/util"
 )
@@ -19,7 +19,7 @@ func CreateTodoStep(userID, todoID int64, name string) (entity.TodoStep, error) 
 		Name:   name,
 		TodoID: todoID,
 	}
-	if err = dal.InsertTodoStep(&step); err != nil {
+	if err = repository.InsertTodoStep(&step); err != nil {
 		return entity.TodoStep{}, util.NewErrorWithUnknown("fails to create todo step")
 	}
 
@@ -40,7 +40,7 @@ func UpdateTodoStep(userID int64, step *entity.TodoStep) error {
 		step.DoneAt = &t
 	}
 
-	if err = dal.SaveTodoStep(step); err != nil {
+	if err = repository.SaveTodoStep(step); err != nil {
 		return util.NewErrorWithUnknown("fails to update todo step")
 	}
 
@@ -57,11 +57,11 @@ func DeleteTodoStep(userID, todoID, todoStepID int64) (entity.TodoStep, error) {
 		return entity.TodoStep{}, util.NewErrorWithNotFound("todo step not found in todo: %v", todoStepID)
 	}
 
-	return step, dal.DeleteTodoStep(todoStepID)
+	return step, repository.DeleteTodoStep(todoStepID)
 }
 
 func OwnTodoStep(userID, todoStepID int64) (entity.TodoStep, error) {
-	step, err := dal.SelectTodoStep(todoStepID)
+	step, err := repository.SelectTodoStep(todoStepID)
 	if err != nil {
 		return entity.TodoStep{}, fmt.Errorf("fails to get todo step: %w", err)
 	}

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/yzx9/otodo/dal"
+	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/model/entity"
 )
 
@@ -13,7 +13,7 @@ func CreateTodoRepeatPlan(plan entity.TodoRepeatPlan) (entity.TodoRepeatPlan, er
 		return entity.TodoRepeatPlan{}, nil
 	}
 
-	if err := dal.InsertTodoRepeatPlan(&plan); err != nil {
+	if err := repository.InsertTodoRepeatPlan(&plan); err != nil {
 		return entity.TodoRepeatPlan{}, fmt.Errorf("fails to create todo repeat plan: %w", err)
 	}
 
@@ -25,7 +25,7 @@ func UpdateTodoRepeatPlan(plan, oldPlan entity.TodoRepeatPlan) (entity.TodoRepea
 		return oldPlan, nil
 	}
 
-	if err := dal.InsertTodoRepeatPlan(&plan); err != nil {
+	if err := repository.InsertTodoRepeatPlan(&plan); err != nil {
 		return entity.TodoRepeatPlan{}, fmt.Errorf("fails to create todo repeat plan: %w", err)
 	}
 
@@ -33,7 +33,7 @@ func UpdateTodoRepeatPlan(plan, oldPlan entity.TodoRepeatPlan) (entity.TodoRepea
 }
 
 func GetTodoRepeatPlan(id int64) (entity.TodoRepeatPlan, error) {
-	plan, err := dal.SelectTodoRepeatPlan(id)
+	plan, err := repository.SelectTodoRepeatPlan(id)
 	if err != nil {
 		return entity.TodoRepeatPlan{}, fmt.Errorf("fails to get todo repeat plan: %v", err)
 	}
@@ -52,7 +52,7 @@ func CreateRepeatTodoIfNeed(todo entity.Todo) (bool, entity.Todo, error) {
 	}
 
 	todo.Deadline = &nextDeadline
-	if err := dal.InsertTodo(&todo); err != nil {
+	if err := repository.InsertTodo(&todo); err != nil {
 		return false, entity.Todo{}, fmt.Errorf("fails to create todo: %w", err)
 	}
 

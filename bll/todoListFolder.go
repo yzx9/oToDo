@@ -3,14 +3,14 @@ package bll
 import (
 	"fmt"
 
-	"github.com/yzx9/otodo/dal"
+	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/model/entity"
 	"github.com/yzx9/otodo/util"
 )
 
 func CreateTodoListFolder(userID int64, folder *entity.TodoListFolder) error {
 	folder.UserID = userID
-	if err := dal.InsertTodoListFolder(folder); err != nil {
+	if err := repository.InsertTodoListFolder(folder); err != nil {
 		return fmt.Errorf("fails to create todo list folder: %w", err)
 	}
 
@@ -22,7 +22,7 @@ func GetTodoListFolder(userID, todoListFolderID int64) (entity.TodoListFolder, e
 }
 
 func GetTodoListFolders(userID int64) ([]entity.TodoListFolder, error) {
-	vec, err := dal.SelectTodoListFolders(userID)
+	vec, err := repository.SelectTodoListFolders(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get todo list folder: %w", err)
 	}
@@ -42,11 +42,11 @@ func DeleteTodoListFolder(userID, todoListFolderID int64) (entity.TodoListFolder
 
 	// TODO[feat] Whether to cascade delete todo lists
 	// Cascade delete todo lists
-	if _, err = dal.DeleteTodoListsByFolder(todoListFolderID); err != nil {
+	if _, err = repository.DeleteTodoListsByFolder(todoListFolderID); err != nil {
 		return write(fmt.Errorf("fails to cascade delete todo lists: %w", err))
 	}
 
-	if err = dal.DeleteTodoListFolder(todoListFolderID); err != nil {
+	if err = repository.DeleteTodoListFolder(todoListFolderID); err != nil {
 		return write(fmt.Errorf("fails to delete todo list folder: %w", err))
 	}
 
@@ -55,7 +55,7 @@ func DeleteTodoListFolder(userID, todoListFolderID int64) (entity.TodoListFolder
 
 // Verify permission
 func OwnTodoListFolder(userID, todoListFolderID int64) (entity.TodoListFolder, error) {
-	todoListFolder, err := dal.SelectTodoListFolder(todoListFolderID)
+	todoListFolder, err := repository.SelectTodoListFolder(todoListFolderID)
 	if err != nil {
 		return entity.TodoListFolder{}, fmt.Errorf("fails to get todo list folder: %v", todoListFolderID)
 	}

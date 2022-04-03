@@ -3,7 +3,7 @@ package bll
 import (
 	"fmt"
 
-	"github.com/yzx9/otodo/dal"
+	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/model/dto"
 )
 
@@ -14,7 +14,7 @@ func GetTodoListMenu(userID int64) ([]dto.TodoListMenuItem, error) {
 		return nil, fmt.Errorf("fails to get user menu: %w", err)
 	}
 
-	lists, err := dal.SelectTodoListsWithMenuFormat(userID)
+	lists, err := repository.SelectTodoListsWithMenuFormat(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get user menu: %w", err)
 	}

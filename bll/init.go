@@ -3,7 +3,7 @@ package bll
 import (
 	"fmt"
 
-	"github.com/yzx9/otodo/dal"
+	"github.com/yzx9/otodo/infrastructure/repository"
 )
 
 var hasInit = false
@@ -15,7 +15,7 @@ func Init() error {
 
 	hasInit = true
 
-	if err := dal.Init(); err != nil {
+	if err := repository.Init(); err != nil {
 		return fmt.Errorf("fails to init database: %w", err)
 	}
 

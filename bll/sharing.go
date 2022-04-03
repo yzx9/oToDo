@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/yzx9/otodo/dal"
+	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/model/entity"
 	"github.com/yzx9/otodo/util"
 )
@@ -24,7 +24,7 @@ func CreateTodoListSharing(userID, todoListID int64) (entity.Sharing, error) {
 	}
 
 	// Only allow one sharing active
-	if _, err = dal.DeleteSharings(userID, entity.SharingTypeTodoList); err != nil {
+	if _, err = repository.DeleteSharings(userID, entity.SharingTypeTodoList); err != nil {
 		return entity.Sharing{}, fmt.Errorf("fails to delete old sharing tokens: %w", err)
 	}
 
@@ -35,7 +35,7 @@ func CreateTodoListSharing(userID, todoListID int64) (entity.Sharing, error) {
 		RelatedID: todoListID,
 		UserID:    userID,
 	}
-	if err := dal.InsertSharing(&sharing); err != nil {
+	if err := repository.InsertSharing(&sharing); err != nil {
 		return entity.Sharing{}, fmt.Errorf("fails to create sharing token: %w", err)
 	}
 
@@ -43,7 +43,7 @@ func CreateTodoListSharing(userID, todoListID int64) (entity.Sharing, error) {
 }
 
 func GetActiveTodoListSharings(userID, todoListID int64) ([]entity.Sharing, error) {
-	sharings, err := dal.SelectActiveSharings(userID, entity.SharingTypeTodoList)
+	sharings, err := repository.SelectActiveSharings(userID, entity.SharingTypeTodoList)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get sharing tokens: %w", err)
 	}
@@ -73,7 +73,7 @@ func DeleteTodoListSharing(userID int64, token string) error {
 	}
 
 	sharing.Active = false
-	if err := dal.SaveSharing(&sharing); err != nil {
+	if err := repository.SaveSharing(&sharing); err != nil {
 		return fmt.Errorf("fails to delete sharing: %w", err)
 	}
 
@@ -81,7 +81,7 @@ func DeleteTodoListSharing(userID int64, token string) error {
 }
 
 func ValidSharing(token string) (entity.Sharing, error) {
-	sharing, err := dal.SelectSharing(token)
+	sharing, err := repository.SelectSharing(token)
 	if err != nil {
 		return entity.Sharing{}, fmt.Errorf("invalid sharing token: %w", err)
 	}

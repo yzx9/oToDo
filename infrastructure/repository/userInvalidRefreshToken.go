@@ -1,4 +1,4 @@
-package dal
+package repository
 
 import (
 	"github.com/yzx9/otodo/model/entity"
