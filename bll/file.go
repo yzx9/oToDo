@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/yzx9/otodo/infrastructure/config"
 	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/model/entity"
 	"github.com/yzx9/otodo/otodo"
@@ -68,7 +69,7 @@ func uploadFile(file *multipart.FileHeader, record *entity.File) error {
 	}
 
 	// TODO[pref]: avoid duplicate save, remove :id in template?
-	record.FileServerID = otodo.Conf.Server.ID
+	record.FileServerID = config.Server.ID
 	record.FilePath = applyFilePathTemplate(record)
 	if err := util.SaveFile(file, record.FilePath); err != nil {
 		return write(err)
@@ -124,7 +125,7 @@ func OwnFile(userID, fileID int64) (*entity.File, error) {
 }
 
 func applyFilePathTemplate(file *entity.File) string {
-	template := otodo.Conf.Server.FilePathTemplate
+	template := config.Server.FilePathTemplate
 	template = strings.ReplaceAll(template, ":id", strconv.FormatInt(file.ID, 10))
 	template = strings.ReplaceAll(template, ":ext", filepath.Ext(file.FileName))
 	template = strings.ReplaceAll(template, ":name", file.FileName)

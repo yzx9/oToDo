@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"fmt"
 
+	"github.com/yzx9/otodo/infrastructure/config"
 	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/model/dto"
 	"github.com/yzx9/otodo/model/entity"
@@ -79,7 +80,7 @@ func IsValidRefreshToken(userID int64, tokenID string) (bool, error) {
 
 // Password
 func GetCryptoPassword(password string) []byte {
-	pwd := sha256.Sum256(append([]byte(password), otodo.Conf.Secret.PasswordNonce...))
+	pwd := sha256.Sum256(append([]byte(password), config.Secret.PasswordNonce...))
 	return pwd[:]
 }
 

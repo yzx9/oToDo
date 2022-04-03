@@ -8,10 +8,10 @@ import (
 
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
+	"github.com/yzx9/otodo/infrastructure/config"
 	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/model/dto"
 	"github.com/yzx9/otodo/model/entity"
-	"github.com/yzx9/otodo/otodo"
 	"github.com/yzx9/otodo/util"
 )
 
@@ -35,9 +35,9 @@ func Login(payload dto.LoginDTO) (dto.SessionToken, error) {
 	}
 
 	if payload.RefreshTokenExpiresIn <= 0 {
-		payload.RefreshTokenExpiresIn = otodo.Conf.Session.RefreshTokenExpiresInDefault
-	} else if payload.RefreshTokenExpiresIn > otodo.Conf.Session.RefreshTokenExpiresInMax {
-		payload.RefreshTokenExpiresIn = otodo.Conf.Session.RefreshTokenExpiresInMax
+		payload.RefreshTokenExpiresIn = config.Session.RefreshTokenExpiresInDefault
+	} else if payload.RefreshTokenExpiresIn > config.Session.RefreshTokenExpiresInMax {
+		payload.RefreshTokenExpiresIn = config.Session.RefreshTokenExpiresInMax
 	}
 
 	return newSessionToken(user, payload.RefreshTokenExpiresIn), nil
@@ -61,7 +61,7 @@ func LoginByGithubOAuth(code, state string) (dto.SessionToken, error) {
 
 	go UpdateThirdPartyOAuthTokenAsync(&token)
 
-	exp := otodo.Conf.Session.RefreshTokenExpiresInOAuth
+	exp := config.Session.RefreshTokenExpiresInOAuth
 	return newSessionToken(user, exp), nil
 }
 
@@ -107,14 +107,14 @@ func ShouldRefreshAccessToken(oldAccessToken *jwt.Token) bool {
 		return false
 	}
 
-	thd := otodo.Conf.Session.AccessTokenRefreshThreshold
+	thd := config.Session.AccessTokenRefreshThreshold
 	dur := time.Duration(thd * int(time.Second))
 	return time.Now().Add(dur).Unix() > claims.ExpiresAt
 }
 
 // generate access token only
 func newAccessToken(user entity.User, refreshTokenID string) dto.SessionToken {
-	exp := otodo.Conf.Session.AccessTokenExpiresIn
+	exp := config.Session.AccessTokenExpiresIn
 	dur := time.Duration(exp * int(time.Second))
 
 	claims := dto.SessionTokenClaims{

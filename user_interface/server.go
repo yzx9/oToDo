@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"github.com/yzx9/otodo/bll"
+	"github.com/yzx9/otodo/infrastructure/config"
 	"github.com/yzx9/otodo/otodo"
 	"github.com/yzx9/otodo/user_interface/middleware"
 )
@@ -57,7 +58,7 @@ func (s *Server) LoadConfig(dir string) *Server {
 		return s
 	}
 
-	SetConfig(s.config)
+	config.SetConfig(s.config)
 
 	return s
 }
@@ -71,7 +72,7 @@ func (s *Server) LoadAndWatchConfig(dir string) *Server {
 
 	s.config.OnConfigChange(func(e fsnotify.Event) {
 		fmt.Println("Config file changed: ", e.Name)
-		SetConfig(s.config)
+		config.SetConfig(s.config)
 	})
 
 	s.config.WatchConfig()
@@ -94,11 +95,11 @@ func (s *Server) Run() *Server {
 		return s
 	}
 
-	port := otodo.Conf.Server.Port
+	port := config.Server.Port
 	if port == 0 {
 		port = 8080
 	}
-	host := otodo.Conf.Server.Host
+	host := config.Server.Host
 
 	s.addr = fmt.Sprintf("%v:%v", host, port)
 

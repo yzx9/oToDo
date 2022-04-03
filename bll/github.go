@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/yzx9/otodo/infrastructure/config"
 	"github.com/yzx9/otodo/model/dto"
 	"github.com/yzx9/otodo/model/entity"
 	"github.com/yzx9/otodo/otodo"
@@ -23,7 +24,7 @@ const githubUserURI = "https://api.github.com/user"
 var githubOAuthStates = make(map[string]time.Time)
 
 func CreateGithubOAuthURI() (string, error) {
-	c := otodo.Conf.Github
+	c := config.GitHub
 	uri := githubOAuthAuthorizeURI
 
 	uri += "?client_id=" + c.ClientID
@@ -37,7 +38,7 @@ func CreateGithubOAuthURI() (string, error) {
 }
 
 func FetchGithubOAuthToken(code, state string) (entity.ThirdPartyOAuthToken, error) {
-	c := otodo.Conf.Github
+	c := config.GitHub
 	write := func(err error) (entity.ThirdPartyOAuthToken, error) {
 		return entity.ThirdPartyOAuthToken{}, err
 	}

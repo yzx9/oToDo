@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 
+	"github.com/yzx9/otodo/infrastructure/config"
 	"github.com/yzx9/otodo/model/entity"
 	"github.com/yzx9/otodo/otodo"
 	"github.com/yzx9/otodo/util"
@@ -19,7 +20,7 @@ func initDatabase() error {
 	}
 
 	// See https://github.com/go-sql-driver/mysql#dsn-data-source-name for details
-	c := otodo.Conf.Database
+	c := config.Database
 	dsn := fmt.Sprintf("%v:%v@%v(%v:%v)/%v?charset=utf8mb4&parseTime=True&loc=Local", c.UserName, c.Password, c.Protocol, c.Host, c.Port, c.DatabaseName)
 	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
 		DisableForeignKeyConstraintWhenMigrating: true,

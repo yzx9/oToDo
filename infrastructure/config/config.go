@@ -1,14 +1,13 @@
-package user_interface
+package config
 
 import (
 	"github.com/spf13/viper"
-	"github.com/yzx9/otodo/otodo"
 )
 
 func SetConfig(config *viper.Viper) {
 	{
 		c := config.Sub("server")
-		otodo.Conf.Server = otodo.ConfigServer{
+		Server = server{
 			ID:                       c.GetString("id"),
 			Port:                     c.GetInt("port"),
 			Host:                     c.GetString("host"),
@@ -19,7 +18,7 @@ func SetConfig(config *viper.Viper) {
 
 	{
 		c := config.Sub("database")
-		otodo.Conf.Database = otodo.ConfigDatabase{
+		Database = database{
 			Host:         c.GetString("host"),
 			Port:         c.GetInt("port"),
 			UserName:     c.GetString("username"),
@@ -31,7 +30,7 @@ func SetConfig(config *viper.Viper) {
 
 	{
 		c := config.Sub("session")
-		otodo.Conf.Session = otodo.ConfigSession{
+		Session = session{
 			AccessTokenExpiresIn:         c.GetInt("access_token_exp"),
 			RefreshTokenExpiresInDefault: c.GetInt("refresh_token_exp_default"),
 			RefreshTokenExpiresInMax:     c.GetInt("refresh_token_exp_max"),
@@ -42,7 +41,7 @@ func SetConfig(config *viper.Viper) {
 
 	{
 		c := config.Sub("secret")
-		otodo.Conf.Secret = otodo.ConfigSecret{
+		Secret = secret{
 			TokenIssuer:     c.GetString("token_issuer"),
 			TokenHmacSecret: []byte(c.GetString("token_hmac_secret")),
 			PasswordNonce:   []byte(c.GetString("password_nonce")),
@@ -51,7 +50,7 @@ func SetConfig(config *viper.Viper) {
 
 	{
 		c := config.Sub("github")
-		otodo.Conf.Github = otodo.ConfigGithub{
+		GitHub = github{
 			ClientID:            c.GetString("client_id"),
 			ClientSecret:        c.GetString("client_secret"),
 			OAuthRedirectURI:    c.GetString("oauth_redirect_uri"),

@@ -5,15 +5,15 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/yzx9/otodo/infrastructure/config"
 	"github.com/yzx9/otodo/model/dto"
-	"github.com/yzx9/otodo/otodo"
 )
 
 func NewClaims(userID int64, exp time.Duration) dto.TokenClaims {
 	now := time.Now().UTC()
 	return dto.TokenClaims{
 		StandardClaims: jwt.StandardClaims{
-			Issuer:    otodo.Conf.Secret.TokenIssuer,
+			Issuer:    config.Secret.TokenIssuer,
 			IssuedAt:  now.Unix(),
 			NotBefore: now.Unix(),
 			ExpiresAt: now.Add(exp).Unix(),
@@ -24,7 +24,7 @@ func NewClaims(userID int64, exp time.Duration) dto.TokenClaims {
 
 func NewToken(claims jwt.Claims) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(otodo.Conf.Secret.TokenHmacSecret)
+	tokenString, err := token.SignedString(config.Secret.TokenHmacSecret)
 	if err != nil {
 		return ""
 	}
@@ -45,5 +45,5 @@ func keyFunc(token *jwt.Token) (interface{}, error) {
 	if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 		return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 	}
-	return otodo.Conf.Secret.TokenHmacSecret, nil
+	return config.Secret.TokenHmacSecret, nil
 }
