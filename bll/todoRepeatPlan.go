@@ -5,85 +5,84 @@ import (
 	"time"
 
 	"github.com/yzx9/otodo/infrastructure/repository"
-	"github.com/yzx9/otodo/model/entity"
 )
 
-func CreateTodoRepeatPlan(plan entity.TodoRepeatPlan) (entity.TodoRepeatPlan, error) {
+func CreateTodoRepeatPlan(plan repository.TodoRepeatPlan) (repository.TodoRepeatPlan, error) {
 	if !isValidTodoRepeatPlan(plan) {
-		return entity.TodoRepeatPlan{}, nil
+		return repository.TodoRepeatPlan{}, nil
 	}
 
 	if err := repository.InsertTodoRepeatPlan(&plan); err != nil {
-		return entity.TodoRepeatPlan{}, fmt.Errorf("fails to create todo repeat plan: %w", err)
+		return repository.TodoRepeatPlan{}, fmt.Errorf("fails to create todo repeat plan: %w", err)
 	}
 
 	return plan, nil
 }
 
-func UpdateTodoRepeatPlan(plan, oldPlan entity.TodoRepeatPlan) (entity.TodoRepeatPlan, error) {
+func UpdateTodoRepeatPlan(plan, oldPlan repository.TodoRepeatPlan) (repository.TodoRepeatPlan, error) {
 	if !isValidTodoRepeatPlan(plan) || isSameTodoRepeatPlan(plan, oldPlan) {
 		return oldPlan, nil
 	}
 
 	if err := repository.InsertTodoRepeatPlan(&plan); err != nil {
-		return entity.TodoRepeatPlan{}, fmt.Errorf("fails to create todo repeat plan: %w", err)
+		return repository.TodoRepeatPlan{}, fmt.Errorf("fails to create todo repeat plan: %w", err)
 	}
 
 	return plan, nil
 }
 
-func GetTodoRepeatPlan(id int64) (entity.TodoRepeatPlan, error) {
+func GetTodoRepeatPlan(id int64) (repository.TodoRepeatPlan, error) {
 	plan, err := repository.SelectTodoRepeatPlan(id)
 	if err != nil {
-		return entity.TodoRepeatPlan{}, fmt.Errorf("fails to get todo repeat plan: %v", err)
+		return repository.TodoRepeatPlan{}, fmt.Errorf("fails to get todo repeat plan: %v", err)
 	}
 
 	return plan, nil
 }
 
-func CreateRepeatTodoIfNeed(todo entity.Todo) (bool, entity.Todo, error) {
+func CreateRepeatTodoIfNeed(todo repository.Todo) (bool, repository.Todo, error) {
 	if todo.TodoRepeatPlanID == 0 {
-		return false, entity.Todo{}, nil
+		return false, repository.Todo{}, nil
 	}
 
 	nextDeadline := getTodoNextRepeatTime(todo)
 	if todo.TodoRepeatPlan.Before.Before(nextDeadline) {
-		return false, entity.Todo{}, nil
+		return false, repository.Todo{}, nil
 	}
 
 	todo.Deadline = &nextDeadline
 	if err := repository.InsertTodo(&todo); err != nil {
-		return false, entity.Todo{}, fmt.Errorf("fails to create todo: %w", err)
+		return false, repository.Todo{}, fmt.Errorf("fails to create todo: %w", err)
 	}
 
 	return true, todo, nil
 }
 
-func isValidTodoRepeatPlan(plan entity.TodoRepeatPlan) bool {
-	t := entity.TodoRepeatPlanType(plan.Type)
-	if t != entity.TodoRepeatPlanTypeDay &&
-		t != entity.TodoRepeatPlanTypeMonth &&
-		t != entity.TodoRepeatPlanTypeYear &&
-		t != entity.TodoRepeatPlanTypeWeek {
+func isValidTodoRepeatPlan(plan repository.TodoRepeatPlan) bool {
+	t := repository.TodoRepeatPlanType(plan.Type)
+	if t != repository.TodoRepeatPlanTypeDay &&
+		t != repository.TodoRepeatPlanTypeMonth &&
+		t != repository.TodoRepeatPlanTypeYear &&
+		t != repository.TodoRepeatPlanTypeWeek {
 		return false
 	}
 
 	// Do not allow set all weekday to false
-	if t == entity.TodoRepeatPlanTypeWeek && plan.Weekday == 0 {
+	if t == repository.TodoRepeatPlanTypeWeek && plan.Weekday == 0 {
 		return false
 	}
 
 	return plan.Interval > 0
 }
 
-func isSameTodoRepeatPlan(plan, oldPlan entity.TodoRepeatPlan) bool {
+func isSameTodoRepeatPlan(plan, oldPlan repository.TodoRepeatPlan) bool {
 	if plan.Type != oldPlan.Type ||
 		plan.Interval != oldPlan.Interval ||
 		plan.Before != oldPlan.Before {
 		return false
 	}
 
-	if plan.Type == string(entity.TodoRepeatPlanTypeWeek) {
+	if plan.Type == string(repository.TodoRepeatPlanTypeWeek) {
 		if plan.Weekday != oldPlan.Weekday {
 			return false
 		}
@@ -92,23 +91,23 @@ func isSameTodoRepeatPlan(plan, oldPlan entity.TodoRepeatPlan) bool {
 	return true
 }
 
-func getTodoNextRepeatTime(todo entity.Todo) time.Time {
+func getTodoNextRepeatTime(todo repository.Todo) time.Time {
 	deadline := *todo.Deadline
 	interval := todo.TodoRepeatPlan.Interval
 
 	weekend := time.Sunday // TODO 此处默认周一为一周开始
 
-	switch entity.TodoRepeatPlanType(todo.TodoRepeatPlan.Type) {
-	case entity.TodoRepeatPlanTypeDay:
+	switch repository.TodoRepeatPlanType(todo.TodoRepeatPlan.Type) {
+	case repository.TodoRepeatPlanTypeDay:
 		return deadline.AddDate(0, 0, interval)
 
-	case entity.TodoRepeatPlanTypeMonth:
+	case repository.TodoRepeatPlanTypeMonth:
 		return deadline.AddDate(0, interval, 0)
 
-	case entity.TodoRepeatPlanTypeYear:
+	case repository.TodoRepeatPlanTypeYear:
 		return deadline.AddDate(interval, 0, 0)
 
-	case entity.TodoRepeatPlanTypeWeek:
+	case repository.TodoRepeatPlanTypeWeek:
 		if deadline.Weekday() == weekend {
 			deadline = deadline.AddDate(0, 0, (interval-1)*7)
 		}

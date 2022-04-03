@@ -2,19 +2,37 @@ package repository
 
 import (
 	"github.com/yzx9/otodo/infrastructure/util"
-	"github.com/yzx9/otodo/model/entity"
 )
 
-func InsertUser(user *entity.User) error {
+type User struct {
+	Entity
+
+	Name      string `json:"name" gorm:"size:128;index:,unique,priority:11;"`
+	Nickname  string `json:"nickname" gorm:"size:128"`
+	Password  []byte `json:"-" gorm:"size:32;"`
+	Email     string `json:"email" gorm:"size:32;"`
+	Telephone string `json:"telephone" gorm:"size:16;"`
+	Avatar    string `json:"avatar"`
+	GithubID  int64  `json:"githubID" gorm:"index:,unique,priority:12"`
+
+	BasicTodoListID int64     `json:"basicTodoListID"`
+	BasicTodoList   *TodoList `json:"-"`
+
+	TodoLists []TodoList `json:"-"`
+
+	SharedTodoLists []*TodoList `json:"-" gorm:"many2many:todo_list_shared_users"`
+}
+
+func InsertUser(user *User) error {
 	re := db.Create(user)
 	return util.WrapGormErr(re.Error, "user")
 }
 
-func SelectUser(id int64) (entity.User, error) {
-	var user entity.User
+func SelectUser(id int64) (User, error) {
+	var user User
 	err := db.
-		Where(&entity.User{
-			Entity: entity.Entity{
+		Where(&User{
+			Entity: Entity{
 				ID: id,
 			},
 		}).
@@ -24,10 +42,10 @@ func SelectUser(id int64) (entity.User, error) {
 	return user, util.WrapGormErr(err, "user")
 }
 
-func SelectUserByUserName(username string) (entity.User, error) {
-	var user entity.User
+func SelectUserByUserName(username string) (User, error) {
+	var user User
 	err := db.
-		Where(entity.User{
+		Where(User{
 			Name: username,
 		}).
 		First(&user).
@@ -36,10 +54,10 @@ func SelectUserByUserName(username string) (entity.User, error) {
 	return user, util.WrapGormErr(err, "user")
 }
 
-func SelectUserByGithubID(githubID int64) (entity.User, error) {
-	var user entity.User
+func SelectUserByGithubID(githubID int64) (User, error) {
+	var user User
 	err := db.
-		Where(entity.User{
+		Where(User{
 			GithubID: githubID,
 		}).
 		First(&user).
@@ -48,11 +66,11 @@ func SelectUserByGithubID(githubID int64) (entity.User, error) {
 	return user, util.WrapGormErr(err, "user")
 }
 
-func SelectUserByTodo(todoID int64) (entity.User, error) {
-	var todo entity.Todo
+func SelectUserByTodo(todoID int64) (User, error) {
+	var todo Todo
 	err := db.
-		Where(&entity.Todo{
-			Entity: entity.Entity{
+		Where(&Todo{
+			Entity: Entity{
 				ID: todoID,
 			},
 		}).
@@ -61,13 +79,13 @@ func SelectUserByTodo(todoID int64) (entity.User, error) {
 		Error
 
 	if err != nil {
-		return entity.User{}, util.WrapGormErr(err, "todo")
+		return User{}, util.WrapGormErr(err, "todo")
 	}
 
 	return SelectUser(todo.UserID)
 }
 
-func SaveUser(user *entity.User) error {
+func SaveUser(user *User) error {
 	err := db.Save(&user).Error
 	return util.WrapGormErr(err, "user")
 }
@@ -75,8 +93,8 @@ func SaveUser(user *entity.User) error {
 func ExistUserByUserName(username string) (bool, error) {
 	var count int64
 	err := db.
-		Model(&entity.User{}).
-		Where(entity.User{
+		Model(&User{}).
+		Where(User{
 			Name: username,
 		}).
 		Count(&count).
@@ -88,8 +106,8 @@ func ExistUserByUserName(username string) (bool, error) {
 func ExistUserByGithubID(githubID int64) (bool, error) {
 	var count int64
 	err := db.
-		Model(&entity.User{}).
-		Where(entity.User{
+		Model(&User{}).
+		Where(User{
 			GithubID: githubID,
 		}).
 		Count(&count).

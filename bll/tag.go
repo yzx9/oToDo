@@ -7,11 +7,10 @@ import (
 
 	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/infrastructure/util"
-	"github.com/yzx9/otodo/model/entity"
 )
 
 // Update tag, should be called with `go UpdateTagAsync()`
-func UpdateTag(todo *entity.Todo, oldTodoTitle string) error {
+func UpdateTag(todo *repository.Todo, oldTodoTitle string) error {
 	// TODO[bug]: handle error
 	if todo.Title == oldTodoTitle {
 		return nil
@@ -41,10 +40,10 @@ func UpdateTag(todo *entity.Todo, oldTodoTitle string) error {
 			}
 
 			if !exist {
-				tag := entity.Tag{
+				tag := repository.Tag{
 					Name:   tagName,
 					UserID: userID,
-					Todos:  make([]entity.Todo, 0),
+					Todos:  make([]repository.Todo, 0),
 				}
 				if err := repository.InsertTag(&tag); err != nil {
 					return fmt.Errorf("fails to create tag: %w", err)
@@ -65,7 +64,7 @@ func UpdateTag(todo *entity.Todo, oldTodoTitle string) error {
 	return nil
 }
 
-func UpdateTagAsync(todo *entity.Todo, oldTodoTitle string) {
+func UpdateTagAsync(todo *repository.Todo, oldTodoTitle string) {
 	if err := UpdateTag(todo, oldTodoTitle); err != nil {
 		// TODO[bug]: handle error
 		fmt.Println(err)

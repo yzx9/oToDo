@@ -2,17 +2,27 @@ package repository
 
 import (
 	"github.com/yzx9/otodo/infrastructure/util"
-	"github.com/yzx9/otodo/model/entity"
 	"gorm.io/gorm"
 )
 
-func InsertTag(tag *entity.Tag) error {
+type Tag struct {
+	Entity
+
+	Name string `json:"name" gorm:"size:32;index:idx_tags_user,unique"`
+
+	UserID int64 `json:"userID" gorm:"index:idx_tags_user,unique"`
+	User   User  `json:"-"`
+
+	Todos []Todo `json:"-" gorm:"many2many:tag_todos;"`
+}
+
+func InsertTag(tag *Tag) error {
 	err := db.Create(tag).Error
 	return util.WrapGormErr(err, "tag")
 }
 
-func SelectTag(userID int64, tagName string) (entity.Tag, error) {
-	var tag entity.Tag
+func SelectTag(userID int64, tagName string) (Tag, error) {
+	var tag Tag
 	err := db.
 		Scopes(tagScope(userID, tagName)).
 		First(&tag).
@@ -21,10 +31,10 @@ func SelectTag(userID int64, tagName string) (entity.Tag, error) {
 	return tag, util.WrapGormErr(err, "tag")
 }
 
-func SelectTags(userID int64) ([]entity.Tag, error) {
-	var tags []entity.Tag
+func SelectTags(userID int64) ([]Tag, error) {
+	var tags []Tag
 	err := db.
-		Where(entity.Tag{
+		Where(Tag{
 			UserID: userID,
 		}).
 		Find(&tags).
@@ -37,8 +47,8 @@ func InsertTagTodo(userID, todoID int64, tagName string) error {
 	err := db.
 		Scopes(tagScope(userID, tagName)).
 		Association("Todos").
-		Append(&entity.Todo{
-			Entity: entity.Entity{
+		Append(&Todo{
+			Entity: Entity{
 				ID: todoID,
 			},
 		})
@@ -50,8 +60,8 @@ func DeleteTagTodo(userID, todoID int64, tagName string) error {
 	err := db.
 		Scopes(tagScope(userID, tagName)).
 		Association("Todos").
-		Delete(&entity.Todo{
-			Entity: entity.Entity{
+		Delete(&Todo{
+			Entity: Entity{
 				ID: todoID,
 			},
 		})
@@ -76,8 +86,8 @@ func ExistTag(userID int64, tagName string) (bool, error) {
 func tagScope(userID int64, tagName string) func(*gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 		return db.
-			Model(&entity.Tag{}).
-			Where(&entity.Tag{
+			Model(&Tag{}).
+			Where(&Tag{
 				UserID: userID,
 				Name:   tagName,
 			})

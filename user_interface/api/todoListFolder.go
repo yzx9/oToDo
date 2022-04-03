@@ -5,13 +5,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/bll"
-	"github.com/yzx9/otodo/model/entity"
+	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/user_interface/common"
 )
 
 // Create todo list folder
 func PostTodoListFolderHandler(c *gin.Context) {
-	folder := entity.TodoListFolder{}
+	folder := repository.TodoListFolder{}
 	if err := c.ShouldBind(&folder); err != nil {
 		common.AbortWithError(c, err)
 		return

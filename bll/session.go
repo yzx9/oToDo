@@ -12,7 +12,6 @@ import (
 	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/infrastructure/util"
 	"github.com/yzx9/otodo/model/dto"
-	"github.com/yzx9/otodo/model/entity"
 )
 
 const tokenType = `bearer`
@@ -113,7 +112,7 @@ func ShouldRefreshAccessToken(oldAccessToken *jwt.Token) bool {
 }
 
 // generate access token only
-func newAccessToken(user entity.User, refreshTokenID string) dto.SessionToken {
+func newAccessToken(user repository.User, refreshTokenID string) dto.SessionToken {
 	exp := config.Session.AccessTokenExpiresIn
 	dur := time.Duration(exp * int(time.Second))
 
@@ -131,7 +130,7 @@ func newAccessToken(user entity.User, refreshTokenID string) dto.SessionToken {
 }
 
 // generate new access token and refresh token
-func newSessionToken(user entity.User, refreshTokenExp int) dto.SessionToken {
+func newSessionToken(user repository.User, refreshTokenExp int) dto.SessionToken {
 	// refresh token
 	dur := time.Duration(refreshTokenExp * int(time.Second))
 

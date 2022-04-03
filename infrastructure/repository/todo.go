@@ -1,22 +1,52 @@
 package repository
 
 import (
+	"time"
+
 	"github.com/yzx9/otodo/infrastructure/util"
-	"github.com/yzx9/otodo/model/entity"
 	"gorm.io/gorm"
 )
 
-func InsertTodo(todo *entity.Todo) error {
+type Todo struct {
+	Entity
+
+	Title      string     `json:"title" gorm:"size:128"`
+	Memo       string     `json:"memo"`
+	Importance bool       `json:"importance"`
+	Deadline   *time.Time `json:"deadline"`
+	Notified   bool       `json:"notified"`
+	NotifyAt   *time.Time `json:"notifyAt"`
+	Done       bool       `json:"done"`
+	DoneAt     *time.Time `json:"doneAt"`
+
+	UserID int64 `json:"userID"`
+	User   User  `json:"-"`
+
+	TodoListID int64    `json:"todolistID"`
+	TodoList   TodoList `json:"-"`
+
+	Files []File `json:"files" gorm:"many2many:todo_files"`
+
+	Steps []TodoStep `json:"steps"`
+
+	TodoRepeatPlanID int64          `json:"-"`
+	TodoRepeatPlan   TodoRepeatPlan `json:"todoRepeatPlan"`
+
+	NextID *int64 `json:"nextID"` // next todo id if repeat
+	Next   *Todo  `json:"-"`
+}
+
+func InsertTodo(todo *Todo) error {
 	err := db.Create(todo).Error
 	return util.WrapGormErr(err, "todo")
 }
 
-func SelectTodo(id int64) (entity.Todo, error) {
-	var todo entity.Todo
+func SelectTodo(id int64) (Todo, error) {
+	var todo Todo
 	err := db.
 		Scopes(todoPreload).
-		Where(&entity.Todo{
-			Entity: entity.Entity{
+		Where(&Todo{
+			Entity: Entity{
 				ID: id,
 			},
 		}).
@@ -26,11 +56,11 @@ func SelectTodo(id int64) (entity.Todo, error) {
 	return todo, util.WrapGormErr(err, "todo")
 }
 
-func SelectTodos(todoListID int64) ([]entity.Todo, error) {
-	var todos []entity.Todo
+func SelectTodos(todoListID int64) ([]Todo, error) {
+	var todos []Todo
 	err := db.
 		Scopes(todoPreload).
-		Where(entity.Todo{
+		Where(Todo{
 			TodoListID: todoListID,
 		}).
 		Find(&todos).
@@ -39,8 +69,8 @@ func SelectTodos(todoListID int64) ([]entity.Todo, error) {
 	return todos, util.WrapGormErr(err, "todos")
 }
 
-func SelectAllTodos(userID int64) ([]entity.Todo, error) {
-	var todos []entity.Todo
+func SelectAllTodos(userID int64) ([]Todo, error) {
+	var todos []Todo
 	err := db.
 		Scopes(todoUser(userID)).
 		Find(&todos).
@@ -49,8 +79,8 @@ func SelectAllTodos(userID int64) ([]entity.Todo, error) {
 	return todos, util.WrapGormErr(err, "all todos")
 }
 
-func SelectImportantTodos(userID int64) ([]entity.Todo, error) {
-	var todos []entity.Todo
+func SelectImportantTodos(userID int64) ([]Todo, error) {
+	var todos []Todo
 	err := db.
 		Scopes(todoUser(userID)).
 		Where("Importance", true).
@@ -60,8 +90,8 @@ func SelectImportantTodos(userID int64) ([]entity.Todo, error) {
 	return todos, util.WrapGormErr(err, "important todos")
 }
 
-func SelectPlanedTodos(userID int64) ([]entity.Todo, error) {
-	var todos []entity.Todo
+func SelectPlanedTodos(userID int64) ([]Todo, error) {
+	var todos []Todo
 	err := db.
 		Scopes(todoUser(userID)).
 		Not("deadline", nil).
@@ -72,8 +102,8 @@ func SelectPlanedTodos(userID int64) ([]entity.Todo, error) {
 	return todos, util.WrapGormErr(err, "planed todos")
 }
 
-func SelectNotNotifiedTodos(userID int64) ([]entity.Todo, error) {
-	var todos []entity.Todo
+func SelectNotNotifiedTodos(userID int64) ([]Todo, error) {
+	var todos []Todo
 	err := db.
 		Scopes(todoUser(userID)).
 		Not("notified", false).
@@ -84,15 +114,15 @@ func SelectNotNotifiedTodos(userID int64) ([]entity.Todo, error) {
 	return todos, util.WrapGormErr(err, "not notified todos")
 }
 
-func SaveTodo(todo *entity.Todo) error {
+func SaveTodo(todo *Todo) error {
 	err := db.Save(&todo).Error
 	return util.WrapGormErr(err, "todo")
 }
 
 func DeleteTodo(id int64) error {
 	err := db.
-		Delete(&entity.Todo{
-			Entity: entity.Entity{
+		Delete(&Todo{
+			Entity: Entity{
 				ID: id,
 			},
 		}).
@@ -103,10 +133,10 @@ func DeleteTodo(id int64) error {
 
 func DeleteTodos(todoListID int64) (int64, error) {
 	re := db.
-		Where(entity.Todo{
+		Where(Todo{
 			TodoListID: todoListID,
 		}).
-		Delete(entity.Todo{})
+		Delete(Todo{})
 
 	return re.RowsAffected, util.WrapGormErr(re.Error, "todo")
 }
@@ -117,14 +147,14 @@ func DeleteTodos(todoListID int64) (int64, error) {
 
 func InsertTodoFile(todoID, fileID int64) error {
 	err := db.
-		Where(entity.Todo{
-			Entity: entity.Entity{
+		Where(Todo{
+			Entity: Entity{
 				ID: todoID,
 			},
 		}).
 		Association("Files").
-		Append(&entity.File{
-			Entity: entity.Entity{
+		Append(&File{
+			Entity: Entity{
 				ID: fileID,
 			},
 		})
@@ -132,10 +162,14 @@ func InsertTodoFile(todoID, fileID int64) error {
 	return util.WrapGormErr(err, "todo file")
 }
 
-func SelectTodoFiles(todoID int64) ([]entity.File, error) {
-	var files []entity.File
+func SelectTodoFiles(todoID int64) ([]File, error) {
+	var files []File
 	err := db.
-		Where(entity.Todo{Entity: entity.Entity{ID: todoID}}).
+		Where(Todo{
+			Entity: Entity{
+				ID: todoID,
+			},
+		}).
 		Find(&files).
 		Error
 
@@ -149,7 +183,7 @@ func SelectTodoFiles(todoID int64) ([]entity.File, error) {
 func todoUser(userID int64) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 		return db.
-			Where(entity.Todo{UserID: userID}).
+			Where(Todo{UserID: userID}).
 			Scopes(todoPreload)
 	}
 }

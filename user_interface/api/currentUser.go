@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/bll"
-	"github.com/yzx9/otodo/model/entity"
+	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/user_interface/common"
 )
 
@@ -83,7 +83,7 @@ func GetCurrentUserNotNotifiedTodosHandler(c *gin.Context) {
 	handleGetCurrentUserTodos(c, bll.GetNotNotifiedTodos)
 }
 
-func handleGetCurrentUserTodos(c *gin.Context, getTodos func(userID int64) ([]entity.Todo, error)) {
+func handleGetCurrentUserTodos(c *gin.Context, getTodos func(userID int64) ([]repository.Todo, error)) {
 	userID := common.MustGetAccessUserID(c)
 	todos, err := getTodos(userID)
 	if err != nil {

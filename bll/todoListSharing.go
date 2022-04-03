@@ -5,7 +5,6 @@ import (
 
 	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/infrastructure/util"
-	"github.com/yzx9/otodo/model/entity"
 )
 
 /**
@@ -34,7 +33,7 @@ func CreateTodoListSharedUser(userID int64, token string) error {
 	return nil
 }
 
-func GetTodoListSharedUsers(userID, todoListID int64) ([]entity.User, error) {
+func GetTodoListSharedUsers(userID, todoListID int64) ([]repository.User, error) {
 	_, err := OwnOrSharedTodoList(userID, todoListID)
 	if err != nil {
 		return nil, err
@@ -78,20 +77,20 @@ func ExistTodoListSharing(userID, todoListID int64) (bool, error) {
 }
 
 // owner or shared user
-func OwnOrSharedTodoList(userID, todoListID int64) (entity.TodoList, error) {
+func OwnOrSharedTodoList(userID, todoListID int64) (repository.TodoList, error) {
 	todoList, err := repository.SelectTodoList(todoListID)
 	if err != nil {
-		return entity.TodoList{}, fmt.Errorf("fails to get todo list: %v", todoListID)
+		return repository.TodoList{}, fmt.Errorf("fails to get todo list: %v", todoListID)
 	}
 
 	if todoList.UserID != userID {
 		sharing, err := ExistTodoListSharing(userID, todoListID)
 		if err != nil {
-			return entity.TodoList{}, fmt.Errorf("fails to get todo list sharing: %v", todoListID)
+			return repository.TodoList{}, fmt.Errorf("fails to get todo list sharing: %v", todoListID)
 		}
 
 		if !sharing {
-			return entity.TodoList{}, util.NewErrorWithForbidden("unable to handle unauthorized todo list: %v", todoListID)
+			return repository.TodoList{}, util.NewErrorWithForbidden("unable to handle unauthorized todo list: %v", todoListID)
 		}
 	}
 

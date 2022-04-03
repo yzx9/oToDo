@@ -1,20 +1,32 @@
 package repository
 
 import (
+	"time"
+
 	"github.com/yzx9/otodo/infrastructure/util"
-	"github.com/yzx9/otodo/model/entity"
 )
 
-func InsertTodoStep(step *entity.TodoStep) error {
+type TodoStep struct {
+	Entity
+
+	Name   string     `json:"name" gorm:"-"`
+	Done   bool       `json:"done"`
+	DoneAt *time.Time `json:"doneAt"`
+
+	TodoID int64 `json:"todoID"`
+	Todo   Todo  `json:"-"`
+}
+
+func InsertTodoStep(step *TodoStep) error {
 	err := db.Create(step).Error
 	return util.WrapGormErr(err, "todo step")
 }
 
-func SelectTodoStep(id int64) (entity.TodoStep, error) {
-	var step entity.TodoStep
+func SelectTodoStep(id int64) (TodoStep, error) {
+	var step TodoStep
 	err := db.
-		Where(&entity.TodoStep{
-			Entity: entity.Entity{
+		Where(&TodoStep{
+			Entity: Entity{
 				ID: id,
 			},
 		}).
@@ -24,10 +36,10 @@ func SelectTodoStep(id int64) (entity.TodoStep, error) {
 	return step, util.WrapGormErr(err, "todo step")
 }
 
-func SelectTodoSteps(todoID int64) ([]entity.TodoStep, error) {
-	var steps []entity.TodoStep
+func SelectTodoSteps(todoID int64) ([]TodoStep, error) {
+	var steps []TodoStep
 	err := db.
-		Where(entity.TodoStep{
+		Where(TodoStep{
 			TodoID: todoID,
 		}).
 		Find(&steps).
@@ -36,15 +48,15 @@ func SelectTodoSteps(todoID int64) ([]entity.TodoStep, error) {
 	return steps, util.WrapGormErr(err, "todo step")
 }
 
-func SaveTodoStep(todoStep *entity.TodoStep) error {
+func SaveTodoStep(todoStep *TodoStep) error {
 	err := db.Save(&todoStep).Error
 	return util.WrapGormErr(err, "todo step")
 }
 
 func DeleteTodoStep(id int64) error {
 	err := db.
-		Delete(&entity.TodoStep{
-			Entity: entity.Entity{
+		Delete(&TodoStep{
+			Entity: Entity{
 				ID: id,
 			},
 		}).

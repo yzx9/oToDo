@@ -10,9 +10,9 @@ import (
 
 	"github.com/yzx9/otodo/infrastructure/config"
 	"github.com/yzx9/otodo/infrastructure/errors"
+	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/infrastructure/util"
 	"github.com/yzx9/otodo/model/dto"
-	"github.com/yzx9/otodo/model/entity"
 )
 
 const githubOAuthStateLen = 10
@@ -37,10 +37,10 @@ func CreateGithubOAuthURI() (string, error) {
 	return uri, nil
 }
 
-func FetchGithubOAuthToken(code, state string) (entity.ThirdPartyOAuthToken, error) {
+func FetchGithubOAuthToken(code, state string) (repository.ThirdPartyOAuthToken, error) {
 	c := config.GitHub
-	write := func(err error) (entity.ThirdPartyOAuthToken, error) {
-		return entity.ThirdPartyOAuthToken{}, err
+	write := func(err error) (repository.ThirdPartyOAuthToken, error) {
+		return repository.ThirdPartyOAuthToken{}, err
 	}
 
 	// Check state
@@ -87,9 +87,9 @@ func FetchGithubOAuthToken(code, state string) (entity.ThirdPartyOAuthToken, err
 		return write(util.NewErrorWithUnknown("fails to parse github access token"))
 	}
 
-	return entity.ThirdPartyOAuthToken{
+	return repository.ThirdPartyOAuthToken{
 		Active: true,
-		Type:   int8(entity.ThirdPartyTokenTypeGithubAccessToken),
+		Type:   int8(repository.ThirdPartyTokenTypeGithubAccessToken),
 		Token:  payload.AccessToken,
 		Scope:  payload.Scope,
 	}, nil

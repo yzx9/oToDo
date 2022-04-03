@@ -5,10 +5,9 @@ import (
 
 	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/infrastructure/util"
-	"github.com/yzx9/otodo/model/entity"
 )
 
-func CreateTodoListFolder(userID int64, folder *entity.TodoListFolder) error {
+func CreateTodoListFolder(userID int64, folder *repository.TodoListFolder) error {
 	folder.UserID = userID
 	if err := repository.InsertTodoListFolder(folder); err != nil {
 		return fmt.Errorf("fails to create todo list folder: %w", err)
@@ -17,11 +16,11 @@ func CreateTodoListFolder(userID int64, folder *entity.TodoListFolder) error {
 	return nil
 }
 
-func GetTodoListFolder(userID, todoListFolderID int64) (entity.TodoListFolder, error) {
+func GetTodoListFolder(userID, todoListFolderID int64) (repository.TodoListFolder, error) {
 	return OwnTodoListFolder(userID, todoListFolderID)
 }
 
-func GetTodoListFolders(userID int64) ([]entity.TodoListFolder, error) {
+func GetTodoListFolders(userID int64) ([]repository.TodoListFolder, error) {
 	vec, err := repository.SelectTodoListFolders(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get todo list folder: %w", err)
@@ -30,9 +29,9 @@ func GetTodoListFolders(userID int64) ([]entity.TodoListFolder, error) {
 	return vec, nil
 }
 
-func DeleteTodoListFolder(userID, todoListFolderID int64) (entity.TodoListFolder, error) {
-	write := func(err error) (entity.TodoListFolder, error) {
-		return entity.TodoListFolder{}, err
+func DeleteTodoListFolder(userID, todoListFolderID int64) (repository.TodoListFolder, error) {
+	write := func(err error) (repository.TodoListFolder, error) {
+		return repository.TodoListFolder{}, err
 	}
 
 	folder, err := OwnTodoListFolder(userID, todoListFolderID)
@@ -54,14 +53,14 @@ func DeleteTodoListFolder(userID, todoListFolderID int64) (entity.TodoListFolder
 }
 
 // Verify permission
-func OwnTodoListFolder(userID, todoListFolderID int64) (entity.TodoListFolder, error) {
+func OwnTodoListFolder(userID, todoListFolderID int64) (repository.TodoListFolder, error) {
 	todoListFolder, err := repository.SelectTodoListFolder(todoListFolderID)
 	if err != nil {
-		return entity.TodoListFolder{}, fmt.Errorf("fails to get todo list folder: %v", todoListFolderID)
+		return repository.TodoListFolder{}, fmt.Errorf("fails to get todo list folder: %v", todoListFolderID)
 	}
 
 	if todoListFolder.UserID != userID {
-		return entity.TodoListFolder{}, util.NewErrorWithForbidden("unable to handle non-owned todo list folder: %v", todoListFolderID)
+		return repository.TodoListFolder{}, util.NewErrorWithForbidden("unable to handle non-owned todo list folder: %v", todoListFolderID)
 	}
 
 	return todoListFolder, nil

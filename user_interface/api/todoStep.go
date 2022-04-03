@@ -6,9 +6,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/bll"
 	"github.com/yzx9/otodo/infrastructure/errors"
+	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/infrastructure/util"
 	"github.com/yzx9/otodo/model/dto"
-	"github.com/yzx9/otodo/model/entity"
 	"github.com/yzx9/otodo/user_interface/common"
 )
 
@@ -38,7 +38,7 @@ func PostTodoStepHandler(c *gin.Context) {
 
 // Update todo step
 func PutTodoStepHandler(c *gin.Context) {
-	step := entity.TodoStep{}
+	step := repository.TodoStep{}
 	if err := c.ShouldBind(&step); err != nil {
 		common.AbortWithError(c, err)
 		return

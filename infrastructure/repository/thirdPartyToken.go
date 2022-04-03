@@ -2,17 +2,38 @@ package repository
 
 import (
 	"github.com/yzx9/otodo/infrastructure/util"
-	"github.com/yzx9/otodo/model/entity"
 )
 
-func InsertThirdPartyOAuthToken(entity *entity.ThirdPartyOAuthToken) error {
+type ThirdPartyTokenType int8
+
+const (
+	ThirdPartyTokenTypeGithubAccessToken ThirdPartyTokenType = 10*iota + 11
+)
+
+type ThirdPartyOAuthToken struct {
+	Entity
+
+	Active bool   `json:"active"`
+	Type   int8   `json:"type" gorm:"index:idx_third_party_oauth_tokens_user,unique"`
+	Token  string `json:"token" gorm:"size:128"`
+	Scope  string `json:"scope" gorm:"size:32"`
+
+	UserID int64 `json:"userID" gorm:"index:idx_third_party_oauth_tokens_user,unique"`
+	User   User  `json:"-"`
+}
+
+func (ThirdPartyOAuthToken) TableName() string {
+	return "third_party_oauth_tokens"
+}
+
+func InsertThirdPartyOAuthToken(entity *ThirdPartyOAuthToken) error {
 	err := db.Create(entity).Error
 	return util.WrapGormErr(err, "third party token")
 }
 
-func UpdateThirdPartyOAuthToken(new *entity.ThirdPartyOAuthToken) error {
+func UpdateThirdPartyOAuthToken(new *ThirdPartyOAuthToken) error {
 	err := db.
-		Where(&entity.ThirdPartyOAuthToken{
+		Where(&ThirdPartyOAuthToken{
 			UserID: new.UserID,
 			Type:   new.Type,
 		}).
@@ -22,11 +43,11 @@ func UpdateThirdPartyOAuthToken(new *entity.ThirdPartyOAuthToken) error {
 	return util.WrapGormErr(err, "third party token")
 }
 
-func ExistActiveThirdPartyOAuthToken(userID int64, tokenType entity.ThirdPartyTokenType) (bool, error) {
+func ExistActiveThirdPartyOAuthToken(userID int64, tokenType ThirdPartyTokenType) (bool, error) {
 	var count int64
 	err := db.
-		Model(entity.ThirdPartyOAuthToken{}).
-		Where(entity.ThirdPartyOAuthToken{
+		Model(ThirdPartyOAuthToken{}).
+		Where(ThirdPartyOAuthToken{
 			UserID: userID,
 			Type:   int8(tokenType),
 			Active: true,

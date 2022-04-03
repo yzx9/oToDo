@@ -3,10 +3,25 @@ package repository
 import (
 	"github.com/yzx9/otodo/infrastructure/util"
 	"github.com/yzx9/otodo/model/dto"
-	"github.com/yzx9/otodo/model/entity"
 )
 
-func InsertTodoList(todoList *entity.TodoList) error {
+type TodoList struct {
+	Entity
+
+	Name      string `json:"name" gorm:"size:128"`
+	IsBasic   bool   `json:"-"`
+	IsSharing bool   `json:"isSharing"`
+
+	UserID int64 `json:"userID"`
+	User   User  `json:"-"`
+
+	TodoListFolderID int64          `json:"todoListFolderID"`
+	TodoListFolder   TodoListFolder `json:"-"`
+
+	SharedUsers []*User `json:"-" gorm:"many2many:todo_list_shared_users"`
+}
+
+func InsertTodoList(todoList *TodoList) error {
 	err := db.
 		Create(todoList).
 		Error
@@ -14,11 +29,11 @@ func InsertTodoList(todoList *entity.TodoList) error {
 	return util.WrapGormErr(err, "todo list")
 }
 
-func SelectTodoList(id int64) (entity.TodoList, error) {
-	var list entity.TodoList
+func SelectTodoList(id int64) (TodoList, error) {
+	var list TodoList
 	err := db.
-		Where(&entity.TodoList{
-			Entity: entity.Entity{
+		Where(&TodoList{
+			Entity: Entity{
 				ID: id,
 			},
 		}).
@@ -28,10 +43,10 @@ func SelectTodoList(id int64) (entity.TodoList, error) {
 	return list, util.WrapGormErr(err, "todo list")
 }
 
-func SelectTodoLists(userId int64) ([]entity.TodoList, error) {
-	var lists []entity.TodoList
+func SelectTodoLists(userId int64) ([]TodoList, error) {
+	var lists []TodoList
 	err := db.
-		Where(entity.TodoList{
+		Where(TodoList{
 			UserID: userId,
 		}).
 		Find(&lists).
@@ -43,11 +58,11 @@ func SelectTodoLists(userId int64) ([]entity.TodoList, error) {
 func SelectTodoListsWithMenuFormat(userID int64) ([]dto.TodoListMenuItemRaw, error) {
 	var lists []dto.TodoListMenuItemRaw
 	err := db.
-		Model(entity.TodoList{}).
-		Where(entity.TodoList{
+		Model(TodoList{}).
+		Where(TodoList{
 			UserID: userID,
 		}).
-		Not(entity.TodoList{
+		Not(TodoList{
 			IsBasic: true, // Skip basic todo list
 		}).
 		Select("id", "name", "todo_list_folder_id", "(SELECT count(todos.id) FROM todos WHERE todos.todo_list_id = todo_lists.id) as count").
@@ -57,15 +72,15 @@ func SelectTodoListsWithMenuFormat(userID int64) ([]dto.TodoListMenuItemRaw, err
 	return lists, util.WrapGormErr(err, "todo list")
 }
 
-func SaveTodoList(todoList *entity.TodoList) error {
+func SaveTodoList(todoList *TodoList) error {
 	re := db.Save(&todoList)
 	return util.WrapGormErr(re.Error, "todo list")
 }
 
 func DeleteTodoList(id int64) error {
 	err := db.
-		Delete(&entity.Todo{
-			Entity: entity.Entity{
+		Delete(&Todo{
+			Entity: Entity{
 				ID: id,
 			},
 		}).
@@ -76,10 +91,10 @@ func DeleteTodoList(id int64) error {
 
 func DeleteTodoListsByFolder(todoListFolderID int64) (int64, error) {
 	re := db.
-		Where(entity.TodoList{
+		Where(TodoList{
 			TodoListFolderID: todoListFolderID,
 		}).
-		Delete(entity.TodoList{})
+		Delete(TodoList{})
 
 	return re.RowsAffected, util.WrapGormErr(re.Error, "todo list")
 }
@@ -87,9 +102,9 @@ func DeleteTodoListsByFolder(todoListFolderID int64) (int64, error) {
 func ExistTodoList(id int64) (bool, error) {
 	var count int64
 	err := db.
-		Model(&entity.TodoList{}).
-		Where(&entity.TodoList{
-			Entity: entity.Entity{
+		Model(&TodoList{}).
+		Where(&TodoList{
+			Entity: Entity{
 				ID: id,
 			},
 		}).
@@ -105,14 +120,14 @@ func ExistTodoList(id int64) (bool, error) {
 
 func InsertTodoListSharedUser(userID, todoListID int64) error {
 	err := db.
-		Model(&entity.User{
-			Entity: entity.Entity{
+		Model(&User{
+			Entity: Entity{
 				ID: userID,
 			},
 		}).
 		Association("SharedTodoLists").
-		Append(&entity.TodoList{
-			Entity: entity.Entity{
+		Append(&TodoList{
+			Entity: Entity{
 				ID: todoListID,
 			},
 		})
@@ -120,11 +135,11 @@ func InsertTodoListSharedUser(userID, todoListID int64) error {
 	return util.WrapGormErr(err, "todo list shared user")
 }
 
-func SelectSharedTodoLists(userID int64) ([]entity.TodoList, error) {
-	var lists []entity.TodoList
+func SelectSharedTodoLists(userID int64) ([]TodoList, error) {
+	var lists []TodoList
 	err := db.
-		Model(&entity.User{
-			Entity: entity.Entity{
+		Model(&User{
+			Entity: Entity{
 				ID: userID,
 			},
 		}).
@@ -134,11 +149,11 @@ func SelectSharedTodoLists(userID int64) ([]entity.TodoList, error) {
 	return lists, util.WrapGormErr(err, "user shared todo list")
 }
 
-func SelectTodoListSharedUsers(todoListID int64) ([]entity.User, error) {
-	var users []entity.User
+func SelectTodoListSharedUsers(todoListID int64) ([]User, error) {
+	var users []User
 	err := db.
-		Model(&entity.TodoList{
-			Entity: entity.Entity{
+		Model(&TodoList{
+			Entity: Entity{
 				ID: todoListID,
 			},
 		}).
@@ -150,14 +165,14 @@ func SelectTodoListSharedUsers(todoListID int64) ([]entity.User, error) {
 
 func DeleteTodoListSharedUser(userID, todoListID int64) error {
 	err := db.
-		Model(&entity.TodoList{
-			Entity: entity.Entity{
+		Model(&TodoList{
+			Entity: Entity{
 				ID: todoListID,
 			},
 		}).
 		Association("SharedUsers").
-		Delete(&entity.User{
-			Entity: entity.Entity{
+		Delete(&User{
+			Entity: Entity{
 				ID: userID,
 			},
 		})
@@ -167,16 +182,16 @@ func DeleteTodoListSharedUser(userID, todoListID int64) error {
 
 func ExistTodoListSharing(userID, todoListID int64) (bool, error) {
 	// TODO[pref]: count in db
-	var lists []entity.TodoList
+	var lists []TodoList
 	err := db.
-		Model(&entity.User{
-			Entity: entity.Entity{
+		Model(&User{
+			Entity: Entity{
 				ID: userID,
 			},
 		}).
 		Association("SharedTodoLists").
-		Find(&lists, &entity.TodoList{
-			Entity: entity.Entity{
+		Find(&lists, &TodoList{
+			Entity: Entity{
 				ID: todoListID,
 			},
 		})

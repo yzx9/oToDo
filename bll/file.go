@@ -12,50 +12,49 @@ import (
 	"github.com/yzx9/otodo/infrastructure/errors"
 	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/infrastructure/util"
-	"github.com/yzx9/otodo/model/entity"
 )
 
 const maxFileSize = 8 << 20 // 8MiB
 
 var supportedFileTypeRegex = regexp.MustCompile(`.(jpg|jpeg|JPG|png|PNG|gif|GIF|ico|ICO)$`)
 
-func UploadPublicFile(file *multipart.FileHeader) (entity.File, error) {
+func UploadPublicFile(file *multipart.FileHeader) (repository.File, error) {
 	// only support img now
 	if !supportedFileTypeRegex.MatchString(file.Filename) {
-		return entity.File{}, util.NewErrorWithForbidden("unsupported file type")
+		return repository.File{}, util.NewErrorWithForbidden("unsupported file type")
 	}
 
-	record := entity.File{
+	record := repository.File{
 		FileName:   file.Filename,
-		AccessType: int8(entity.FileTypePublic),
+		AccessType: int8(repository.FileTypePublic),
 	}
 	err := uploadFile(file, &record)
 	return record, err
 }
 
-func UploadTodoFile(userID, todoID int64, file *multipart.FileHeader) (entity.File, error) {
+func UploadTodoFile(userID, todoID int64, file *multipart.FileHeader) (repository.File, error) {
 	_, err := OwnTodo(userID, todoID)
 	if err != nil {
-		return entity.File{}, err
+		return repository.File{}, err
 	}
 
-	record := entity.File{
+	record := repository.File{
 		FileName:   file.Filename,
-		AccessType: int8(entity.FileTypeTodo),
+		AccessType: int8(repository.FileTypeTodo),
 		RelatedID:  todoID,
 	}
 	if err := uploadFile(file, &record); err != nil {
-		return entity.File{}, err
+		return repository.File{}, err
 	}
 
 	if err := repository.InsertTodoFile(todoID, record.ID); err != nil {
-		return entity.File{}, fmt.Errorf("fails to upload todo file: %w", err)
+		return repository.File{}, fmt.Errorf("fails to upload todo file: %w", err)
 	}
 
 	return record, nil
 }
 
-func uploadFile(file *multipart.FileHeader, record *entity.File) error {
+func uploadFile(file *multipart.FileHeader, record *repository.File) error {
 	write := func(err error) error {
 		return fmt.Errorf("fails to upload file: %w", err)
 	}
@@ -82,7 +81,7 @@ func uploadFile(file *multipart.FileHeader, record *entity.File) error {
 	return nil
 }
 
-func GetFile(fileID int64) (*entity.File, error) {
+func GetFile(fileID int64) (*repository.File, error) {
 	file, err := repository.SelectFile(fileID)
 	return file, fmt.Errorf("fails to get file: %w", err)
 }
@@ -102,17 +101,17 @@ func GetFilePath(userID int64, fileID string) (string, error) {
 	return getFilePath(file), nil
 }
 
-func OwnFile(userID, fileID int64) (*entity.File, error) {
+func OwnFile(userID, fileID int64) (*repository.File, error) {
 	file, err := GetFile(fileID)
 	if err != nil {
 		return nil, err
 	}
 
-	switch entity.FileAccessType(file.AccessType) {
-	case entity.FileTypePublic:
+	switch repository.FileAccessType(file.AccessType) {
+	case repository.FileTypePublic:
 		break
 
-	case entity.FileTypeTodo:
+	case repository.FileTypeTodo:
 		if _, err := OwnTodo(userID, file.RelatedID); err != nil {
 			return nil, util.NewErrorWithForbidden("unable to get non-owned file: %w", err)
 		}
@@ -124,7 +123,7 @@ func OwnFile(userID, fileID int64) (*entity.File, error) {
 	return file, nil
 }
 
-func applyFilePathTemplate(file *entity.File) string {
+func applyFilePathTemplate(file *repository.File) string {
 	template := config.Server.FilePathTemplate
 	template = strings.ReplaceAll(template, ":id", strconv.FormatInt(file.ID, 10))
 	template = strings.ReplaceAll(template, ":ext", filepath.Ext(file.FileName))
@@ -134,7 +133,7 @@ func applyFilePathTemplate(file *entity.File) string {
 	return template
 }
 
-func getFilePath(file *entity.File) string {
+func getFilePath(file *repository.File) string {
 	// TODO[feat]: If exist multi servers, how to get file? maybe we need redirect
 	return file.FilePath
 }

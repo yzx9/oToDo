@@ -2,19 +2,29 @@ package repository
 
 import (
 	"github.com/yzx9/otodo/infrastructure/util"
-	"github.com/yzx9/otodo/model/entity"
 )
 
-func InsertTodoListFolder(todoListFolder *entity.TodoListFolder) error {
+type TodoListFolder struct {
+	Entity
+
+	Name string `json:"name" gorm:"size:128"`
+
+	UserID int64 `json:"userID"`
+	User   User  `json:"-"`
+
+	TodoLists []TodoList `json:"-"`
+}
+
+func InsertTodoListFolder(todoListFolder *TodoListFolder) error {
 	re := db.Create(todoListFolder).Error
 	return util.WrapGormErr(re, "todo list folder")
 }
 
-func SelectTodoListFolder(id int64) (entity.TodoListFolder, error) {
-	var folder entity.TodoListFolder
+func SelectTodoListFolder(id int64) (TodoListFolder, error) {
+	var folder TodoListFolder
 	err := db.
-		Where(&entity.TodoListFolder{
-			Entity: entity.Entity{
+		Where(&TodoListFolder{
+			Entity: Entity{
 				ID: id,
 			},
 		}).
@@ -24,10 +34,10 @@ func SelectTodoListFolder(id int64) (entity.TodoListFolder, error) {
 	return folder, util.WrapGormErr(err, "todo list folder")
 }
 
-func SelectTodoListFolders(userId int64) ([]entity.TodoListFolder, error) {
-	var folders []entity.TodoListFolder
+func SelectTodoListFolders(userId int64) ([]TodoListFolder, error) {
+	var folders []TodoListFolder
 	err := db.
-		Where(entity.TodoListFolder{
+		Where(TodoListFolder{
 			UserID: userId,
 		}).
 		Find(&folders).
@@ -38,8 +48,8 @@ func SelectTodoListFolders(userId int64) ([]entity.TodoListFolder, error) {
 
 func DeleteTodoListFolder(id int64) error {
 	err := db.
-		Delete(&entity.TodoListFolder{
-			Entity: entity.Entity{
+		Delete(&TodoListFolder{
+			Entity: Entity{
 				ID: id,
 			},
 		}).
@@ -51,9 +61,9 @@ func DeleteTodoListFolder(id int64) error {
 func ExistTodoListFolder(id int64) (bool, error) {
 	var count int64
 	err := db.
-		Model(&entity.TodoListFolder{}).
-		Where(&entity.TodoListFolder{
-			Entity: entity.Entity{
+		Model(&TodoListFolder{}).
+		Where(&TodoListFolder{
+			Entity: Entity{
 				ID: id,
 			},
 		}).

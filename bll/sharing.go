@@ -7,48 +7,47 @@ import (
 	"github.com/google/uuid"
 	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/infrastructure/util"
-	"github.com/yzx9/otodo/model/entity"
 )
 
 /**
  * oTodo List Sharing
  */
-func CreateTodoListSharing(userID, todoListID int64) (entity.Sharing, error) {
+func CreateTodoListSharing(userID, todoListID int64) (repository.Sharing, error) {
 	todoList, err := OwnTodoList(userID, todoListID)
 	if err != nil {
-		return entity.Sharing{}, err
+		return repository.Sharing{}, err
 	}
 
 	if todoList.IsBasic {
-		return entity.Sharing{}, fmt.Errorf("unable to share basic todo list: %v", todoListID)
+		return repository.Sharing{}, fmt.Errorf("unable to share basic todo list: %v", todoListID)
 	}
 
 	// Only allow one sharing active
-	if _, err = repository.DeleteSharings(userID, entity.SharingTypeTodoList); err != nil {
-		return entity.Sharing{}, fmt.Errorf("fails to delete old sharing tokens: %w", err)
+	if _, err = repository.DeleteSharings(userID, repository.SharingTypeTodoList); err != nil {
+		return repository.Sharing{}, fmt.Errorf("fails to delete old sharing tokens: %w", err)
 	}
 
-	sharing := entity.Sharing{
+	sharing := repository.Sharing{
 		Token:     newSharingToken(),
 		Active:    true,
-		Type:      entity.SharingTypeTodoList,
+		Type:      repository.SharingTypeTodoList,
 		RelatedID: todoListID,
 		UserID:    userID,
 	}
 	if err := repository.InsertSharing(&sharing); err != nil {
-		return entity.Sharing{}, fmt.Errorf("fails to create sharing token: %w", err)
+		return repository.Sharing{}, fmt.Errorf("fails to create sharing token: %w", err)
 	}
 
 	return sharing, nil
 }
 
-func GetActiveTodoListSharings(userID, todoListID int64) ([]entity.Sharing, error) {
-	sharings, err := repository.SelectActiveSharings(userID, entity.SharingTypeTodoList)
+func GetActiveTodoListSharings(userID, todoListID int64) ([]repository.Sharing, error) {
+	sharings, err := repository.SelectActiveSharings(userID, repository.SharingTypeTodoList)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get sharing tokens: %w", err)
 	}
 
-	vec := make([]entity.Sharing, 0)
+	vec := make([]repository.Sharing, 0)
 	for i := range sharings {
 		if sharings[i].RelatedID == todoListID {
 			vec = append(vec, sharings[i])
@@ -64,7 +63,7 @@ func DeleteTodoListSharing(userID int64, token string) error {
 		return err
 	}
 
-	if sharing.Type != entity.SharingTypeTodoList {
+	if sharing.Type != repository.SharingTypeTodoList {
 		return util.NewErrorWithForbidden("invalid sharing token: %v")
 	}
 
@@ -80,14 +79,14 @@ func DeleteTodoListSharing(userID int64, token string) error {
 	return nil
 }
 
-func ValidSharing(token string) (entity.Sharing, error) {
+func ValidSharing(token string) (repository.Sharing, error) {
 	sharing, err := repository.SelectSharing(token)
 	if err != nil {
-		return entity.Sharing{}, fmt.Errorf("invalid sharing token: %w", err)
+		return repository.Sharing{}, fmt.Errorf("invalid sharing token: %w", err)
 	}
 
 	if !sharing.Active {
-		return entity.Sharing{}, util.NewErrorWithForbidden("sharing token has been inactive: %v", token)
+		return repository.Sharing{}, util.NewErrorWithForbidden("sharing token has been inactive: %v", token)
 	}
 
 	return sharing, nil

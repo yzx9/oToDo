@@ -6,10 +6,9 @@ import (
 
 	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/infrastructure/util"
-	"github.com/yzx9/otodo/model/entity"
 )
 
-func CreateTodo(userID int64, todo *entity.Todo) error {
+func CreateTodo(userID int64, todo *repository.Todo) error {
 	_, err := OwnOrSharedTodoList(userID, todo.TodoListID)
 	if err != nil {
 		return fmt.Errorf("fails to get todo list: %w", err)
@@ -30,16 +29,16 @@ func CreateTodo(userID int64, todo *entity.Todo) error {
 	return nil
 }
 
-func GetTodo(userID, todoID int64) (entity.Todo, error) {
+func GetTodo(userID, todoID int64) (repository.Todo, error) {
 	todo, err := OwnTodo(userID, todoID)
 	if err != nil {
-		return entity.Todo{}, fmt.Errorf("fails to get todo: %w", err)
+		return repository.Todo{}, fmt.Errorf("fails to get todo: %w", err)
 	}
 
 	return todo, nil
 }
 
-func GetTodos(userID, todoListID int64) ([]entity.Todo, error) {
+func GetTodos(userID, todoListID int64) ([]repository.Todo, error) {
 	if _, err := OwnOrSharedTodoList(userID, todoListID); err != nil {
 		return nil, err
 	}
@@ -47,7 +46,7 @@ func GetTodos(userID, todoListID int64) ([]entity.Todo, error) {
 	return ForceGetTodos(todoListID)
 }
 
-func ForceGetTodos(todoListID int64) ([]entity.Todo, error) {
+func ForceGetTodos(todoListID int64) ([]repository.Todo, error) {
 	todos, err := repository.SelectTodos(todoListID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get todos: %w", err)
@@ -56,7 +55,7 @@ func ForceGetTodos(todoListID int64) ([]entity.Todo, error) {
 	return todos, nil
 }
 
-func GetImportantTodos(userID int64) ([]entity.Todo, error) {
+func GetImportantTodos(userID int64) ([]repository.Todo, error) {
 	todos, err := repository.SelectImportantTodos(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get important todos: %w", err)
@@ -65,7 +64,7 @@ func GetImportantTodos(userID int64) ([]entity.Todo, error) {
 	return todos, nil
 }
 
-func GetPlannedTodos(userID int64) ([]entity.Todo, error) {
+func GetPlannedTodos(userID int64) ([]repository.Todo, error) {
 	todos, err := repository.SelectPlanedTodos(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get planed todos: %w", err)
@@ -74,7 +73,7 @@ func GetPlannedTodos(userID int64) ([]entity.Todo, error) {
 	return todos, nil
 }
 
-func GetNotNotifiedTodos(userID int64) ([]entity.Todo, error) {
+func GetNotNotifiedTodos(userID int64) ([]repository.Todo, error) {
 	todos, err := repository.SelectNotNotifiedTodos(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get not-notified todos: %w", err)
@@ -83,7 +82,7 @@ func GetNotNotifiedTodos(userID int64) ([]entity.Todo, error) {
 	return todos, nil
 }
 
-func UpdateTodo(userID int64, todo *entity.Todo) error {
+func UpdateTodo(userID int64, todo *repository.Todo) error {
 	// Limits
 	oldTodo, err := OwnTodo(userID, todo.ID)
 	if err != nil {
@@ -129,14 +128,14 @@ func UpdateTodo(userID int64, todo *entity.Todo) error {
 	return nil
 }
 
-func DeleteTodo(userID, todoID int64) (entity.Todo, error) {
+func DeleteTodo(userID, todoID int64) (repository.Todo, error) {
 	todo, err := OwnTodo(userID, todoID)
 	if err != nil {
-		return entity.Todo{}, err
+		return repository.Todo{}, err
 	}
 
 	if err = repository.DeleteTodo(todoID); err != nil {
-		return entity.Todo{}, fmt.Errorf("fails to delete todo: %w", err)
+		return repository.Todo{}, fmt.Errorf("fails to delete todo: %w", err)
 	}
 
 	go UpdateTagAsync(&todo, "")
@@ -144,14 +143,14 @@ func DeleteTodo(userID, todoID int64) (entity.Todo, error) {
 	return todo, nil
 }
 
-func OwnTodo(userID, todoID int64) (entity.Todo, error) {
+func OwnTodo(userID, todoID int64) (repository.Todo, error) {
 	todo, err := repository.SelectTodo(todoID)
 	if err != nil {
-		return entity.Todo{}, fmt.Errorf("fails to get todo: %w", err)
+		return repository.Todo{}, fmt.Errorf("fails to get todo: %w", err)
 	}
 
 	if _, err = OwnOrSharedTodoList(userID, todo.TodoListID); err != nil {
-		return entity.Todo{}, util.NewErrorWithForbidden("unable to handle non-owned todo: %v", todo.ID)
+		return repository.Todo{}, util.NewErrorWithForbidden("unable to handle non-owned todo: %v", todo.ID)
 	}
 
 	return todo, nil

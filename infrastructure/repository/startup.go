@@ -3,17 +3,18 @@ package repository
 import (
 	"fmt"
 
+	"github.com/bwmarrin/snowflake"
 	"github.com/yzx9/otodo/infrastructure/config"
 	"github.com/yzx9/otodo/infrastructure/errors"
 	"github.com/yzx9/otodo/infrastructure/util"
-	"github.com/yzx9/otodo/model/entity"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
 var db *gorm.DB
+var NewID func() int64
 
-func initDatabase() error {
+func startUpDatabase() error {
 	var err error
 	write := func(err error) error {
 		return util.NewError(errors.ErrDatabaseConnectFailed, "fails to connect database: %w", err)
@@ -38,22 +39,39 @@ func initDatabase() error {
 
 func autoMigrate() error {
 	return db.AutoMigrate(
-		&entity.File{},
+		&File{},
 
-		&entity.User{},
-		&entity.UserInvalidRefreshToken{},
+		&User{},
+		&UserInvalidRefreshToken{},
 
-		&entity.Todo{},
-		&entity.TodoStep{},
-		&entity.TodoRepeatPlan{},
+		&Todo{},
+		&TodoStep{},
+		&TodoRepeatPlan{},
 
-		&entity.TodoList{},
-		&entity.TodoListFolder{},
+		&TodoList{},
+		&TodoListFolder{},
 
-		&entity.Tag{},
+		&Tag{},
 
-		&entity.Sharing{},
+		&Sharing{},
 
-		&entity.ThirdPartyOAuthToken{},
+		&ThirdPartyOAuthToken{},
 	)
+}
+
+func startUpIDGenerator() error {
+	node, err := snowflake.NewNode(1)
+	if err != nil {
+		return fmt.Errorf("fails to create id generator")
+	}
+
+	NewID = func() int64 {
+		return node.Generate().Int64()
+	}
+
+	return nil
+}
+
+func StartUp() error {
+	return startUpDatabase()
 }

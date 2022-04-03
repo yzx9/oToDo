@@ -2,10 +2,18 @@ package repository
 
 import (
 	"github.com/yzx9/otodo/infrastructure/util"
-	"github.com/yzx9/otodo/model/entity"
 )
 
-func InsertUserInvalidRefreshToken(entity *entity.UserInvalidRefreshToken) error {
+type UserInvalidRefreshToken struct {
+	Entity
+
+	UserID int64 `json:"userID"`
+	User   User  `json:"-"`
+
+	TokenID string `json:"tokenID" gorm:"type:char(36);"`
+}
+
+func InsertUserInvalidRefreshToken(entity *UserInvalidRefreshToken) error {
 	err := db.Create(entity).Error
 	return util.WrapGormErr(err, "user invalid refresh token")
 }
@@ -13,8 +21,8 @@ func InsertUserInvalidRefreshToken(entity *entity.UserInvalidRefreshToken) error
 func ExistUserInvalidRefreshToken(userID int64, tokenID string) (bool, error) {
 	var count int64
 	err := db.
-		Model(entity.UserInvalidRefreshToken{}).
-		Where(&entity.UserInvalidRefreshToken{
+		Model(UserInvalidRefreshToken{}).
+		Where(&UserInvalidRefreshToken{
 			UserID:  userID,
 			TokenID: tokenID,
 		}).

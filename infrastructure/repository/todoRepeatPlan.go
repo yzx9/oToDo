@@ -1,20 +1,41 @@
 package repository
 
 import (
+	"time"
+
 	"github.com/yzx9/otodo/infrastructure/util"
-	"github.com/yzx9/otodo/model/entity"
 )
 
-func InsertTodoRepeatPlan(plan *entity.TodoRepeatPlan) error {
+type TodoRepeatPlanType string
+
+const (
+	TodoRepeatPlanTypeDay   TodoRepeatPlanType = "day"
+	TodoRepeatPlanTypeWeek  TodoRepeatPlanType = "week"
+	TodoRepeatPlanTypeMonth TodoRepeatPlanType = "month"
+	TodoRepeatPlanTypeYear  TodoRepeatPlanType = "year"
+)
+
+type TodoRepeatPlan struct {
+	Entity
+
+	Type     string     `json:"type" gorm:"size:8"`
+	Interval int        `json:"interval"`
+	Before   *time.Time `json:"before"`
+	Weekday  int8       `json:"weekday"` // BitBools, [0..6]=[Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday]
+
+	Todos []Todo `json:"-"`
+}
+
+func InsertTodoRepeatPlan(plan *TodoRepeatPlan) error {
 	err := db.Create(plan).Error
 	return util.WrapGormErr(err, "todo repeat plan")
 }
 
-func SelectTodoRepeatPlan(id int64) (entity.TodoRepeatPlan, error) {
-	var plan entity.TodoRepeatPlan
+func SelectTodoRepeatPlan(id int64) (TodoRepeatPlan, error) {
+	var plan TodoRepeatPlan
 	err := db.
-		Where(&entity.TodoRepeatPlan{
-			Entity: entity.Entity{
+		Where(&TodoRepeatPlan{
+			Entity: Entity{
 				ID: id,
 			},
 		}).
@@ -24,15 +45,15 @@ func SelectTodoRepeatPlan(id int64) (entity.TodoRepeatPlan, error) {
 	return plan, util.WrapGormErr(err, "todo repeat plan")
 }
 
-func SaveTodoRepeatPlan(todoRepeatPlan *entity.TodoRepeatPlan) error {
+func SaveTodoRepeatPlan(todoRepeatPlan *TodoRepeatPlan) error {
 	err := db.Save(&todoRepeatPlan).Error
 	return util.WrapGormErr(err, "todo repeat plan")
 }
 
 func DeleteTodoRepeatPlan(id int64) error {
 	err := db.
-		Delete(&entity.TodoRepeatPlan{
-			Entity: entity.Entity{
+		Delete(&TodoRepeatPlan{
+			Entity: Entity{
 				ID: id,
 			},
 		}).

@@ -6,27 +6,26 @@ import (
 
 	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/infrastructure/util"
-	"github.com/yzx9/otodo/model/entity"
 )
 
-func CreateTodoStep(userID, todoID int64, name string) (entity.TodoStep, error) {
+func CreateTodoStep(userID, todoID int64, name string) (repository.TodoStep, error) {
 	_, err := OwnTodo(userID, todoID)
 	if err != nil {
-		return entity.TodoStep{}, util.NewErrorWithNotFound("todo not found: %v", todoID)
+		return repository.TodoStep{}, util.NewErrorWithNotFound("todo not found: %v", todoID)
 	}
 
-	step := entity.TodoStep{
+	step := repository.TodoStep{
 		Name:   name,
 		TodoID: todoID,
 	}
 	if err = repository.InsertTodoStep(&step); err != nil {
-		return entity.TodoStep{}, util.NewErrorWithUnknown("fails to create todo step")
+		return repository.TodoStep{}, util.NewErrorWithUnknown("fails to create todo step")
 	}
 
 	return step, nil
 }
 
-func UpdateTodoStep(userID int64, step *entity.TodoStep) error {
+func UpdateTodoStep(userID int64, step *repository.TodoStep) error {
 	oldStep, err := OwnTodoStep(userID, step.ID)
 	if err != nil {
 		return err
@@ -47,28 +46,28 @@ func UpdateTodoStep(userID int64, step *entity.TodoStep) error {
 	return nil
 }
 
-func DeleteTodoStep(userID, todoID, todoStepID int64) (entity.TodoStep, error) {
+func DeleteTodoStep(userID, todoID, todoStepID int64) (repository.TodoStep, error) {
 	step, err := OwnTodoStep(userID, todoStepID)
 	if err != nil {
-		return entity.TodoStep{}, err
+		return repository.TodoStep{}, err
 	}
 
 	if step.TodoID != todoID {
-		return entity.TodoStep{}, util.NewErrorWithNotFound("todo step not found in todo: %v", todoStepID)
+		return repository.TodoStep{}, util.NewErrorWithNotFound("todo step not found in todo: %v", todoStepID)
 	}
 
 	return step, repository.DeleteTodoStep(todoStepID)
 }
 
-func OwnTodoStep(userID, todoStepID int64) (entity.TodoStep, error) {
+func OwnTodoStep(userID, todoStepID int64) (repository.TodoStep, error) {
 	step, err := repository.SelectTodoStep(todoStepID)
 	if err != nil {
-		return entity.TodoStep{}, fmt.Errorf("fails to get todo step: %w", err)
+		return repository.TodoStep{}, fmt.Errorf("fails to get todo step: %w", err)
 	}
 
 	_, err = OwnTodo(userID, step.TodoID)
 	if err != nil {
-		return entity.TodoStep{}, util.NewErrorWithForbidden("unable to handle non-owned todo: %v", step.ID)
+		return repository.TodoStep{}, util.NewErrorWithForbidden("unable to handle non-owned todo: %v", step.ID)
 	}
 
 	return step, nil

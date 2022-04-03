@@ -4,12 +4,11 @@ import (
 	"fmt"
 
 	"github.com/yzx9/otodo/infrastructure/repository"
-	"github.com/yzx9/otodo/model/entity"
 )
 
-func UpdateThirdPartyOAuthToken(token *entity.ThirdPartyOAuthToken) error {
+func UpdateThirdPartyOAuthToken(token *repository.ThirdPartyOAuthToken) error {
 	// TODO[bug]: handle error
-	exist, err := repository.ExistActiveThirdPartyOAuthToken(token.UserID, entity.ThirdPartyTokenType(token.Type))
+	exist, err := repository.ExistActiveThirdPartyOAuthToken(token.UserID, repository.ThirdPartyTokenType(token.Type))
 	if err != nil {
 		return fmt.Errorf("fails to update third party oauth token: %w", err)
 	}
@@ -26,7 +25,7 @@ func UpdateThirdPartyOAuthToken(token *entity.ThirdPartyOAuthToken) error {
 	return nil
 }
 
-func UpdateThirdPartyOAuthTokenAsync(token *entity.ThirdPartyOAuthToken) {
+func UpdateThirdPartyOAuthTokenAsync(token *repository.ThirdPartyOAuthToken) {
 	if err := UpdateThirdPartyOAuthToken(token); err != nil {
 		// TODO[bug]: handle error
 		fmt.Println(err)
