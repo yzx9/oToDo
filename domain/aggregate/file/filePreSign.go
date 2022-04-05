@@ -1,10 +1,11 @@
-package bll
+package file
 
 import (
 	"encoding/base64"
 	"time"
 
 	"github.com/yzx9/otodo/application/dto"
+	"github.com/yzx9/otodo/domain/aggregate/user"
 	"github.com/yzx9/otodo/infrastructure/util"
 )
 
@@ -27,8 +28,8 @@ func CreateFilePreSignIDWithExp(userID, fileID int64, exp int) (string, error) {
 		return "", err
 	}
 
-	token := NewToken(dto.FilePreSignClaims{
-		TokenClaims: NewClaims(userID, expiresIn),
+	token := user.NewToken(dto.FilePreSignClaims{
+		TokenClaims: user.NewClaims(userID, expiresIn),
 		UserID:      userID,
 		FileID:      fileID,
 	})
@@ -59,7 +60,7 @@ func parseFilePreSignID(filePresignedID string) (int64, error) {
 		return write()
 	}
 
-	token, err := ParseToken(string(payload), &dto.FilePreSignClaims{})
+	token, err := user.ParseToken(string(payload), &dto.FilePreSignClaims{})
 	if err != nil || !token.Valid {
 		return write()
 	}

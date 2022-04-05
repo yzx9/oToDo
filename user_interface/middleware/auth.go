@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/yzx9/otodo/bll"
+	"github.com/yzx9/otodo/domain/aggregate/user"
 	"github.com/yzx9/otodo/infrastructure/errors"
 	"github.com/yzx9/otodo/infrastructure/util"
 	"github.com/yzx9/otodo/user_interface/common"
@@ -16,9 +16,9 @@ func JwtAuthMiddleware() func(*gin.Context) {
 			return
 		}
 
-		if bll.ShouldRefreshAccessToken(token) {
+		if user.ShouldRefreshAccessToken(token) {
 			claims := common.MustGetAccessTokenClaims(c)
-			newToken, err := bll.NewAccessToken(claims.UserID, claims.RefreshTokenID)
+			newToken, err := user.NewAccessToken(claims.UserID, claims.RefreshTokenID)
 
 			if err == nil {
 				c.Header(common.AuthorizationHeaderKey, newToken.TokenType+" "+newToken.AccessToken)

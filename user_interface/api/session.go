@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/application/dto"
-	"github.com/yzx9/otodo/bll"
+	"github.com/yzx9/otodo/domain/aggregate/user"
 	"github.com/yzx9/otodo/infrastructure/errors"
 	"github.com/yzx9/otodo/infrastructure/util"
 	"github.com/yzx9/otodo/user_interface/common"
@@ -25,7 +25,7 @@ func PostSessionHandler(c *gin.Context) {
 		return
 	}
 
-	tokens, err := bll.Login(payload)
+	tokens, err := user.Login(payload)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -37,7 +37,7 @@ func PostSessionHandler(c *gin.Context) {
 // Logout, unactive refresh token
 func DeleteSessionHandler(c *gin.Context) {
 	claims := common.MustGetAccessTokenClaims(c)
-	err := bll.Logout(claims.UserID, claims.RefreshTokenID)
+	err := user.Logout(claims.UserID, claims.RefreshTokenID)
 	if err != nil {
 		// TODO log
 		fmt.Println(err.Error())
@@ -54,7 +54,7 @@ func PostSessionTokenHandler(c *gin.Context) {
 		return
 	}
 
-	valid, err := bll.IsValidRefreshToken(userID, refreshTokenID)
+	valid, err := user.IsValidRefreshToken(userID, refreshTokenID)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -65,7 +65,7 @@ func PostSessionTokenHandler(c *gin.Context) {
 		return
 	}
 
-	newToken, err := bll.NewAccessToken(userID, refreshTokenID)
+	newToken, err := user.NewAccessToken(userID, refreshTokenID)
 	if err != nil {
 		msg := fmt.Sprintf("fails to refresh an token, %v", err.Error())
 		c.AbortWithStatusJSON(http.StatusBadRequest, msg)
@@ -81,7 +81,7 @@ func parseRefreshToken(c *gin.Context) (int64, string, error) {
 		return 0, "", fmt.Errorf("refresh_token required")
 	}
 
-	token, err := bll.ParseSessionToken(obj.RefreshToken)
+	token, err := user.ParseSessionToken(obj.RefreshToken)
 	claims, ok := token.Claims.(*dto.SessionTokenClaims)
 	if err != nil || !ok || !token.Valid {
 		return 0, "", fmt.Errorf("invalid token")
@@ -95,7 +95,7 @@ func parseRefreshToken(c *gin.Context) (int64, string, error) {
  */
 
 func GetSessionOAuthGithub(c *gin.Context) {
-	uri, err := bll.CreateGithubOAuthURI()
+	uri, err := user.CreateGithubOAuthURI()
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -111,7 +111,7 @@ func PostSessionOAuthGithub(c *gin.Context) {
 		return
 	}
 
-	tokens, err := bll.LoginByGithubOAuth(payload.Code, payload.State)
+	tokens, err := user.LoginByGithubOAuth(payload.Code, payload.State)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return

@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/application/dto"
-	"github.com/yzx9/otodo/bll"
+	"github.com/yzx9/otodo/domain/aggregate/user"
 	"github.com/yzx9/otodo/user_interface/common"
 )
 
@@ -17,7 +17,7 @@ func PostUserHandler(c *gin.Context) {
 		return
 	}
 
-	user, err := bll.CreateUser(payload)
+	user, err := user.CreateUser(payload)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return

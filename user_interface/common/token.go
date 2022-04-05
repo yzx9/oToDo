@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 	"github.com/yzx9/otodo/application/dto"
-	"github.com/yzx9/otodo/bll"
+	"github.com/yzx9/otodo/domain/aggregate/user"
 	"github.com/yzx9/otodo/infrastructure/errors"
 	"github.com/yzx9/otodo/infrastructure/util"
 )
@@ -14,7 +14,7 @@ const contextAccessTokenKey = "access_token"
 
 func GetAccessToken(c *gin.Context) (*jwt.Token, error) {
 	authorization := c.Request.Header.Get(AuthorizationHeaderKey)
-	token, err := bll.ParseAccessToken(authorization)
+	token, err := user.ParseAccessToken(authorization)
 	if err != nil {
 		return nil, util.NewError(errors.ErrUnauthorized, "invalid token: %w", err)
 	}

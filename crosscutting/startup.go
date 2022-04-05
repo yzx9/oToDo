@@ -1,4 +1,4 @@
-package application
+package crosscutting
 
 import (
 	"github.com/yzx9/otodo/bll"

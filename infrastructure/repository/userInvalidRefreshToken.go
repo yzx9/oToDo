@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/yzx9/otodo/infrastructure/util"
+	"gorm.io/gorm"
 )
 
 type UserInvalidRefreshToken struct {
@@ -13,14 +14,20 @@ type UserInvalidRefreshToken struct {
 	TokenID string `json:"tokenID" gorm:"type:char(36);"`
 }
 
-func InsertUserInvalidRefreshToken(entity *UserInvalidRefreshToken) error {
-	err := db.Create(entity).Error
+var UserInvalidRefreshTokenRepo UserInvalidRefreshTokenRepository
+
+type UserInvalidRefreshTokenRepository struct {
+	db *gorm.DB
+}
+
+func (r UserInvalidRefreshTokenRepository) InsertUserInvalidRefreshToken(entity *UserInvalidRefreshToken) error {
+	err := r.db.Create(entity).Error
 	return util.WrapGormErr(err, "user invalid refresh token")
 }
 
-func ExistUserInvalidRefreshToken(userID int64, tokenID string) (bool, error) {
+func (r UserInvalidRefreshTokenRepository) ExistUserInvalidRefreshToken(userID int64, tokenID string) (bool, error) {
 	var count int64
-	err := db.
+	err := r.db.
 		Model(UserInvalidRefreshToken{}).
 		Where(&UserInvalidRefreshToken{
 			UserID:  userID,

@@ -1,4 +1,4 @@
-package bll
+package user
 
 import (
 	"bytes"
@@ -24,7 +24,7 @@ func Login(payload dto.LoginDTO) (dto.SessionToken, error) {
 		return dto.SessionToken{}, util.NewErrorWithBadRequest("invalid credential")
 	}
 
-	user, err := repository.SelectUserByUserName(payload.UserName)
+	user, err := repository.UserRepo.SelectUserByUserName(payload.UserName)
 	if err != nil || user.Password == nil {
 		return write()
 	}
@@ -70,7 +70,7 @@ func Logout(userID int64, refreshTokenID string) error {
 }
 
 func NewAccessToken(userID int64, refreshTokenID string) (dto.SessionToken, error) {
-	user, err := repository.SelectUser(userID)
+	user, err := repository.UserRepo.SelectUser(userID)
 	if err != nil {
 		return dto.SessionToken{}, fmt.Errorf("fails to get user, %w", err)
 	}

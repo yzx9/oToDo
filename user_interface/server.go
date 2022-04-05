@@ -3,10 +3,10 @@ package user_interface
 import (
 	"fmt"
 
-	"github.com/fsnotify/fsnotify"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
-	"github.com/yzx9/otodo/application"
+	"github.com/yzx9/otodo/bll"
+	"github.com/yzx9/otodo/crosscutting"
 	"github.com/yzx9/otodo/infrastructure/config"
 	"github.com/yzx9/otodo/user_interface/middleware"
 )
@@ -41,23 +41,12 @@ func (s *Server) LoadConfig(dir string) *Server {
 		return s
 	}
 
-	s.config = viper.New()
-	s.config.SetConfigType("yaml")
-	s.config.AddConfigPath(dir)
-
-	s.config.SetConfigName("config.yaml")
-	if err := s.config.ReadInConfig(); err != nil {
-		s.Error = fmt.Errorf("fails to load config.yaml: %w", err)
+	config, err := crosscutting.LoadConfig(dir)
+	if err != nil {
+		s.Error = fmt.Errorf("fails to load config: %w", err)
 		return s
 	}
-
-	s.config.SetConfigName("secret.yaml")
-	if err := s.config.MergeInConfig(); err != nil {
-		s.Error = fmt.Errorf("fails to load secret.yaml: %w", err)
-		return s
-	}
-
-	config.SetConfig(s.config)
+	s.config = config
 
 	return s
 }
@@ -67,14 +56,12 @@ func (s *Server) LoadAndWatchConfig(dir string) *Server {
 		return s
 	}
 
-	s.LoadConfig(dir)
-
-	s.config.OnConfigChange(func(e fsnotify.Event) {
-		fmt.Println("Config file changed: ", e.Name)
-		config.SetConfig(s.config)
-	})
-
-	s.config.WatchConfig()
+	config, err := crosscutting.LoadAndWatchConfig(dir)
+	if err != nil {
+		s.Error = fmt.Errorf("fails to load config: %w", err)
+		return s
+	}
+	s.config = config
 
 	return s
 }
@@ -84,7 +71,12 @@ func (s *Server) Run() *Server {
 		return s
 	}
 
-	if err := application.StartUp(); err != nil {
+	if err := crosscutting.StartUp(); err != nil {
+		s.Error = err
+		return s
+	}
+
+	if err := bll.StartUp(); err != nil {
 		s.Error = err
 		return s
 	}

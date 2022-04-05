@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/bll"
+	"github.com/yzx9/otodo/domain/aggregate/user"
 	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/user_interface/common"
 )
@@ -12,7 +13,7 @@ import (
 // Get current user
 func GetCurrentUserHandler(c *gin.Context) {
 	userID := common.MustGetAccessUserID(c)
-	user, err := bll.GetUser(userID)
+	user, err := user.GetUser(userID)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -48,7 +49,7 @@ func GetCurrentUserTodoListsHandler(c *gin.Context) {
 // Get basic todo list todos for current user
 func GetCurrentUserBasicTodoListTodosHandler(c *gin.Context) {
 	userID := common.MustGetAccessUserID(c)
-	user, err := bll.GetUser(userID)
+	user, err := user.GetUser(userID)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return

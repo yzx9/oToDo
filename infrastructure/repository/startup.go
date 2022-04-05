@@ -14,30 +14,21 @@ import (
 var db *gorm.DB
 var NewID func() int64
 
-func startUpDatabase() error {
-	var err error
-	write := func(err error) error {
-		return util.NewError(errors.ErrDatabaseConnectFailed, "fails to connect database: %w", err)
-	}
-
+func startUpDatabase() (*gorm.DB, error) {
 	// See https://github.com/go-sql-driver/mysql#dsn-data-source-name for details
 	c := config.Database
 	dsn := fmt.Sprintf("%v:%v@%v(%v:%v)/%v?charset=utf8mb4&parseTime=True&loc=Local", c.UserName, c.Password, c.Protocol, c.Host, c.Port, c.DatabaseName)
-	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
 		DisableForeignKeyConstraintWhenMigrating: true,
 	})
 	if err != nil {
-		return write(err)
+		return nil, util.NewError(errors.ErrDatabaseConnectFailed, "fails to connect database: %w", err)
 	}
 
-	if err = autoMigrate(); err != nil {
-		return write(err)
-	}
-
-	return nil
+	return db, nil
 }
 
-func autoMigrate() error {
+func autoMigrate(db *gorm.DB) error {
 	return db.AutoMigrate(
 		&File{},
 
@@ -73,5 +64,18 @@ func startUpIDGenerator() error {
 }
 
 func StartUp() error {
-	return startUpDatabase()
+	_db, err := startUpDatabase()
+	if err != nil {
+		return err
+	}
+
+	if err := autoMigrate(_db); err != nil {
+		return util.NewError(errors.ErrDatabaseConnectFailed, "fails to migrate database: %w", err)
+	}
+
+	db = _db
+	UserRepo = UserRepository{db: _db}
+	UserInvalidRefreshTokenRepo = UserInvalidRefreshTokenRepository{db: _db}
+
+	return nil
 }

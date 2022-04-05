@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/application/dto"
 	"github.com/yzx9/otodo/bll"
+	"github.com/yzx9/otodo/domain/aggregate/user"
 	"github.com/yzx9/otodo/user_interface/common"
 )
 
@@ -44,7 +45,7 @@ func GetSharingTodoListHandler(c *gin.Context) {
 		return
 	}
 
-	user, err := bll.GetUser(sharing.UserID)
+	user, err := user.GetUser(sharing.UserID)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return

@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/yzx9/otodo/infrastructure/util"
+	"gorm.io/gorm"
 )
 
 type User struct {
@@ -23,14 +24,25 @@ type User struct {
 	SharedTodoLists []*TodoList `json:"-" gorm:"many2many:todo_list_shared_users"`
 }
 
-func InsertUser(user *User) error {
-	re := db.Create(user)
+var UserRepo UserRepository
+
+type UserRepository struct {
+	db *gorm.DB
+}
+
+func (r *UserRepository) InsertUser(user *User) error {
+	re := r.db.Create(user)
 	return util.WrapGormErr(re.Error, "user")
 }
 
-func SelectUser(id int64) (User, error) {
+func (r *UserRepository) SaveUser(user *User) error {
+	err := r.db.Save(&user).Error
+	return util.WrapGormErr(err, "user")
+}
+
+func (r *UserRepository) SelectUser(id int64) (User, error) {
 	var user User
-	err := db.
+	err := r.db.
 		Where(&User{
 			Entity: Entity{
 				ID: id,
@@ -42,9 +54,9 @@ func SelectUser(id int64) (User, error) {
 	return user, util.WrapGormErr(err, "user")
 }
 
-func SelectUserByUserName(username string) (User, error) {
+func (r *UserRepository) SelectUserByUserName(username string) (User, error) {
 	var user User
-	err := db.
+	err := r.db.
 		Where(User{
 			Name: username,
 		}).
@@ -54,9 +66,9 @@ func SelectUserByUserName(username string) (User, error) {
 	return user, util.WrapGormErr(err, "user")
 }
 
-func SelectUserByGithubID(githubID int64) (User, error) {
+func (r *UserRepository) SelectUserByGithubID(githubID int64) (User, error) {
 	var user User
-	err := db.
+	err := r.db.
 		Where(User{
 			GithubID: githubID,
 		}).
@@ -66,9 +78,9 @@ func SelectUserByGithubID(githubID int64) (User, error) {
 	return user, util.WrapGormErr(err, "user")
 }
 
-func SelectUserByTodo(todoID int64) (User, error) {
+func (r *UserRepository) SelectUserByTodo(todoID int64) (User, error) {
 	var todo Todo
-	err := db.
+	err := r.db.
 		Where(&Todo{
 			Entity: Entity{
 				ID: todoID,
@@ -82,17 +94,12 @@ func SelectUserByTodo(todoID int64) (User, error) {
 		return User{}, util.WrapGormErr(err, "todo")
 	}
 
-	return SelectUser(todo.UserID)
+	return r.SelectUser(todo.UserID)
 }
 
-func SaveUser(user *User) error {
-	err := db.Save(&user).Error
-	return util.WrapGormErr(err, "user")
-}
-
-func ExistUserByUserName(username string) (bool, error) {
+func (r *UserRepository) ExistUserByUserName(username string) (bool, error) {
 	var count int64
-	err := db.
+	err := r.db.
 		Model(&User{}).
 		Where(User{
 			Name: username,
@@ -103,9 +110,9 @@ func ExistUserByUserName(username string) (bool, error) {
 	return count != 0, util.WrapGormErr(err, "user")
 }
 
-func ExistUserByGithubID(githubID int64) (bool, error) {
+func (r *UserRepository) ExistUserByGithubID(githubID int64) (bool, error) {
 	var count int64
-	err := db.
+	err := r.db.
 		Model(&User{}).
 		Where(User{
 			GithubID: githubID,
