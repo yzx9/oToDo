@@ -21,7 +21,7 @@ func GetTodoListMenu(userID int64) ([]TodoListMenuItem, error) {
 		return nil, fmt.Errorf("fails to get user menu: %w", err)
 	}
 
-	lists, err := repository.SelectTodoListsWithMenuFormat(userID)
+	lists, err := repository.TodoListRepo.SelectTodoListsWithMenuFormat(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get user menu: %w", err)
 	}

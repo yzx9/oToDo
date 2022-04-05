@@ -11,9 +11,6 @@ import (
 	"gorm.io/gorm"
 )
 
-var db *gorm.DB
-var NewID func() int64
-
 func startUpDatabase() (*gorm.DB, error) {
 	// See https://github.com/go-sql-driver/mysql#dsn-data-source-name for details
 	c := config.Database
@@ -56,26 +53,52 @@ func startUpIDGenerator() error {
 		return fmt.Errorf("fails to create id generator")
 	}
 
-	NewID = func() int64 {
+	newID = func() int64 {
 		return node.Generate().Int64()
 	}
 
 	return nil
 }
 
+func startUpRepositories(db *gorm.DB) {
+	FileRepo = FileRepository{db: db}
+
+	UserRepo = UserRepository{db: db}
+	UserInvalidRefreshTokenRepo = UserInvalidRefreshTokenRepository{db: db}
+
+	TodoRepo = TodoRepository{db: db}
+	TodoStepRepo = TodoStepRepository{db: db}
+	TodoRepeatPlanRepo = TodoRepeatPlanRepository{db: db}
+
+	TodoListRepo = TodoListRepository{db: db}
+	TodoListFolderRepo = TodoListFolderRepository{db: db}
+
+	TagRepo = TagRepository{db: db}
+
+	SharingRepo = SharingRepository{db: db}
+
+	ThirdPartyOAuthTokenRepo = ThirdPartyOAuthTokenRepository{db: db}
+	FileRepo = FileRepository{db: db}
+	SharingRepo = SharingRepository{db: db}
+	UserRepo = UserRepository{db: db}
+	UserInvalidRefreshTokenRepo = UserInvalidRefreshTokenRepository{db: db}
+}
+
 func StartUp() error {
-	_db, err := startUpDatabase()
+	if err := startUpIDGenerator(); err != nil {
+		return err
+	}
+
+	db, err := startUpDatabase()
 	if err != nil {
 		return err
 	}
 
-	if err := autoMigrate(_db); err != nil {
+	if err := autoMigrate(db); err != nil {
 		return util.NewError(errors.ErrDatabaseConnectFailed, "fails to migrate database: %w", err)
 	}
 
-	db = _db
-	UserRepo = UserRepository{db: _db}
-	UserInvalidRefreshTokenRepo = UserInvalidRefreshTokenRepository{db: _db}
+	startUpRepositories(db)
 
 	return nil
 }

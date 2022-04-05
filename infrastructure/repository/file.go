@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/yzx9/otodo/infrastructure/util"
+	"gorm.io/gorm"
 )
 
 type FileAccessType int
@@ -21,14 +22,20 @@ type File struct {
 	RelatedID    int64  `json:"-"` // Depend on access type
 }
 
-func InsertFile(file *File) error {
-	err := db.Create(file).Error
+var FileRepo FileRepository
+
+type FileRepository struct {
+	db *gorm.DB
+}
+
+func (r *FileRepository) InsertFile(file *File) error {
+	err := r.db.Create(file).Error
 	return util.WrapGormErr(err, "file")
 }
 
-func SelectFile(id int64) (*File, error) {
+func (r *FileRepository) SelectFile(id int64) (*File, error) {
 	var file File
-	err := db.
+	err := r.db.
 		Where(&File{
 			Entity: Entity{
 				ID: id,
@@ -40,7 +47,7 @@ func SelectFile(id int64) (*File, error) {
 	return &file, util.WrapGormErr(err, "file")
 }
 
-func SaveFile(file *File) error {
-	err := db.Save(file).Error
+func (r *FileRepository) SaveFile(file *File) error {
+	err := r.db.Save(file).Error
 	return util.WrapGormErr(err, "file")
 }

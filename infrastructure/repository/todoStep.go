@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/yzx9/otodo/infrastructure/util"
+	"gorm.io/gorm"
 )
 
 type TodoStep struct {
@@ -17,14 +18,20 @@ type TodoStep struct {
 	Todo   Todo  `json:"-"`
 }
 
-func InsertTodoStep(step *TodoStep) error {
-	err := db.Create(step).Error
+var TodoStepRepo TodoStepRepository
+
+type TodoStepRepository struct {
+	db *gorm.DB
+}
+
+func (r *TodoStepRepository) InsertTodoStep(step *TodoStep) error {
+	err := r.db.Create(step).Error
 	return util.WrapGormErr(err, "todo step")
 }
 
-func SelectTodoStep(id int64) (TodoStep, error) {
+func (r *TodoStepRepository) SelectTodoStep(id int64) (TodoStep, error) {
 	var step TodoStep
-	err := db.
+	err := r.db.
 		Where(&TodoStep{
 			Entity: Entity{
 				ID: id,
@@ -36,9 +43,9 @@ func SelectTodoStep(id int64) (TodoStep, error) {
 	return step, util.WrapGormErr(err, "todo step")
 }
 
-func SelectTodoSteps(todoID int64) ([]TodoStep, error) {
+func (r *TodoStepRepository) SelectTodoSteps(todoID int64) ([]TodoStep, error) {
 	var steps []TodoStep
-	err := db.
+	err := r.db.
 		Where(TodoStep{
 			TodoID: todoID,
 		}).
@@ -48,13 +55,13 @@ func SelectTodoSteps(todoID int64) ([]TodoStep, error) {
 	return steps, util.WrapGormErr(err, "todo step")
 }
 
-func SaveTodoStep(todoStep *TodoStep) error {
-	err := db.Save(&todoStep).Error
+func (r *TodoStepRepository) SaveTodoStep(todoStep *TodoStep) error {
+	err := r.db.Save(&todoStep).Error
 	return util.WrapGormErr(err, "todo step")
 }
 
-func DeleteTodoStep(id int64) error {
-	err := db.
+func (r *TodoStepRepository) DeleteTodoStep(id int64) error {
+	err := r.db.
 		Delete(&TodoStep{
 			Entity: Entity{
 				ID: id,

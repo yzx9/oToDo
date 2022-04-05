@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/yzx9/otodo/infrastructure/util"
+	"gorm.io/gorm"
 )
 
 type TodoRepeatPlanType string
@@ -26,14 +27,20 @@ type TodoRepeatPlan struct {
 	Todos []Todo `json:"-"`
 }
 
-func InsertTodoRepeatPlan(plan *TodoRepeatPlan) error {
-	err := db.Create(plan).Error
+var TodoRepeatPlanRepo TodoRepeatPlanRepository
+
+type TodoRepeatPlanRepository struct {
+	db *gorm.DB
+}
+
+func (r *TodoRepeatPlanRepository) InsertTodoRepeatPlan(plan *TodoRepeatPlan) error {
+	err := r.db.Create(plan).Error
 	return util.WrapGormErr(err, "todo repeat plan")
 }
 
-func SelectTodoRepeatPlan(id int64) (TodoRepeatPlan, error) {
+func (r *TodoRepeatPlanRepository) SelectTodoRepeatPlan(id int64) (TodoRepeatPlan, error) {
 	var plan TodoRepeatPlan
-	err := db.
+	err := r.db.
 		Where(&TodoRepeatPlan{
 			Entity: Entity{
 				ID: id,
@@ -45,13 +52,13 @@ func SelectTodoRepeatPlan(id int64) (TodoRepeatPlan, error) {
 	return plan, util.WrapGormErr(err, "todo repeat plan")
 }
 
-func SaveTodoRepeatPlan(todoRepeatPlan *TodoRepeatPlan) error {
-	err := db.Save(&todoRepeatPlan).Error
+func (r *TodoRepeatPlanRepository) SaveTodoRepeatPlan(todoRepeatPlan *TodoRepeatPlan) error {
+	err := r.db.Save(&todoRepeatPlan).Error
 	return util.WrapGormErr(err, "todo repeat plan")
 }
 
-func DeleteTodoRepeatPlan(id int64) error {
-	err := db.
+func (r *TodoRepeatPlanRepository) DeleteTodoRepeatPlan(id int64) error {
+	err := r.db.
 		Delete(&TodoRepeatPlan{
 			Entity: Entity{
 				ID: id,

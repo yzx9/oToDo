@@ -22,7 +22,7 @@ func CreateTodo(userID int64, todo *repository.Todo) error {
 	}
 	todo.TodoRepeatPlanID = plan.ID
 
-	if err := repository.InsertTodo(todo); err != nil {
+	if err := repository.TodoRepo.InsertTodo(todo); err != nil {
 		return fmt.Errorf("fails to create todo: %w", err)
 	}
 
@@ -47,7 +47,7 @@ func GetTodos(userID, todoListID int64) ([]repository.Todo, error) {
 }
 
 func ForceGetTodos(todoListID int64) ([]repository.Todo, error) {
-	todos, err := repository.SelectTodos(todoListID)
+	todos, err := repository.TodoRepo.SelectTodos(todoListID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get todos: %w", err)
 	}
@@ -56,7 +56,7 @@ func ForceGetTodos(todoListID int64) ([]repository.Todo, error) {
 }
 
 func GetImportantTodos(userID int64) ([]repository.Todo, error) {
-	todos, err := repository.SelectImportantTodos(userID)
+	todos, err := repository.TodoRepo.SelectImportantTodos(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get important todos: %w", err)
 	}
@@ -65,7 +65,7 @@ func GetImportantTodos(userID int64) ([]repository.Todo, error) {
 }
 
 func GetPlannedTodos(userID int64) ([]repository.Todo, error) {
-	todos, err := repository.SelectPlanedTodos(userID)
+	todos, err := repository.TodoRepo.SelectPlanedTodos(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get planed todos: %w", err)
 	}
@@ -74,7 +74,7 @@ func GetPlannedTodos(userID int64) ([]repository.Todo, error) {
 }
 
 func GetNotNotifiedTodos(userID int64) ([]repository.Todo, error) {
-	todos, err := repository.SelectNotNotifiedTodos(userID)
+	todos, err := repository.TodoRepo.SelectNotNotifiedTodos(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get not-notified todos: %w", err)
 	}
@@ -119,7 +119,7 @@ func UpdateTodo(userID int64, todo *repository.Todo) error {
 	todo.TodoRepeatPlanID = plan.ID
 
 	// Save
-	if err = repository.SaveTodo(todo); err != nil {
+	if err = repository.TodoRepo.SaveTodo(todo); err != nil {
 		return err
 	}
 
@@ -134,7 +134,7 @@ func DeleteTodo(userID, todoID int64) (repository.Todo, error) {
 		return repository.Todo{}, err
 	}
 
-	if err = repository.DeleteTodo(todoID); err != nil {
+	if err = repository.TodoRepo.DeleteTodo(todoID); err != nil {
 		return repository.Todo{}, fmt.Errorf("fails to delete todo: %w", err)
 	}
 
@@ -144,7 +144,7 @@ func DeleteTodo(userID, todoID int64) (repository.Todo, error) {
 }
 
 func OwnTodo(userID, todoID int64) (repository.Todo, error) {
-	todo, err := repository.SelectTodo(todoID)
+	todo, err := repository.TodoRepo.SelectTodo(todoID)
 	if err != nil {
 		return repository.Todo{}, fmt.Errorf("fails to get todo: %w", err)
 	}

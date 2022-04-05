@@ -5,7 +5,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
-	"github.com/yzx9/otodo/bll"
 	"github.com/yzx9/otodo/crosscutting"
 	"github.com/yzx9/otodo/infrastructure/config"
 	"github.com/yzx9/otodo/user_interface/middleware"
@@ -72,11 +71,6 @@ func (s *Server) Run() *Server {
 	}
 
 	if err := crosscutting.StartUp(); err != nil {
-		s.Error = err
-		return s
-	}
-
-	if err := bll.StartUp(); err != nil {
 		s.Error = err
 		return s
 	}

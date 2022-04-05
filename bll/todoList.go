@@ -11,7 +11,7 @@ func CreateTodoList(userID int64, todoList *repository.TodoList) error {
 	todoList.IsBasic = false
 	todoList.UserID = userID
 	todoList.TodoListFolderID = 0
-	if err := repository.InsertTodoList(todoList); err != nil {
+	if err := repository.TodoListRepo.InsertTodoList(todoList); err != nil {
 		return fmt.Errorf("fails to create todo list: %w", err)
 	}
 
@@ -23,7 +23,7 @@ func GetTodoList(userID, todoListID int64) (repository.TodoList, error) {
 }
 
 func ForceGetTodoList(todoListID int64) (repository.TodoList, error) {
-	list, err := repository.SelectTodoList(todoListID)
+	list, err := repository.TodoListRepo.SelectTodoList(todoListID)
 	if err != nil {
 		return repository.TodoList{}, fmt.Errorf("fails to get todo list: %w", err)
 	}
@@ -32,12 +32,12 @@ func ForceGetTodoList(todoListID int64) (repository.TodoList, error) {
 }
 
 func GetTodoLists(userID int64) ([]repository.TodoList, error) {
-	vec, err := repository.SelectTodoLists(userID)
+	vec, err := repository.TodoListRepo.SelectTodoLists(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get user todo lists: %w", err)
 	}
 
-	shared, err := repository.SelectSharedTodoLists(userID)
+	shared, err := repository.TodoListRepo.SelectSharedTodoLists(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get user shared todo lists: %w", err)
 	}
@@ -56,7 +56,7 @@ func UpdateTodoList(userID int64, todoList *repository.TodoList) error {
 		return util.NewErrorWithForbidden("unable to update basic todo list")
 	}
 
-	if err := repository.SaveTodoList(todoList); err != nil {
+	if err := repository.TodoListRepo.SaveTodoList(todoList); err != nil {
 		return fmt.Errorf("fails to update todo list: %w", err)
 	}
 
@@ -76,11 +76,11 @@ func DeleteTodoList(userID, todoListID int64) (repository.TodoList, error) {
 	}
 
 	// cascade delete todos
-	if _, err = repository.DeleteTodos(todoListID); err != nil {
+	if _, err = repository.TodoRepo.DeleteTodos(todoListID); err != nil {
 		return repository.TodoList{}, fmt.Errorf("fails to cascade delete todos: %w", err)
 	}
 
-	if err = repository.DeleteTodoList(todoListID); err != nil {
+	if err = repository.TodoListRepo.DeleteTodoList(todoListID); err != nil {
 		return repository.TodoList{}, fmt.Errorf("fails to delete todo list: %w", err)
 	}
 
@@ -89,7 +89,7 @@ func DeleteTodoList(userID, todoListID int64) (repository.TodoList, error) {
 
 // owner
 func OwnTodoList(userID, todoListID int64) (repository.TodoList, error) {
-	todoList, err := repository.SelectTodoList(todoListID)
+	todoList, err := repository.TodoListRepo.SelectTodoList(todoListID)
 	if err != nil {
 		return repository.TodoList{}, fmt.Errorf("fails to get todo list: %v", todoListID)
 	}

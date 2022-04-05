@@ -12,7 +12,7 @@ func CreateTodoRepeatPlan(plan repository.TodoRepeatPlan) (repository.TodoRepeat
 		return repository.TodoRepeatPlan{}, nil
 	}
 
-	if err := repository.InsertTodoRepeatPlan(&plan); err != nil {
+	if err := repository.TodoRepeatPlanRepo.InsertTodoRepeatPlan(&plan); err != nil {
 		return repository.TodoRepeatPlan{}, fmt.Errorf("fails to create todo repeat plan: %w", err)
 	}
 
@@ -24,7 +24,7 @@ func UpdateTodoRepeatPlan(plan, oldPlan repository.TodoRepeatPlan) (repository.T
 		return oldPlan, nil
 	}
 
-	if err := repository.InsertTodoRepeatPlan(&plan); err != nil {
+	if err := repository.TodoRepeatPlanRepo.InsertTodoRepeatPlan(&plan); err != nil {
 		return repository.TodoRepeatPlan{}, fmt.Errorf("fails to create todo repeat plan: %w", err)
 	}
 
@@ -32,7 +32,7 @@ func UpdateTodoRepeatPlan(plan, oldPlan repository.TodoRepeatPlan) (repository.T
 }
 
 func GetTodoRepeatPlan(id int64) (repository.TodoRepeatPlan, error) {
-	plan, err := repository.SelectTodoRepeatPlan(id)
+	plan, err := repository.TodoRepeatPlanRepo.SelectTodoRepeatPlan(id)
 	if err != nil {
 		return repository.TodoRepeatPlan{}, fmt.Errorf("fails to get todo repeat plan: %v", err)
 	}
@@ -51,7 +51,7 @@ func CreateRepeatTodoIfNeed(todo repository.Todo) (bool, repository.Todo, error)
 	}
 
 	todo.Deadline = &nextDeadline
-	if err := repository.InsertTodo(&todo); err != nil {
+	if err := repository.TodoRepo.InsertTodo(&todo); err != nil {
 		return false, repository.Todo{}, fmt.Errorf("fails to create todo: %w", err)
 	}
 

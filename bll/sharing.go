@@ -23,7 +23,7 @@ func CreateTodoListSharing(userID, todoListID int64) (repository.Sharing, error)
 	}
 
 	// Only allow one sharing active
-	if _, err = repository.DeleteSharings(userID, repository.SharingTypeTodoList); err != nil {
+	if _, err = repository.SharingRepo.DeleteSharings(userID, repository.SharingTypeTodoList); err != nil {
 		return repository.Sharing{}, fmt.Errorf("fails to delete old sharing tokens: %w", err)
 	}
 
@@ -34,7 +34,7 @@ func CreateTodoListSharing(userID, todoListID int64) (repository.Sharing, error)
 		RelatedID: todoListID,
 		UserID:    userID,
 	}
-	if err := repository.InsertSharing(&sharing); err != nil {
+	if err := repository.SharingRepo.InsertSharing(&sharing); err != nil {
 		return repository.Sharing{}, fmt.Errorf("fails to create sharing token: %w", err)
 	}
 
@@ -42,7 +42,7 @@ func CreateTodoListSharing(userID, todoListID int64) (repository.Sharing, error)
 }
 
 func GetActiveTodoListSharings(userID, todoListID int64) ([]repository.Sharing, error) {
-	sharings, err := repository.SelectActiveSharings(userID, repository.SharingTypeTodoList)
+	sharings, err := repository.SharingRepo.SelectActiveSharings(userID, repository.SharingTypeTodoList)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get sharing tokens: %w", err)
 	}
@@ -72,7 +72,7 @@ func DeleteTodoListSharing(userID int64, token string) error {
 	}
 
 	sharing.Active = false
-	if err := repository.SaveSharing(&sharing); err != nil {
+	if err := repository.SharingRepo.SaveSharing(&sharing); err != nil {
 		return fmt.Errorf("fails to delete sharing: %w", err)
 	}
 
@@ -80,7 +80,7 @@ func DeleteTodoListSharing(userID int64, token string) error {
 }
 
 func ValidSharing(token string) (repository.Sharing, error) {
-	sharing, err := repository.SelectSharing(token)
+	sharing, err := repository.SharingRepo.SelectSharing(token)
 	if err != nil {
 		return repository.Sharing{}, fmt.Errorf("invalid sharing token: %w", err)
 	}

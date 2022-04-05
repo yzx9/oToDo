@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/yzx9/otodo/infrastructure/util"
+	"gorm.io/gorm"
 )
 
 type TodoListFolder struct {
@@ -15,14 +16,20 @@ type TodoListFolder struct {
 	TodoLists []TodoList `json:"-"`
 }
 
-func InsertTodoListFolder(todoListFolder *TodoListFolder) error {
-	re := db.Create(todoListFolder).Error
+var TodoListFolderRepo TodoListFolderRepository
+
+type TodoListFolderRepository struct {
+	db *gorm.DB
+}
+
+func (r *TodoListFolderRepository) InsertTodoListFolder(todoListFolder *TodoListFolder) error {
+	re := r.db.Create(todoListFolder).Error
 	return util.WrapGormErr(re, "todo list folder")
 }
 
-func SelectTodoListFolder(id int64) (TodoListFolder, error) {
+func (r *TodoListFolderRepository) SelectTodoListFolder(id int64) (TodoListFolder, error) {
 	var folder TodoListFolder
-	err := db.
+	err := r.db.
 		Where(&TodoListFolder{
 			Entity: Entity{
 				ID: id,
@@ -34,9 +41,9 @@ func SelectTodoListFolder(id int64) (TodoListFolder, error) {
 	return folder, util.WrapGormErr(err, "todo list folder")
 }
 
-func SelectTodoListFolders(userId int64) ([]TodoListFolder, error) {
+func (r *TodoListFolderRepository) SelectTodoListFolders(userId int64) ([]TodoListFolder, error) {
 	var folders []TodoListFolder
-	err := db.
+	err := r.db.
 		Where(TodoListFolder{
 			UserID: userId,
 		}).
@@ -46,8 +53,8 @@ func SelectTodoListFolders(userId int64) ([]TodoListFolder, error) {
 	return folders, util.WrapGormErr(err, "todo list folder")
 }
 
-func DeleteTodoListFolder(id int64) error {
-	err := db.
+func (r *TodoListFolderRepository) DeleteTodoListFolder(id int64) error {
+	err := r.db.
 		Delete(&TodoListFolder{
 			Entity: Entity{
 				ID: id,
@@ -58,9 +65,9 @@ func DeleteTodoListFolder(id int64) error {
 	return util.WrapGormErr(err, "todo list folder")
 }
 
-func ExistTodoListFolder(id int64) (bool, error) {
+func (r *TodoListFolderRepository) ExistTodoListFolder(id int64) (bool, error) {
 	var count int64
-	err := db.
+	err := r.db.
 		Model(&TodoListFolder{}).
 		Where(&TodoListFolder{
 			Entity: Entity{

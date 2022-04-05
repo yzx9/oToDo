@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/yzx9/otodo/infrastructure/util"
+	"gorm.io/gorm"
 )
 
 type SharingType = int8
@@ -22,14 +23,20 @@ type Sharing struct {
 	User   User  `json:"-"`
 }
 
-func InsertSharing(sharing *Sharing) error {
-	err := db.Create(sharing).Error
+var SharingRepo SharingRepository
+
+type SharingRepository struct {
+	db *gorm.DB
+}
+
+func (r *SharingRepository) InsertSharing(sharing *Sharing) error {
+	err := r.db.Create(sharing).Error
 	return util.WrapGormErr(err, "sharing")
 }
 
-func SelectSharing(token string) (Sharing, error) {
+func (r *SharingRepository) SelectSharing(token string) (Sharing, error) {
 	var sharing Sharing
-	err := db.
+	err := r.db.
 		Where(&Sharing{
 			Token: token,
 		}).
@@ -39,9 +46,9 @@ func SelectSharing(token string) (Sharing, error) {
 	return sharing, util.WrapGormErr(err, "sharing")
 }
 
-func SelectSharings(userID int64, sharingType SharingType) ([]Sharing, error) {
+func (r *SharingRepository) SelectSharings(userID int64, sharingType SharingType) ([]Sharing, error) {
 	var sharings []Sharing
-	err := db.
+	err := r.db.
 		Where(&Sharing{
 			UserID: userID,
 			Type:   sharingType,
@@ -52,9 +59,9 @@ func SelectSharings(userID int64, sharingType SharingType) ([]Sharing, error) {
 	return sharings, util.WrapGormErr(err, "sharing")
 }
 
-func SelectActiveSharings(userID int64, sharingType SharingType) ([]Sharing, error) {
+func (r *SharingRepository) SelectActiveSharings(userID int64, sharingType SharingType) ([]Sharing, error) {
 	var sharings []Sharing
-	err := db.
+	err := r.db.
 		Where(&Sharing{
 			UserID: userID,
 			Type:   sharingType,
@@ -66,14 +73,14 @@ func SelectActiveSharings(userID int64, sharingType SharingType) ([]Sharing, err
 	return sharings, util.WrapGormErr(err, "sharing")
 }
 
-func SaveSharing(sharing *Sharing) error {
-	err := db.Save(&sharing).Error
+func (r *SharingRepository) SaveSharing(sharing *Sharing) error {
+	err := r.db.Save(&sharing).Error
 	return util.WrapGormErr(err, "sharing")
 }
 
-func ExistActiveSharing(userID int64, sharingType SharingType) (bool, error) {
+func (r *SharingRepository) ExistActiveSharing(userID int64, sharingType SharingType) (bool, error) {
 	var count int64
-	err := db.
+	err := r.db.
 		Where(&Sharing{
 			UserID: userID,
 			Type:   sharingType,
@@ -85,9 +92,9 @@ func ExistActiveSharing(userID int64, sharingType SharingType) (bool, error) {
 	return count != 0, util.WrapGormErr(err, "sharing")
 }
 
-func DeleteSharings(userID int64, sharingType SharingType) (int64, error) {
+func (r *SharingRepository) DeleteSharings(userID int64, sharingType SharingType) (int64, error) {
 	// Here we inactive sharing instead of not delete
-	re := db.
+	re := r.db.
 		Where(Sharing{
 			UserID: userID,
 			Type:   sharingType,

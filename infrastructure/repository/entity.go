@@ -13,7 +13,9 @@ type Entity struct {
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
 }
 
+var newID func() int64
+
 func (e *Entity) BeforeCreate(tx *gorm.DB) (err error) {
-	e.ID = NewID()
+	e.ID = newID()
 	return
 }

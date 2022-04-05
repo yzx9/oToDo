@@ -48,7 +48,7 @@ func UploadTodoFile(userID, todoID int64, file *multipart.FileHeader) (repositor
 		return repository.File{}, err
 	}
 
-	if err := repository.InsertTodoFile(todoID, record.ID); err != nil {
+	if err := repository.TodoRepo.InsertTodoFile(todoID, record.ID); err != nil {
 		return repository.File{}, fmt.Errorf("fails to upload todo file: %w", err)
 	}
 
@@ -64,7 +64,7 @@ func uploadFile(file *multipart.FileHeader, record *repository.File) error {
 		return util.NewError(errors.ErrRequestEntityTooLarge, "file too large")
 	}
 
-	if err := repository.InsertFile(record); err != nil {
+	if err := repository.FileRepo.InsertFile(record); err != nil {
 		return write(err)
 	}
 
@@ -75,7 +75,7 @@ func uploadFile(file *multipart.FileHeader, record *repository.File) error {
 		return write(err)
 	}
 
-	if err := repository.SaveFile(record); err != nil {
+	if err := repository.FileRepo.SaveFile(record); err != nil {
 		return write(err)
 	}
 
@@ -83,7 +83,7 @@ func uploadFile(file *multipart.FileHeader, record *repository.File) error {
 }
 
 func GetFile(fileID int64) (*repository.File, error) {
-	file, err := repository.SelectFile(fileID)
+	file, err := repository.FileRepo.SelectFile(fileID)
 	return file, fmt.Errorf("fails to get file: %w", err)
 }
 

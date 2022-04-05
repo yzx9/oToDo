@@ -16,14 +16,20 @@ type Tag struct {
 	Todos []Todo `json:"-" gorm:"many2many:tag_todos;"`
 }
 
-func InsertTag(tag *Tag) error {
-	err := db.Create(tag).Error
+var TagRepo TagRepository
+
+type TagRepository struct {
+	db *gorm.DB
+}
+
+func (r *TagRepository) InsertTag(tag *Tag) error {
+	err := r.db.Create(tag).Error
 	return util.WrapGormErr(err, "tag")
 }
 
-func SelectTag(userID int64, tagName string) (Tag, error) {
+func (r *TagRepository) SelectTag(userID int64, tagName string) (Tag, error) {
 	var tag Tag
-	err := db.
+	err := r.db.
 		Scopes(tagScope(userID, tagName)).
 		First(&tag).
 		Error
@@ -31,9 +37,9 @@ func SelectTag(userID int64, tagName string) (Tag, error) {
 	return tag, util.WrapGormErr(err, "tag")
 }
 
-func SelectTags(userID int64) ([]Tag, error) {
+func (r *TagRepository) SelectTags(userID int64) ([]Tag, error) {
 	var tags []Tag
-	err := db.
+	err := r.db.
 		Where(Tag{
 			UserID: userID,
 		}).
@@ -43,8 +49,8 @@ func SelectTags(userID int64) ([]Tag, error) {
 	return tags, util.WrapGormErr(err, "tag")
 }
 
-func InsertTagTodo(userID, todoID int64, tagName string) error {
-	err := db.
+func (r *TagRepository) InsertTagTodo(userID, todoID int64, tagName string) error {
+	err := r.db.
 		Scopes(tagScope(userID, tagName)).
 		Association("Todos").
 		Append(&Todo{
@@ -56,8 +62,8 @@ func InsertTagTodo(userID, todoID int64, tagName string) error {
 	return util.WrapGormErr(err, "tag todos")
 }
 
-func DeleteTagTodo(userID, todoID int64, tagName string) error {
-	err := db.
+func (r *TagRepository) DeleteTagTodo(userID, todoID int64, tagName string) error {
+	err := r.db.
 		Scopes(tagScope(userID, tagName)).
 		Association("Todos").
 		Delete(&Todo{
@@ -69,9 +75,9 @@ func DeleteTagTodo(userID, todoID int64, tagName string) error {
 	return util.WrapGormErr(err, "tag todos")
 }
 
-func ExistTag(userID int64, tagName string) (bool, error) {
+func (r *TagRepository) ExistTag(userID int64, tagName string) (bool, error) {
 	var count int64
-	err := db.
+	err := r.db.
 		Scopes(tagScope(userID, tagName)).
 		Count(&count).
 		Error

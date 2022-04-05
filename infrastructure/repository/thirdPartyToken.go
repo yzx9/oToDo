@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/yzx9/otodo/infrastructure/util"
+	"gorm.io/gorm"
 )
 
 type ThirdPartyTokenType int8
@@ -26,13 +27,19 @@ func (ThirdPartyOAuthToken) TableName() string {
 	return "third_party_oauth_tokens"
 }
 
-func InsertThirdPartyOAuthToken(entity *ThirdPartyOAuthToken) error {
-	err := db.Create(entity).Error
+var ThirdPartyOAuthTokenRepo ThirdPartyOAuthTokenRepository
+
+type ThirdPartyOAuthTokenRepository struct {
+	db *gorm.DB
+}
+
+func (r *ThirdPartyOAuthTokenRepository) InsertThirdPartyOAuthToken(entity *ThirdPartyOAuthToken) error {
+	err := r.db.Create(entity).Error
 	return util.WrapGormErr(err, "third party token")
 }
 
-func UpdateThirdPartyOAuthToken(new *ThirdPartyOAuthToken) error {
-	err := db.
+func (r *ThirdPartyOAuthTokenRepository) UpdateThirdPartyOAuthToken(new *ThirdPartyOAuthToken) error {
+	err := r.db.
 		Where(&ThirdPartyOAuthToken{
 			UserID: new.UserID,
 			Type:   new.Type,
@@ -43,9 +50,9 @@ func UpdateThirdPartyOAuthToken(new *ThirdPartyOAuthToken) error {
 	return util.WrapGormErr(err, "third party token")
 }
 
-func ExistActiveThirdPartyOAuthToken(userID int64, tokenType ThirdPartyTokenType) (bool, error) {
+func (r *ThirdPartyOAuthTokenRepository) ExistActiveThirdPartyOAuthToken(userID int64, tokenType ThirdPartyTokenType) (bool, error) {
 	var count int64
-	err := db.
+	err := r.db.
 		Model(ThirdPartyOAuthToken{}).
 		Where(ThirdPartyOAuthToken{
 			UserID: userID,

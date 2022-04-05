@@ -36,14 +36,20 @@ type Todo struct {
 	Next   *Todo  `json:"-"`
 }
 
-func InsertTodo(todo *Todo) error {
-	err := db.Create(todo).Error
+var TodoRepo TodoRepository
+
+type TodoRepository struct {
+	db *gorm.DB
+}
+
+func (r *TodoRepository) InsertTodo(todo *Todo) error {
+	err := r.db.Create(todo).Error
 	return util.WrapGormErr(err, "todo")
 }
 
-func SelectTodo(id int64) (Todo, error) {
+func (r *TodoRepository) SelectTodo(id int64) (Todo, error) {
 	var todo Todo
-	err := db.
+	err := r.db.
 		Scopes(todoPreload).
 		Where(&Todo{
 			Entity: Entity{
@@ -56,9 +62,9 @@ func SelectTodo(id int64) (Todo, error) {
 	return todo, util.WrapGormErr(err, "todo")
 }
 
-func SelectTodos(todoListID int64) ([]Todo, error) {
+func (r *TodoRepository) SelectTodos(todoListID int64) ([]Todo, error) {
 	var todos []Todo
-	err := db.
+	err := r.db.
 		Scopes(todoPreload).
 		Where(Todo{
 			TodoListID: todoListID,
@@ -69,9 +75,9 @@ func SelectTodos(todoListID int64) ([]Todo, error) {
 	return todos, util.WrapGormErr(err, "todos")
 }
 
-func SelectAllTodos(userID int64) ([]Todo, error) {
+func (r *TodoRepository) SelectAllTodos(userID int64) ([]Todo, error) {
 	var todos []Todo
-	err := db.
+	err := r.db.
 		Scopes(todoUser(userID)).
 		Find(&todos).
 		Error
@@ -79,9 +85,9 @@ func SelectAllTodos(userID int64) ([]Todo, error) {
 	return todos, util.WrapGormErr(err, "all todos")
 }
 
-func SelectImportantTodos(userID int64) ([]Todo, error) {
+func (r *TodoRepository) SelectImportantTodos(userID int64) ([]Todo, error) {
 	var todos []Todo
-	err := db.
+	err := r.db.
 		Scopes(todoUser(userID)).
 		Where("Importance", true).
 		Find(&todos).
@@ -90,9 +96,9 @@ func SelectImportantTodos(userID int64) ([]Todo, error) {
 	return todos, util.WrapGormErr(err, "important todos")
 }
 
-func SelectPlanedTodos(userID int64) ([]Todo, error) {
+func (r *TodoRepository) SelectPlanedTodos(userID int64) ([]Todo, error) {
 	var todos []Todo
-	err := db.
+	err := r.db.
 		Scopes(todoUser(userID)).
 		Not("deadline", nil).
 		Order("deadline").
@@ -102,9 +108,9 @@ func SelectPlanedTodos(userID int64) ([]Todo, error) {
 	return todos, util.WrapGormErr(err, "planed todos")
 }
 
-func SelectNotNotifiedTodos(userID int64) ([]Todo, error) {
+func (r *TodoRepository) SelectNotNotifiedTodos(userID int64) ([]Todo, error) {
 	var todos []Todo
-	err := db.
+	err := r.db.
 		Scopes(todoUser(userID)).
 		Not("notified", false).
 		Order("notify_at").
@@ -114,13 +120,13 @@ func SelectNotNotifiedTodos(userID int64) ([]Todo, error) {
 	return todos, util.WrapGormErr(err, "not notified todos")
 }
 
-func SaveTodo(todo *Todo) error {
-	err := db.Save(&todo).Error
+func (r *TodoRepository) SaveTodo(todo *Todo) error {
+	err := r.db.Save(&todo).Error
 	return util.WrapGormErr(err, "todo")
 }
 
-func DeleteTodo(id int64) error {
-	err := db.
+func (r *TodoRepository) DeleteTodo(id int64) error {
+	err := r.db.
 		Delete(&Todo{
 			Entity: Entity{
 				ID: id,
@@ -131,8 +137,8 @@ func DeleteTodo(id int64) error {
 	return util.WrapGormErr(err, "todo")
 }
 
-func DeleteTodos(todoListID int64) (int64, error) {
-	re := db.
+func (r *TodoRepository) DeleteTodos(todoListID int64) (int64, error) {
+	re := r.db.
 		Where(Todo{
 			TodoListID: todoListID,
 		}).
@@ -145,8 +151,8 @@ func DeleteTodos(todoListID int64) (int64, error) {
  * oTodo File
  */
 
-func InsertTodoFile(todoID, fileID int64) error {
-	err := db.
+func (r *TodoRepository) InsertTodoFile(todoID, fileID int64) error {
+	err := r.db.
 		Where(Todo{
 			Entity: Entity{
 				ID: todoID,
@@ -162,9 +168,9 @@ func InsertTodoFile(todoID, fileID int64) error {
 	return util.WrapGormErr(err, "todo file")
 }
 
-func SelectTodoFiles(todoID int64) ([]File, error) {
+func (r *TodoRepository) SelectTodoFiles(todoID int64) ([]File, error) {
 	var files []File
-	err := db.
+	err := r.db.
 		Where(Todo{
 			Entity: Entity{
 				ID: todoID,
