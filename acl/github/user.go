@@ -1,14 +1,19 @@
-package dto
+package github
 
-import "time"
+import (
+	"encoding/json"
+	"io"
+	"net/http"
+	"strings"
+	"time"
 
-type GithubOAuthAccessToken struct {
-	AccessToken string `json:"access_token"`
-	Scope       string `json:"scope"`
-	TokenType   string `json:"token_type"`
-}
+	"github.com/yzx9/otodo/infrastructure/errors"
+	"github.com/yzx9/otodo/infrastructure/util"
+)
 
-type GithubUserPublicProfile struct {
+const UriUser = "https://api.github.com/user"
+
+type UserPublicProfile struct {
 	Login             string    `json:"login"`
 	ID                int64     `json:"id"`
 	NodeID            string    `json:"node_id"`
@@ -41,4 +46,44 @@ type GithubUserPublicProfile struct {
 	Following         int       `json:"following"`
 	CreatedAt         time.Time `json:"created_at"`
 	UpdatedAt         time.Time `json:"updated_at"`
+}
+
+func FetchGithubUserPublicProfile(token string) (UserPublicProfile, error) {
+	write := func(err error) (UserPublicProfile, error) {
+		return UserPublicProfile{}, err
+	}
+
+	req, err := http.NewRequest(http.MethodGet, UriUser, strings.NewReader(""))
+	if err != nil {
+		return write(util.NewErrorWithUnknown("fails to new request"))
+	}
+
+	req.Header.Set("Authorization", "token "+token)
+	req.Header.Set("Accept", "application/json")
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return write(util.NewErrorWithUnknown("fails to fetch github user public profile"))
+	}
+
+	if res.StatusCode == http.StatusForbidden {
+		// TODO[feat]: should we inactive token?
+		return write(util.NewError(errors.ErrThirdPartyForbidden, "github access token has been invalid"))
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return write(util.NewError(errors.ErrThirdPartyUnknown, "fails to fetch github user public profile"))
+	}
+
+	defer res.Body.Close()
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return write(util.NewErrorWithUnknown("fails to fetch github user public profile"))
+	}
+
+	payload := UserPublicProfile{}
+	if err := json.Unmarshal(body, &payload); err != nil {
+		return write(util.NewErrorWithUnknown("fails to parse github user public profile"))
+	}
+
+	return payload, nil
 }

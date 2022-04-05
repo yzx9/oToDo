@@ -8,6 +8,7 @@ import (
 
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
+	"github.com/yzx9/otodo/acl/github"
 	"github.com/yzx9/otodo/application/dto"
 	"github.com/yzx9/otodo/infrastructure/config"
 	"github.com/yzx9/otodo/infrastructure/repository"
@@ -48,7 +49,7 @@ func LoginByGithubOAuth(code, state string) (dto.SessionToken, error) {
 		return dto.SessionToken{}, fmt.Errorf("fails to login: %w", err)
 	}
 
-	profile, err := FetchGithubUserPublicProfile(token.Token)
+	profile, err := github.FetchGithubUserPublicProfile(token.Token)
 	if err != nil {
 		return dto.SessionToken{}, fmt.Errorf("fails to fetch github user: %w", err)
 	}

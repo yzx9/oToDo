@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"fmt"
 
+	"github.com/yzx9/otodo/acl/github"
 	"github.com/yzx9/otodo/application/dto"
 	"github.com/yzx9/otodo/infrastructure/config"
 	"github.com/yzx9/otodo/infrastructure/errors"
@@ -106,7 +107,7 @@ func GetCryptoPassword(password string) []byte {
  * OAuth
  */
 
-func getOrRegisterUserByGithub(profile dto.GithubUserPublicProfile) (repository.User, error) {
+func getOrRegisterUserByGithub(profile github.UserPublicProfile) (repository.User, error) {
 	exist, err := repository.UserRepo.ExistUserByGithubID(profile.ID)
 	if err != nil {
 		return repository.User{}, util.NewErrorWithUnknown("fails to register user: %w", err)
