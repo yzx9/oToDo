@@ -7,7 +7,7 @@ import (
 	"github.com/yzx9/otodo/application/dto"
 	"github.com/yzx9/otodo/bll"
 	"github.com/yzx9/otodo/domain/aggregate/user"
-	"github.com/yzx9/otodo/user_interface/common"
+	"github.com/yzx9/otodo/facade/rest/common"
 )
 
 // Get sharing info, only support todo list now

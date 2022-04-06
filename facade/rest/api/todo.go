@@ -5,8 +5,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/bll"
+	"github.com/yzx9/otodo/facade/rest/common"
 	"github.com/yzx9/otodo/infrastructure/repository"
-	"github.com/yzx9/otodo/user_interface/common"
 )
 
 // Create todo

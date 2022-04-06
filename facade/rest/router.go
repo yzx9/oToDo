@@ -1,15 +1,15 @@
-package user_interface
+package rest
 
 import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yzx9/otodo/user_interface/api"
-	"github.com/yzx9/otodo/user_interface/middleware"
+	"github.com/yzx9/otodo/facade/rest/api"
+	"github.com/yzx9/otodo/facade/rest/middleware"
 )
 
-func (s *Server) setupRouter() {
-	r := s.engine.Group("/api")
+func setupRouter(engine *gin.Engine) {
+	r := engine.Group("/api")
 
 	// Public routes
 	{

@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/application/dto"
 	"github.com/yzx9/otodo/domain/aggregate/user"
-	"github.com/yzx9/otodo/user_interface/common"
+	"github.com/yzx9/otodo/facade/rest/common"
 )
 
 // Register

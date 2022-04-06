@@ -2,44 +2,52 @@ package crosscutting
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 	"github.com/yzx9/otodo/infrastructure/config"
 )
 
-func LoadConfig(dir string) (*viper.Viper, error) {
-	ins := viper.New()
-	ins.SetConfigType("yaml")
-	ins.AddConfigPath(dir)
+var configManager *viper.Viper
 
-	ins.SetConfigName("config.yaml")
-	if err := ins.ReadInConfig(); err != nil {
-		return ins, fmt.Errorf("fails to load config.yaml: %w", err)
+func LoadConfig(dir string) error {
+	configManager = viper.New()
+	configManager.SetConfigType("yaml")
+	configManager.AddConfigPath(dir)
+
+	configManager.SetConfigName("config.yaml")
+	if err := configManager.ReadInConfig(); err != nil {
+		return fmt.Errorf("fails to load config.yaml: %w", err)
 	}
 
-	ins.SetConfigName("secret.yaml")
-	if err := ins.MergeInConfig(); err != nil {
-		return ins, fmt.Errorf("fails to load secret.yaml: %w", err)
+	configManager.SetConfigName("secret.yaml")
+	if err := configManager.MergeInConfig(); err != nil {
+		return fmt.Errorf("fails to load secret.yaml: %w", err)
 	}
 
-	config.SetConfig(ins)
+	config.SetConfig(configManager)
 
-	return ins, nil
+	return nil
 }
 
-func LoadAndWatchConfig(dir string) (*viper.Viper, error) {
-	ins, err := LoadConfig(dir)
-	if err != nil {
+func LoadAndWatchConfig(dir string) (<-chan time.Time, error) {
+	if err := LoadConfig(dir); err != nil {
 		return nil, err
 	}
 
-	ins.OnConfigChange(func(e fsnotify.Event) {
+	changed := make(chan time.Time, 1)
+	configManager.OnConfigChange(func(e fsnotify.Event) {
 		fmt.Println("Config file changed: ", e.Name)
-		config.SetConfig(ins)
+		config.SetConfig(configManager)
+
+		select {
+		case changed <- time.Now():
+		default:
+		}
 	})
 
-	ins.WatchConfig()
+	configManager.WatchConfig()
 
-	return ins, nil
+	return changed, nil
 }
