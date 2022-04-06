@@ -25,7 +25,7 @@ func Login(payload dto.LoginDTO) (dto.SessionToken, error) {
 		return dto.SessionToken{}, util.NewErrorWithBadRequest("invalid credential")
 	}
 
-	user, err := repository.UserRepo.SelectUserByUserName(payload.UserName)
+	user, err := repository.UserRepo.FindByUserName(payload.UserName)
 	if err != nil || user.Password == nil {
 		return write()
 	}

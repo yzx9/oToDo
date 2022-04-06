@@ -18,7 +18,7 @@ func CreateTodoStep(userID, todoID int64, name string) (repository.TodoStep, err
 		Name:   name,
 		TodoID: todoID,
 	}
-	if err = repository.TodoStepRepo.InsertTodoStep(&step); err != nil {
+	if err = repository.TodoStepRepo.Insert(&step); err != nil {
 		return repository.TodoStep{}, util.NewErrorWithUnknown("fails to create todo step")
 	}
 
@@ -39,7 +39,7 @@ func UpdateTodoStep(userID int64, step *repository.TodoStep) error {
 		step.DoneAt = &t
 	}
 
-	if err = repository.TodoStepRepo.SaveTodoStep(step); err != nil {
+	if err = repository.TodoStepRepo.Save(step); err != nil {
 		return util.NewErrorWithUnknown("fails to update todo step")
 	}
 
@@ -56,11 +56,11 @@ func DeleteTodoStep(userID, todoID, todoStepID int64) (repository.TodoStep, erro
 		return repository.TodoStep{}, util.NewErrorWithNotFound("todo step not found in todo: %v", todoStepID)
 	}
 
-	return step, repository.TodoStepRepo.DeleteTodoStep(todoStepID)
+	return step, repository.TodoStepRepo.Delete(todoStepID)
 }
 
 func OwnTodoStep(userID, todoStepID int64) (repository.TodoStep, error) {
-	step, err := repository.TodoStepRepo.SelectTodoStep(todoStepID)
+	step, err := repository.TodoStepRepo.Find(todoStepID)
 	if err != nil {
 		return repository.TodoStep{}, fmt.Errorf("fails to get todo step: %w", err)
 	}

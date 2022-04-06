@@ -20,12 +20,12 @@ type UserInvalidRefreshTokenRepository struct {
 	db *gorm.DB
 }
 
-func (r UserInvalidRefreshTokenRepository) InsertUserInvalidRefreshToken(entity *UserInvalidRefreshToken) error {
+func (r UserInvalidRefreshTokenRepository) Insert(entity *UserInvalidRefreshToken) error {
 	err := r.db.Create(entity).Error
 	return util.WrapGormErr(err, "user invalid refresh token")
 }
 
-func (r UserInvalidRefreshTokenRepository) ExistUserInvalidRefreshToken(userID int64, tokenID string) (bool, error) {
+func (r UserInvalidRefreshTokenRepository) Exist(userID int64, tokenID string) (bool, error) {
 	var count int64
 	err := r.db.
 		Model(UserInvalidRefreshToken{}).

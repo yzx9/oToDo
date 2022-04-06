@@ -40,7 +40,7 @@ func CreateUser(payload dto.CreateUserDTO) (repository.User, error) {
 		return repository.User{}, fmt.Errorf("password too short")
 	}
 
-	exist, err := repository.UserRepo.ExistUserByUserName(payload.UserName)
+	exist, err := repository.UserRepo.ExistByUserName(payload.UserName)
 	if err != nil {
 		return repository.User{}, fmt.Errorf("fails to valid user name: %w", err)
 	}
@@ -79,7 +79,7 @@ func CreateUserInvalidRefreshToken(userID int64, tokenID string) (repository.Use
 		UserID:  userID,
 		TokenID: tokenID,
 	}
-	if err := repository.UserInvalidRefreshTokenRepo.InsertUserInvalidRefreshToken(&model); err != nil {
+	if err := repository.UserInvalidRefreshTokenRepo.Insert(&model); err != nil {
 		return repository.UserInvalidRefreshToken{}, fmt.Errorf("fails to make user refresh token invalid: %w", err)
 	}
 
@@ -89,7 +89,7 @@ func CreateUserInvalidRefreshToken(userID int64, tokenID string) (repository.Use
 // Verify is it an valid token.
 // Note: This func don't check token expire time
 func IsValidRefreshToken(userID int64, tokenID string) (bool, error) {
-	valid, err := repository.UserInvalidRefreshTokenRepo.ExistUserInvalidRefreshToken(userID, tokenID)
+	valid, err := repository.UserInvalidRefreshTokenRepo.Exist(userID, tokenID)
 	if err != nil {
 		return false, fmt.Errorf("fails to get user refresh token: %w", err)
 	}
@@ -108,13 +108,13 @@ func GetCryptoPassword(password string) []byte {
  */
 
 func getOrRegisterUserByGithub(profile github.UserPublicProfile) (repository.User, error) {
-	exist, err := repository.UserRepo.ExistUserByGithubID(profile.ID)
+	exist, err := repository.UserRepo.ExistByGithubID(profile.ID)
 	if err != nil {
 		return repository.User{}, util.NewErrorWithUnknown("fails to register user: %w", err)
 	}
 
 	if exist {
-		user, err := repository.UserRepo.SelectUserByGithubID(profile.ID)
+		user, err := repository.UserRepo.FindByGithubID(profile.ID)
 		if err != nil {
 			return repository.User{}, util.NewErrorWithUnknown("fails to get user: %w", err)
 		}
@@ -142,7 +142,7 @@ func getOrRegisterUserByGithub(profile github.UserPublicProfile) (repository.Use
  */
 
 func createUser(user *repository.User) error {
-	if err := repository.UserRepo.InsertUser(user); err != nil {
+	if err := repository.UserRepo.Insert(user); err != nil {
 		return fmt.Errorf("fails to create user: %w", err)
 	}
 
@@ -160,12 +160,12 @@ func createBasicTodoList(user *repository.User) (repository.TodoList, error) {
 		IsBasic: true,
 		UserID:  user.ID,
 	}
-	if err := repository.TodoListRepo.InsertTodoList(&basicTodoList); err != nil {
+	if err := repository.TodoListRepo.Insert(&basicTodoList); err != nil {
 		return repository.TodoList{}, fmt.Errorf("fails to create user basic todo list: %w", err)
 	}
 
 	user.BasicTodoListID = basicTodoList.ID
-	if err := repository.UserRepo.SaveUser(user); err != nil {
+	if err := repository.UserRepo.Save(user); err != nil {
 		return repository.TodoList{}, fmt.Errorf("fails to create user basic todo list: %w", err)
 	}
 

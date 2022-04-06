@@ -33,12 +33,12 @@ type ThirdPartyOAuthTokenRepository struct {
 	db *gorm.DB
 }
 
-func (r *ThirdPartyOAuthTokenRepository) InsertThirdPartyOAuthToken(entity *ThirdPartyOAuthToken) error {
+func (r *ThirdPartyOAuthTokenRepository) Insert(entity *ThirdPartyOAuthToken) error {
 	err := r.db.Create(entity).Error
 	return util.WrapGormErr(err, "third party token")
 }
 
-func (r *ThirdPartyOAuthTokenRepository) UpdateThirdPartyOAuthToken(new *ThirdPartyOAuthToken) error {
+func (r *ThirdPartyOAuthTokenRepository) Update(new *ThirdPartyOAuthToken) error {
 	err := r.db.
 		Where(&ThirdPartyOAuthToken{
 			UserID: new.UserID,
@@ -50,7 +50,7 @@ func (r *ThirdPartyOAuthTokenRepository) UpdateThirdPartyOAuthToken(new *ThirdPa
 	return util.WrapGormErr(err, "third party token")
 }
 
-func (r *ThirdPartyOAuthTokenRepository) ExistActiveThirdPartyOAuthToken(userID int64, tokenType ThirdPartyTokenType) (bool, error) {
+func (r *ThirdPartyOAuthTokenRepository) ExistActiveOne(userID int64, tokenType ThirdPartyTokenType) (bool, error) {
 	var count int64
 	err := r.db.
 		Model(ThirdPartyOAuthToken{}).

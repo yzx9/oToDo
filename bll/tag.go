@@ -34,7 +34,7 @@ func UpdateTag(todo *repository.Todo, oldTodoTitle string) error {
 	for tagName, op := range tags {
 		if op {
 			// Insert new tag
-			exist, err := repository.TagRepo.ExistTag(userID, tagName)
+			exist, err := repository.TagRepo.Exist(userID, tagName)
 			if err != nil {
 				return util.NewErrorWithUnknown("unknown error: %w", err)
 			}
@@ -45,7 +45,7 @@ func UpdateTag(todo *repository.Todo, oldTodoTitle string) error {
 					UserID: userID,
 					Todos:  make([]repository.Todo, 0),
 				}
-				if err := repository.TagRepo.InsertTag(&tag); err != nil {
+				if err := repository.TagRepo.Insert(&tag); err != nil {
 					return fmt.Errorf("fails to create tag: %w", err)
 				}
 			}

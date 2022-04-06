@@ -29,12 +29,12 @@ type SharingRepository struct {
 	db *gorm.DB
 }
 
-func (r *SharingRepository) InsertSharing(sharing *Sharing) error {
+func (r *SharingRepository) Insert(sharing *Sharing) error {
 	err := r.db.Create(sharing).Error
 	return util.WrapGormErr(err, "sharing")
 }
 
-func (r *SharingRepository) SelectSharing(token string) (Sharing, error) {
+func (r *SharingRepository) Find(token string) (Sharing, error) {
 	var sharing Sharing
 	err := r.db.
 		Where(&Sharing{
@@ -46,7 +46,7 @@ func (r *SharingRepository) SelectSharing(token string) (Sharing, error) {
 	return sharing, util.WrapGormErr(err, "sharing")
 }
 
-func (r *SharingRepository) SelectSharings(userID int64, sharingType SharingType) ([]Sharing, error) {
+func (r *SharingRepository) FindByUser(userID int64, sharingType SharingType) ([]Sharing, error) {
 	var sharings []Sharing
 	err := r.db.
 		Where(&Sharing{
@@ -59,7 +59,7 @@ func (r *SharingRepository) SelectSharings(userID int64, sharingType SharingType
 	return sharings, util.WrapGormErr(err, "sharing")
 }
 
-func (r *SharingRepository) SelectActiveSharings(userID int64, sharingType SharingType) ([]Sharing, error) {
+func (r *SharingRepository) FindAllActiveOnes(userID int64, sharingType SharingType) ([]Sharing, error) {
 	var sharings []Sharing
 	err := r.db.
 		Where(&Sharing{
@@ -73,12 +73,12 @@ func (r *SharingRepository) SelectActiveSharings(userID int64, sharingType Shari
 	return sharings, util.WrapGormErr(err, "sharing")
 }
 
-func (r *SharingRepository) SaveSharing(sharing *Sharing) error {
+func (r *SharingRepository) Save(sharing *Sharing) error {
 	err := r.db.Save(&sharing).Error
 	return util.WrapGormErr(err, "sharing")
 }
 
-func (r *SharingRepository) ExistActiveSharing(userID int64, sharingType SharingType) (bool, error) {
+func (r *SharingRepository) ExistActiveOne(userID int64, sharingType SharingType) (bool, error) {
 	var count int64
 	err := r.db.
 		Where(&Sharing{

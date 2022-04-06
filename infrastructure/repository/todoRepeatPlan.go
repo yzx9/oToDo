@@ -33,12 +33,12 @@ type TodoRepeatPlanRepository struct {
 	db *gorm.DB
 }
 
-func (r *TodoRepeatPlanRepository) InsertTodoRepeatPlan(plan *TodoRepeatPlan) error {
+func (r *TodoRepeatPlanRepository) Insert(plan *TodoRepeatPlan) error {
 	err := r.db.Create(plan).Error
 	return util.WrapGormErr(err, "todo repeat plan")
 }
 
-func (r *TodoRepeatPlanRepository) SelectTodoRepeatPlan(id int64) (TodoRepeatPlan, error) {
+func (r *TodoRepeatPlanRepository) Find(id int64) (TodoRepeatPlan, error) {
 	var plan TodoRepeatPlan
 	err := r.db.
 		Where(&TodoRepeatPlan{
@@ -52,12 +52,12 @@ func (r *TodoRepeatPlanRepository) SelectTodoRepeatPlan(id int64) (TodoRepeatPla
 	return plan, util.WrapGormErr(err, "todo repeat plan")
 }
 
-func (r *TodoRepeatPlanRepository) SaveTodoRepeatPlan(todoRepeatPlan *TodoRepeatPlan) error {
+func (r *TodoRepeatPlanRepository) Save(todoRepeatPlan *TodoRepeatPlan) error {
 	err := r.db.Save(&todoRepeatPlan).Error
 	return util.WrapGormErr(err, "todo repeat plan")
 }
 
-func (r *TodoRepeatPlanRepository) DeleteTodoRepeatPlan(id int64) error {
+func (r *TodoRepeatPlanRepository) Delete(id int64) error {
 	err := r.db.
 		Delete(&TodoRepeatPlan{
 			Entity: Entity{

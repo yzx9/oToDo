@@ -17,14 +17,14 @@ var oauthStates = make(map[string]time.Time)
 
 func UpdateThirdPartyOAuthToken(token *repository.ThirdPartyOAuthToken) error {
 	// TODO[bug]: handle error
-	exist, err := repository.ThirdPartyOAuthTokenRepo.ExistActiveThirdPartyOAuthToken(token.UserID, repository.ThirdPartyTokenType(token.Type))
+	exist, err := repository.ThirdPartyOAuthTokenRepo.ExistActiveOne(token.UserID, repository.ThirdPartyTokenType(token.Type))
 	if err != nil {
 		return fmt.Errorf("fails to update third party oauth token: %w", err)
 	}
 
-	handle := repository.ThirdPartyOAuthTokenRepo.UpdateThirdPartyOAuthToken
+	handle := repository.ThirdPartyOAuthTokenRepo.Update
 	if !exist {
-		handle = repository.ThirdPartyOAuthTokenRepo.InsertThirdPartyOAuthToken
+		handle = repository.ThirdPartyOAuthTokenRepo.Insert
 	}
 
 	if err := handle(token); err != nil {

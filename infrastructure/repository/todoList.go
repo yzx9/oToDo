@@ -34,7 +34,7 @@ type TodoListRepository struct {
 	db *gorm.DB
 }
 
-func (r *TodoListRepository) InsertTodoList(todoList *TodoList) error {
+func (r *TodoListRepository) Insert(todoList *TodoList) error {
 	err := r.db.
 		Create(todoList).
 		Error
@@ -42,7 +42,7 @@ func (r *TodoListRepository) InsertTodoList(todoList *TodoList) error {
 	return util.WrapGormErr(err, "todo list")
 }
 
-func (r *TodoListRepository) SelectTodoList(id int64) (TodoList, error) {
+func (r *TodoListRepository) Find(id int64) (TodoList, error) {
 	var list TodoList
 	err := r.db.
 		Where(&TodoList{
@@ -56,7 +56,7 @@ func (r *TodoListRepository) SelectTodoList(id int64) (TodoList, error) {
 	return list, util.WrapGormErr(err, "todo list")
 }
 
-func (r *TodoListRepository) SelectTodoLists(userId int64) ([]TodoList, error) {
+func (r *TodoListRepository) FindByUser(userId int64) ([]TodoList, error) {
 	var lists []TodoList
 	err := r.db.
 		Where(TodoList{
@@ -68,7 +68,7 @@ func (r *TodoListRepository) SelectTodoLists(userId int64) ([]TodoList, error) {
 	return lists, util.WrapGormErr(err, "todo list")
 }
 
-func (r *TodoListRepository) SelectTodoListsWithMenuFormat(userID int64) ([]TodoListMenuItem, error) {
+func (r *TodoListRepository) FindByUserWithMenuFormat(userID int64) ([]TodoListMenuItem, error) {
 	var lists []TodoListMenuItem
 	err := r.db.
 		Model(TodoList{}).
@@ -85,12 +85,12 @@ func (r *TodoListRepository) SelectTodoListsWithMenuFormat(userID int64) ([]Todo
 	return lists, util.WrapGormErr(err, "todo list")
 }
 
-func (r *TodoListRepository) SaveTodoList(todoList *TodoList) error {
+func (r *TodoListRepository) Save(todoList *TodoList) error {
 	re := r.db.Save(&todoList)
 	return util.WrapGormErr(re.Error, "todo list")
 }
 
-func (r *TodoListRepository) DeleteTodoList(id int64) error {
+func (r *TodoListRepository) Delete(id int64) error {
 	err := r.db.
 		Delete(&Todo{
 			Entity: Entity{
@@ -102,7 +102,7 @@ func (r *TodoListRepository) DeleteTodoList(id int64) error {
 	return util.WrapGormErr(err, "todo list")
 }
 
-func (r *TodoListRepository) DeleteTodoListsByFolder(todoListFolderID int64) (int64, error) {
+func (r *TodoListRepository) DeleteAllByFolder(todoListFolderID int64) (int64, error) {
 	re := r.db.
 		Where(TodoList{
 			TodoListFolderID: todoListFolderID,
@@ -112,7 +112,7 @@ func (r *TodoListRepository) DeleteTodoListsByFolder(todoListFolderID int64) (in
 	return re.RowsAffected, util.WrapGormErr(re.Error, "todo list")
 }
 
-func (r *TodoListRepository) ExistTodoList(id int64) (bool, error) {
+func (r *TodoListRepository) Exist(id int64) (bool, error) {
 	var count int64
 	err := r.db.
 		Model(&TodoList{}).
@@ -131,7 +131,7 @@ func (r *TodoListRepository) ExistTodoList(id int64) (bool, error) {
  * Sharing
  */
 
-func (r *TodoListRepository) InsertTodoListSharedUser(userID, todoListID int64) error {
+func (r *TodoListRepository) InsertSharedUser(userID, todoListID int64) error {
 	err := r.db.
 		Model(&User{
 			Entity: Entity{
@@ -148,7 +148,7 @@ func (r *TodoListRepository) InsertTodoListSharedUser(userID, todoListID int64) 
 	return util.WrapGormErr(err, "todo list shared user")
 }
 
-func (r *TodoListRepository) SelectSharedTodoLists(userID int64) ([]TodoList, error) {
+func (r *TodoListRepository) FindSharedOnesByUser(userID int64) ([]TodoList, error) {
 	var lists []TodoList
 	err := r.db.
 		Model(&User{
@@ -176,7 +176,7 @@ func (r *TodoListRepository) SelectTodoListSharedUsers(todoListID int64) ([]User
 	return users, util.WrapGormErr(err, "todo list shared users")
 }
 
-func (r *TodoListRepository) DeleteTodoListSharedUser(userID, todoListID int64) error {
+func (r *TodoListRepository) DeleteSharedUser(userID, todoListID int64) error {
 	err := r.db.
 		Model(&TodoList{
 			Entity: Entity{
@@ -193,7 +193,7 @@ func (r *TodoListRepository) DeleteTodoListSharedUser(userID, todoListID int64) 
 	return util.WrapGormErr(err, "todo list shared users")
 }
 
-func (r *TodoListRepository) ExistTodoListSharing(userID, todoListID int64) (bool, error) {
+func (r *TodoListRepository) ExistSharing(userID, todoListID int64) (bool, error) {
 	// TODO[pref]: count in db
 	var lists []TodoList
 	err := r.db.

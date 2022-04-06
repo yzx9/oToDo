@@ -56,7 +56,7 @@ func ForceGetTodos(todoListID int64) ([]repository.Todo, error) {
 }
 
 func GetImportantTodos(userID int64) ([]repository.Todo, error) {
-	todos, err := repository.TodoRepo.SelectImportantTodos(userID)
+	todos, err := repository.TodoRepo.FindAllImportantOnesByUser(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get important todos: %w", err)
 	}
@@ -65,7 +65,7 @@ func GetImportantTodos(userID int64) ([]repository.Todo, error) {
 }
 
 func GetPlannedTodos(userID int64) ([]repository.Todo, error) {
-	todos, err := repository.TodoRepo.SelectPlanedTodos(userID)
+	todos, err := repository.TodoRepo.FindAllPlanedOnesByUser(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get planed todos: %w", err)
 	}
@@ -74,7 +74,7 @@ func GetPlannedTodos(userID int64) ([]repository.Todo, error) {
 }
 
 func GetNotNotifiedTodos(userID int64) ([]repository.Todo, error) {
-	todos, err := repository.TodoRepo.SelectNotNotifiedTodos(userID)
+	todos, err := repository.TodoRepo.FindAllNotNotifiedOnesByUser(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get not-notified todos: %w", err)
 	}
@@ -119,7 +119,7 @@ func UpdateTodo(userID int64, todo *repository.Todo) error {
 	todo.TodoRepeatPlanID = plan.ID
 
 	// Save
-	if err = repository.TodoRepo.SaveTodo(todo); err != nil {
+	if err = repository.TodoRepo.Save(todo); err != nil {
 		return err
 	}
 
@@ -134,7 +134,7 @@ func DeleteTodo(userID, todoID int64) (repository.Todo, error) {
 		return repository.Todo{}, err
 	}
 
-	if err = repository.TodoRepo.DeleteTodo(todoID); err != nil {
+	if err = repository.TodoRepo.Delete(todoID); err != nil {
 		return repository.Todo{}, fmt.Errorf("fails to delete todo: %w", err)
 	}
 

@@ -30,12 +30,12 @@ type UserRepository struct {
 	db *gorm.DB
 }
 
-func (r *UserRepository) InsertUser(user *User) error {
+func (r *UserRepository) Insert(user *User) error {
 	re := r.db.Create(user)
 	return util.WrapGormErr(re.Error, "user")
 }
 
-func (r *UserRepository) SaveUser(user *User) error {
+func (r *UserRepository) Save(user *User) error {
 	err := r.db.Save(&user).Error
 	return util.WrapGormErr(err, "user")
 }
@@ -54,7 +54,7 @@ func (r *UserRepository) SelectUser(id int64) (User, error) {
 	return user, util.WrapGormErr(err, "user")
 }
 
-func (r *UserRepository) SelectUserByUserName(username string) (User, error) {
+func (r *UserRepository) FindByUserName(username string) (User, error) {
 	var user User
 	err := r.db.
 		Where(User{
@@ -66,7 +66,7 @@ func (r *UserRepository) SelectUserByUserName(username string) (User, error) {
 	return user, util.WrapGormErr(err, "user")
 }
 
-func (r *UserRepository) SelectUserByGithubID(githubID int64) (User, error) {
+func (r *UserRepository) FindByGithubID(githubID int64) (User, error) {
 	var user User
 	err := r.db.
 		Where(User{
@@ -78,7 +78,7 @@ func (r *UserRepository) SelectUserByGithubID(githubID int64) (User, error) {
 	return user, util.WrapGormErr(err, "user")
 }
 
-func (r *UserRepository) SelectUserByTodo(todoID int64) (User, error) {
+func (r *UserRepository) FindByTodo(todoID int64) (User, error) {
 	var todo Todo
 	err := r.db.
 		Where(&Todo{
@@ -97,7 +97,7 @@ func (r *UserRepository) SelectUserByTodo(todoID int64) (User, error) {
 	return r.SelectUser(todo.UserID)
 }
 
-func (r *UserRepository) ExistUserByUserName(username string) (bool, error) {
+func (r *UserRepository) ExistByUserName(username string) (bool, error) {
 	var count int64
 	err := r.db.
 		Model(&User{}).
@@ -110,7 +110,7 @@ func (r *UserRepository) ExistUserByUserName(username string) (bool, error) {
 	return count != 0, util.WrapGormErr(err, "user")
 }
 
-func (r *UserRepository) ExistUserByGithubID(githubID int64) (bool, error) {
+func (r *UserRepository) ExistByGithubID(githubID int64) (bool, error) {
 	var count int64
 	err := r.db.
 		Model(&User{}).

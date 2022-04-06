@@ -28,12 +28,17 @@ type FileRepository struct {
 	db *gorm.DB
 }
 
-func (r *FileRepository) InsertFile(file *File) error {
+func (r *FileRepository) Insert(file *File) error {
 	err := r.db.Create(file).Error
 	return util.WrapGormErr(err, "file")
 }
 
-func (r *FileRepository) SelectFile(id int64) (*File, error) {
+func (r *FileRepository) Save(file *File) error {
+	err := r.db.Save(file).Error
+	return util.WrapGormErr(err, "file")
+}
+
+func (r *FileRepository) Find(id int64) (*File, error) {
 	var file File
 	err := r.db.
 		Where(&File{
@@ -45,9 +50,4 @@ func (r *FileRepository) SelectFile(id int64) (*File, error) {
 		Error
 
 	return &file, util.WrapGormErr(err, "file")
-}
-
-func (r *FileRepository) SaveFile(file *File) error {
-	err := r.db.Save(file).Error
-	return util.WrapGormErr(err, "file")
 }

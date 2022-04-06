@@ -22,12 +22,12 @@ type TagRepository struct {
 	db *gorm.DB
 }
 
-func (r *TagRepository) InsertTag(tag *Tag) error {
+func (r *TagRepository) Insert(tag *Tag) error {
 	err := r.db.Create(tag).Error
 	return util.WrapGormErr(err, "tag")
 }
 
-func (r *TagRepository) SelectTag(userID int64, tagName string) (Tag, error) {
+func (r *TagRepository) Find(userID int64, tagName string) (Tag, error) {
 	var tag Tag
 	err := r.db.
 		Scopes(tagScope(userID, tagName)).
@@ -37,7 +37,7 @@ func (r *TagRepository) SelectTag(userID int64, tagName string) (Tag, error) {
 	return tag, util.WrapGormErr(err, "tag")
 }
 
-func (r *TagRepository) SelectTags(userID int64) ([]Tag, error) {
+func (r *TagRepository) FindAllByUser(userID int64) ([]Tag, error) {
 	var tags []Tag
 	err := r.db.
 		Where(Tag{
@@ -75,7 +75,7 @@ func (r *TagRepository) DeleteTagTodo(userID, todoID int64, tagName string) erro
 	return util.WrapGormErr(err, "tag todos")
 }
 
-func (r *TagRepository) ExistTag(userID int64, tagName string) (bool, error) {
+func (r *TagRepository) Exist(userID int64, tagName string) (bool, error) {
 	var count int64
 	err := r.db.
 		Scopes(tagScope(userID, tagName)).
