@@ -45,17 +45,17 @@ func UpdateTag(todo *repository.Todo, oldTodoTitle string) error {
 					UserID: userID,
 					Todos:  make([]repository.Todo, 0),
 				}
-				if err := repository.TagRepo.Insert(&tag); err != nil {
+				if err := repository.TagRepo.Save(&tag); err != nil {
 					return fmt.Errorf("fails to create tag: %w", err)
 				}
 			}
 
-			if err := repository.TagRepo.InsertTagTodo(userID, todo.ID, tagName); err != nil {
+			if err := repository.TagRepo.SaveTodo(userID, todo.ID, tagName); err != nil {
 				return fmt.Errorf("fails to update tag: %w", err)
 			}
 		} else {
 			// Remove old tag
-			if err := repository.TagRepo.DeleteTagTodo(userID, todo.ID, tagName); err != nil {
+			if err := repository.TagRepo.DeleteTodo(userID, todo.ID, tagName); err != nil {
 				return fmt.Errorf("fails to update tag: %w", err)
 			}
 		}

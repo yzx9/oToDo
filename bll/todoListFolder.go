@@ -9,7 +9,7 @@ import (
 
 func CreateTodoListFolder(userID int64, folder *repository.TodoListFolder) error {
 	folder.UserID = userID
-	if err := repository.TodoListFolderRepo.Insert(folder); err != nil {
+	if err := repository.TodoListFolderRepo.Save(folder); err != nil {
 		return fmt.Errorf("fails to create todo list folder: %w", err)
 	}
 
@@ -21,7 +21,7 @@ func GetTodoListFolder(userID, todoListFolderID int64) (repository.TodoListFolde
 }
 
 func GetTodoListFolders(userID int64) ([]repository.TodoListFolder, error) {
-	vec, err := repository.TodoListFolderRepo.FindByUser(userID)
+	vec, err := repository.TodoListFolderRepo.FindAllByUser(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get todo list folder: %w", err)
 	}

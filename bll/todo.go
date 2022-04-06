@@ -22,7 +22,8 @@ func CreateTodo(userID int64, todo *repository.Todo) error {
 	}
 	todo.TodoRepeatPlanID = plan.ID
 
-	if err := repository.TodoRepo.InsertTodo(todo); err != nil {
+	todo.ID = 0
+	if err := repository.TodoRepo.Save(todo); err != nil {
 		return fmt.Errorf("fails to create todo: %w", err)
 	}
 
@@ -47,7 +48,7 @@ func GetTodos(userID, todoListID int64) ([]repository.Todo, error) {
 }
 
 func ForceGetTodos(todoListID int64) ([]repository.Todo, error) {
-	todos, err := repository.TodoRepo.SelectTodos(todoListID)
+	todos, err := repository.TodoRepo.FindAllByTodoList(todoListID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get todos: %w", err)
 	}
@@ -144,7 +145,7 @@ func DeleteTodo(userID, todoID int64) (repository.Todo, error) {
 }
 
 func OwnTodo(userID, todoID int64) (repository.Todo, error) {
-	todo, err := repository.TodoRepo.SelectTodo(todoID)
+	todo, err := repository.TodoRepo.Find(todoID)
 	if err != nil {
 		return repository.Todo{}, fmt.Errorf("fails to get todo: %w", err)
 	}

@@ -71,7 +71,7 @@ func Logout(userID int64, refreshTokenID string) error {
 }
 
 func NewAccessToken(userID int64, refreshTokenID string) (dto.SessionToken, error) {
-	user, err := repository.UserRepo.SelectUser(userID)
+	user, err := repository.UserRepo.Find(userID)
 	if err != nil {
 		return dto.SessionToken{}, fmt.Errorf("fails to get user, %w", err)
 	}

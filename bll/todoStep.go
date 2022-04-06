@@ -18,7 +18,7 @@ func CreateTodoStep(userID, todoID int64, name string) (repository.TodoStep, err
 		Name:   name,
 		TodoID: todoID,
 	}
-	if err = repository.TodoStepRepo.Insert(&step); err != nil {
+	if err = repository.TodoStepRepo.Save(&step); err != nil {
 		return repository.TodoStep{}, util.NewErrorWithUnknown("fails to create todo step")
 	}
 

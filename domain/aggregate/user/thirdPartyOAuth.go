@@ -22,12 +22,12 @@ func UpdateThirdPartyOAuthToken(token *repository.ThirdPartyOAuthToken) error {
 		return fmt.Errorf("fails to update third party oauth token: %w", err)
 	}
 
-	handle := repository.ThirdPartyOAuthTokenRepo.Update
+	save := repository.ThirdPartyOAuthTokenRepo.SaveByUserIDAndType
 	if !exist {
-		handle = repository.ThirdPartyOAuthTokenRepo.Insert
+		save = repository.ThirdPartyOAuthTokenRepo.Save
 	}
 
-	if err := handle(token); err != nil {
+	if err := save(token); err != nil {
 		return fmt.Errorf("fails to update third party oauth token: %w", err)
 	}
 

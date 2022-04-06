@@ -20,8 +20,8 @@ type UserInvalidRefreshTokenRepository struct {
 	db *gorm.DB
 }
 
-func (r UserInvalidRefreshTokenRepository) Insert(entity *UserInvalidRefreshToken) error {
-	err := r.db.Create(entity).Error
+func (r UserInvalidRefreshTokenRepository) Save(entity *UserInvalidRefreshToken) error {
+	err := r.db.Save(entity).Error
 	return util.WrapGormErr(err, "user invalid refresh token")
 }
 

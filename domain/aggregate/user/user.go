@@ -62,7 +62,7 @@ func CreateUser(payload dto.CreateUserDTO) (repository.User, error) {
 }
 
 func GetUser(userID int64) (repository.User, error) {
-	user, err := repository.UserRepo.SelectUser(userID)
+	user, err := repository.UserRepo.Find(userID)
 	if err != nil {
 		return repository.User{}, fmt.Errorf("fails to get user: %w", err)
 	}
@@ -79,7 +79,7 @@ func CreateUserInvalidRefreshToken(userID int64, tokenID string) (repository.Use
 		UserID:  userID,
 		TokenID: tokenID,
 	}
-	if err := repository.UserInvalidRefreshTokenRepo.Insert(&model); err != nil {
+	if err := repository.UserInvalidRefreshTokenRepo.Save(&model); err != nil {
 		return repository.UserInvalidRefreshToken{}, fmt.Errorf("fails to make user refresh token invalid: %w", err)
 	}
 
@@ -142,7 +142,7 @@ func getOrRegisterUserByGithub(profile github.UserPublicProfile) (repository.Use
  */
 
 func createUser(user *repository.User) error {
-	if err := repository.UserRepo.Insert(user); err != nil {
+	if err := repository.UserRepo.Save(user); err != nil {
 		return fmt.Errorf("fails to create user: %w", err)
 	}
 

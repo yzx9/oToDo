@@ -22,7 +22,7 @@ type TagRepository struct {
 	db *gorm.DB
 }
 
-func (r *TagRepository) Insert(tag *Tag) error {
+func (r *TagRepository) Save(tag *Tag) error {
 	err := r.db.Create(tag).Error
 	return util.WrapGormErr(err, "tag")
 }
@@ -30,7 +30,7 @@ func (r *TagRepository) Insert(tag *Tag) error {
 func (r *TagRepository) Find(userID int64, tagName string) (Tag, error) {
 	var tag Tag
 	err := r.db.
-		Scopes(tagScope(userID, tagName)).
+		Scopes(filterTag(userID, tagName)).
 		First(&tag).
 		Error
 
@@ -49,9 +49,9 @@ func (r *TagRepository) FindAllByUser(userID int64) ([]Tag, error) {
 	return tags, util.WrapGormErr(err, "tag")
 }
 
-func (r *TagRepository) InsertTagTodo(userID, todoID int64, tagName string) error {
+func (r *TagRepository) SaveTodo(userID, todoID int64, tagName string) error {
 	err := r.db.
-		Scopes(tagScope(userID, tagName)).
+		Scopes(filterTag(userID, tagName)).
 		Association("Todos").
 		Append(&Todo{
 			Entity: Entity{
@@ -62,9 +62,9 @@ func (r *TagRepository) InsertTagTodo(userID, todoID int64, tagName string) erro
 	return util.WrapGormErr(err, "tag todos")
 }
 
-func (r *TagRepository) DeleteTagTodo(userID, todoID int64, tagName string) error {
+func (r *TagRepository) DeleteTodo(userID, todoID int64, tagName string) error {
 	err := r.db.
-		Scopes(tagScope(userID, tagName)).
+		Scopes(filterTag(userID, tagName)).
 		Association("Todos").
 		Delete(&Todo{
 			Entity: Entity{
@@ -78,7 +78,7 @@ func (r *TagRepository) DeleteTagTodo(userID, todoID int64, tagName string) erro
 func (r *TagRepository) Exist(userID int64, tagName string) (bool, error) {
 	var count int64
 	err := r.db.
-		Scopes(tagScope(userID, tagName)).
+		Scopes(filterTag(userID, tagName)).
 		Count(&count).
 		Error
 
@@ -89,7 +89,7 @@ func (r *TagRepository) Exist(userID int64, tagName string) (bool, error) {
 	return count != 0, nil
 }
 
-func tagScope(userID int64, tagName string) func(*gorm.DB) *gorm.DB {
+func filterTag(userID int64, tagName string) func(*gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 		return db.
 			Model(&Tag{}).

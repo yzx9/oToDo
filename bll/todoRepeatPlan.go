@@ -12,7 +12,8 @@ func CreateTodoRepeatPlan(plan repository.TodoRepeatPlan) (repository.TodoRepeat
 		return repository.TodoRepeatPlan{}, nil
 	}
 
-	if err := repository.TodoRepeatPlanRepo.Insert(&plan); err != nil {
+	plan.ID = 0
+	if err := repository.TodoRepeatPlanRepo.Save(&plan); err != nil {
 		return repository.TodoRepeatPlan{}, fmt.Errorf("fails to create todo repeat plan: %w", err)
 	}
 
@@ -24,7 +25,8 @@ func UpdateTodoRepeatPlan(plan, oldPlan repository.TodoRepeatPlan) (repository.T
 		return oldPlan, nil
 	}
 
-	if err := repository.TodoRepeatPlanRepo.Insert(&plan); err != nil {
+	plan.ID = 0
+	if err := repository.TodoRepeatPlanRepo.Save(&plan); err != nil {
 		return repository.TodoRepeatPlan{}, fmt.Errorf("fails to create todo repeat plan: %w", err)
 	}
 
@@ -50,8 +52,9 @@ func CreateRepeatTodoIfNeed(todo repository.Todo) (bool, repository.Todo, error)
 		return false, repository.Todo{}, nil
 	}
 
+	todo.ID = 0
 	todo.Deadline = &nextDeadline
-	if err := repository.TodoRepo.InsertTodo(&todo); err != nil {
+	if err := repository.TodoRepo.Save(&todo); err != nil {
 		return false, repository.Todo{}, fmt.Errorf("fails to create todo: %w", err)
 	}
 

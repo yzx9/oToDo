@@ -34,7 +34,7 @@ func CreateTodoListSharing(userID, todoListID int64) (repository.Sharing, error)
 		RelatedID: todoListID,
 		UserID:    userID,
 	}
-	if err := repository.SharingRepo.Insert(&sharing); err != nil {
+	if err := repository.SharingRepo.Save(&sharing); err != nil {
 		return repository.Sharing{}, fmt.Errorf("fails to create sharing token: %w", err)
 	}
 

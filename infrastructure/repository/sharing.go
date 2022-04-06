@@ -29,8 +29,8 @@ type SharingRepository struct {
 	db *gorm.DB
 }
 
-func (r *SharingRepository) Insert(sharing *Sharing) error {
-	err := r.db.Create(sharing).Error
+func (r *SharingRepository) Save(sharing *Sharing) error {
+	err := r.db.Save(&sharing).Error
 	return util.WrapGormErr(err, "sharing")
 }
 
@@ -71,11 +71,6 @@ func (r *SharingRepository) FindAllActiveOnes(userID int64, sharingType SharingT
 		Error
 
 	return sharings, util.WrapGormErr(err, "sharing")
-}
-
-func (r *SharingRepository) Save(sharing *Sharing) error {
-	err := r.db.Save(&sharing).Error
-	return util.WrapGormErr(err, "sharing")
 }
 
 func (r *SharingRepository) ExistActiveOne(userID int64, sharingType SharingType) (bool, error) {

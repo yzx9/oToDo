@@ -25,7 +25,7 @@ func CreateTodoListSharedUser(userID int64, token string) error {
 		return nil
 	}
 
-	err = repository.TodoListRepo.InsertSharedUser(userID, sharing.RelatedID)
+	err = repository.TodoListRepo.SaveSharedUser(userID, sharing.RelatedID)
 	if err != nil {
 		return fmt.Errorf("fails to create todo list shared user: %w", err)
 	}
@@ -39,7 +39,7 @@ func GetTodoListSharedUsers(userID, todoListID int64) ([]repository.User, error)
 		return nil, err
 	}
 
-	users, err := repository.TodoListRepo.SelectTodoListSharedUsers(todoListID)
+	users, err := repository.TodoListRepo.FindAllSharedUsers(todoListID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get todo list shared users: %w", err)
 	}

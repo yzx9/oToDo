@@ -33,8 +33,8 @@ type TodoRepeatPlanRepository struct {
 	db *gorm.DB
 }
 
-func (r *TodoRepeatPlanRepository) Insert(plan *TodoRepeatPlan) error {
-	err := r.db.Create(plan).Error
+func (r *TodoRepeatPlanRepository) Save(plan *TodoRepeatPlan) error {
+	err := r.db.Save(plan).Error
 	return util.WrapGormErr(err, "todo repeat plan")
 }
 
@@ -50,11 +50,6 @@ func (r *TodoRepeatPlanRepository) Find(id int64) (TodoRepeatPlan, error) {
 		Error
 
 	return plan, util.WrapGormErr(err, "todo repeat plan")
-}
-
-func (r *TodoRepeatPlanRepository) Save(todoRepeatPlan *TodoRepeatPlan) error {
-	err := r.db.Save(&todoRepeatPlan).Error
-	return util.WrapGormErr(err, "todo repeat plan")
 }
 
 func (r *TodoRepeatPlanRepository) Delete(id int64) error {

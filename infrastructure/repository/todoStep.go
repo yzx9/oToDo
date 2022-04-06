@@ -24,8 +24,8 @@ type TodoStepRepository struct {
 	db *gorm.DB
 }
 
-func (r *TodoStepRepository) Insert(step *TodoStep) error {
-	err := r.db.Create(step).Error
+func (r *TodoStepRepository) Save(todoStep *TodoStep) error {
+	err := r.db.Save(&todoStep).Error
 	return util.WrapGormErr(err, "todo step")
 }
 
@@ -43,7 +43,7 @@ func (r *TodoStepRepository) Find(id int64) (TodoStep, error) {
 	return step, util.WrapGormErr(err, "todo step")
 }
 
-func (r *TodoStepRepository) FindByTodo(todoID int64) ([]TodoStep, error) {
+func (r *TodoStepRepository) FindAllByTodo(todoID int64) ([]TodoStep, error) {
 	var steps []TodoStep
 	err := r.db.
 		Where(TodoStep{
@@ -54,12 +54,6 @@ func (r *TodoStepRepository) FindByTodo(todoID int64) ([]TodoStep, error) {
 
 	return steps, util.WrapGormErr(err, "todo step")
 }
-
-func (r *TodoStepRepository) Save(todoStep *TodoStep) error {
-	err := r.db.Save(&todoStep).Error
-	return util.WrapGormErr(err, "todo step")
-}
-
 func (r *TodoStepRepository) Delete(id int64) error {
 	err := r.db.
 		Delete(&TodoStep{

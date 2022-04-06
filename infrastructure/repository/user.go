@@ -30,17 +30,12 @@ type UserRepository struct {
 	db *gorm.DB
 }
 
-func (r *UserRepository) Insert(user *User) error {
-	re := r.db.Create(user)
-	return util.WrapGormErr(re.Error, "user")
-}
-
 func (r *UserRepository) Save(user *User) error {
 	err := r.db.Save(&user).Error
 	return util.WrapGormErr(err, "user")
 }
 
-func (r *UserRepository) SelectUser(id int64) (User, error) {
+func (r *UserRepository) Find(id int64) (User, error) {
 	var user User
 	err := r.db.
 		Where(&User{
@@ -94,7 +89,7 @@ func (r *UserRepository) FindByTodo(todoID int64) (User, error) {
 		return User{}, util.WrapGormErr(err, "todo")
 	}
 
-	return r.SelectUser(todo.UserID)
+	return r.Find(todo.UserID)
 }
 
 func (r *UserRepository) ExistByUserName(username string) (bool, error) {

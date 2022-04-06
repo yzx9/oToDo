@@ -22,7 +22,7 @@ type TodoListFolderRepository struct {
 	db *gorm.DB
 }
 
-func (r *TodoListFolderRepository) Insert(todoListFolder *TodoListFolder) error {
+func (r *TodoListFolderRepository) Save(todoListFolder *TodoListFolder) error {
 	re := r.db.Create(todoListFolder).Error
 	return util.WrapGormErr(re, "todo list folder")
 }
@@ -41,7 +41,7 @@ func (r *TodoListFolderRepository) Find(id int64) (TodoListFolder, error) {
 	return folder, util.WrapGormErr(err, "todo list folder")
 }
 
-func (r *TodoListFolderRepository) FindByUser(userId int64) ([]TodoListFolder, error) {
+func (r *TodoListFolderRepository) FindAllByUser(userId int64) ([]TodoListFolder, error) {
 	var folders []TodoListFolder
 	err := r.db.
 		Where(TodoListFolder{

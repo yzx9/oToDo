@@ -131,7 +131,7 @@ func (r *TodoListRepository) Exist(id int64) (bool, error) {
  * Sharing
  */
 
-func (r *TodoListRepository) InsertSharedUser(userID, todoListID int64) error {
+func (r *TodoListRepository) SaveSharedUser(userID, todoListID int64) error {
 	err := r.db.
 		Model(&User{
 			Entity: Entity{
@@ -162,7 +162,7 @@ func (r *TodoListRepository) FindSharedOnesByUser(userID int64) ([]TodoList, err
 	return lists, util.WrapGormErr(err, "user shared todo list")
 }
 
-func (r *TodoListRepository) SelectTodoListSharedUsers(todoListID int64) ([]User, error) {
+func (r *TodoListRepository) FindAllSharedUsers(todoListID int64) ([]User, error) {
 	var users []User
 	err := r.db.
 		Model(&TodoList{

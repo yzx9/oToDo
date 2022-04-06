@@ -33,18 +33,19 @@ type ThirdPartyOAuthTokenRepository struct {
 	db *gorm.DB
 }
 
-func (r *ThirdPartyOAuthTokenRepository) Insert(entity *ThirdPartyOAuthToken) error {
-	err := r.db.Create(entity).Error
+func (r *ThirdPartyOAuthTokenRepository) Save(entity *ThirdPartyOAuthToken) error {
+	err := r.db.Save(entity).Error
 	return util.WrapGormErr(err, "third party token")
 }
 
-func (r *ThirdPartyOAuthTokenRepository) Update(new *ThirdPartyOAuthToken) error {
+// TODO: change primary key to userID+Type
+func (r *ThirdPartyOAuthTokenRepository) SaveByUserIDAndType(entity *ThirdPartyOAuthToken) error {
 	err := r.db.
 		Where(&ThirdPartyOAuthToken{
-			UserID: new.UserID,
-			Type:   new.Type,
+			UserID: entity.UserID,
+			Type:   entity.Type,
 		}).
-		Save(new).
+		Save(entity).
 		Error
 
 	return util.WrapGormErr(err, "third party token")

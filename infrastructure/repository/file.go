@@ -28,11 +28,6 @@ type FileRepository struct {
 	db *gorm.DB
 }
 
-func (r *FileRepository) Insert(file *File) error {
-	err := r.db.Create(file).Error
-	return util.WrapGormErr(err, "file")
-}
-
 func (r *FileRepository) Save(file *File) error {
 	err := r.db.Save(file).Error
 	return util.WrapGormErr(err, "file")
