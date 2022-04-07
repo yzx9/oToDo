@@ -146,7 +146,7 @@ func (r *TodoRepository) DeleteAllByTodoList(todoListID int64) (int64, error) {
  * oTodo File
  */
 
-func (r *TodoRepository) SaveFile(todoID, fileID int64) error {
+func (r TodoRepository) SaveFile(todoID, fileID int64) error {
 	err := r.db.
 		Where(Todo{
 			Entity: Entity{

@@ -23,11 +23,9 @@ func GetMenu(userID int64) ([]dto.TodoListMenuItem, error) {
 	menu := make([]dto.TodoListMenuItem, 0)
 	for i := range folders {
 		menu = append(menu, dto.TodoListMenuItem{
-			TodoListMenuItem: repository.TodoListMenuItem{
-				ID:    folders[i].ID,
-				Name:  folders[i].Name,
-				Count: 0,
-			},
+			ID:       folders[i].ID,
+			Name:     folders[i].Name,
+			Count:    0,
 			IsLeaf:   false,
 			Children: make([]dto.TodoListMenuItem, 0),
 		})
@@ -35,8 +33,10 @@ func GetMenu(userID int64) ([]dto.TodoListMenuItem, error) {
 
 	for i := range lists {
 		item := dto.TodoListMenuItem{
-			TodoListMenuItem: lists[i],
-			IsLeaf:           true,
+			ID:     lists[i].ID,
+			Name:   lists[i].Name,
+			Count:  lists[i].Count,
+			IsLeaf: true,
 		}
 
 		if lists[i].TodoListFolderID == 0 {

@@ -1,9 +1,10 @@
 package dto
 
-import "github.com/yzx9/otodo/infrastructure/repository"
-
 type TodoListMenuItem struct {
-	repository.TodoListMenuItem
+	ID               int64  `json:"id"`
+	Name             string `json:"name"`
+	Count            int    `json:"count"`
+	TodoListFolderID int64  `json:"-"`
 
 	IsLeaf   bool               `json:"isLeaf"`
 	Children []TodoListMenuItem `json:"children"`

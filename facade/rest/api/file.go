@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/application/dto"
 	"github.com/yzx9/otodo/application/service"
-	fileAggregate "github.com/yzx9/otodo/domain/file"
+	"github.com/yzx9/otodo/domain/file"
 	"github.com/yzx9/otodo/facade/rest/common"
 	"github.com/yzx9/otodo/infrastructure/errors"
 	"github.com/yzx9/otodo/infrastructure/util"
@@ -14,13 +14,13 @@ import (
 
 // Upload public file, for user avatar
 func PostFileHandler(c *gin.Context) {
-	file, err := c.FormFile("file")
+	f, err := c.FormFile("file")
 	if err != nil {
 		common.AbortWithError(c, util.NewError(errors.ErrPreconditionRequired, "file required"))
 		return
 	}
 
-	record, err := fileAggregate.UploadPublicFile(file)
+	record, err := file.UploadPublicFile(f)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -38,13 +38,13 @@ func PostTodoFileHandler(c *gin.Context) {
 		return
 	}
 
-	file, err := c.FormFile("file")
+	f, err := c.FormFile("file")
 	if err != nil {
 		common.AbortWithError(c, util.NewError(errors.ErrPreconditionRequired, "file required"))
 		return
 	}
 
-	record, err := fileAggregate.UploadTodoFile(userID, todoID, file)
+	record, err := file.UploadTodoFile(userID, todoID, f)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -85,7 +85,7 @@ func PostFilePreSignHandler(c *gin.Context) {
 	}
 
 	userID := common.MustGetAccessUserID(c)
-	presigned, err := fileAggregate.CreateFilePreSignID(userID, id)
+	presigned, err := file.CreateFilePreSignID(userID, id)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return

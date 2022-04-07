@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/bwmarrin/snowflake"
+	"github.com/yzx9/otodo/domain/file"
 	"github.com/yzx9/otodo/infrastructure/config"
 	"github.com/yzx9/otodo/infrastructure/errors"
 	"github.com/yzx9/otodo/infrastructure/util"
@@ -61,7 +62,8 @@ func startUpIDGenerator() error {
 }
 
 func startUpRepositories(db *gorm.DB) {
-	FileRepo = FileRepository{db: db}
+	file.FileRepo = FileRepository{db: db}
+	file.TodoRepo = TodoRepository{db: db}
 
 	UserRepo = UserRepository{db: db}
 	UserInvalidRefreshTokenRepo = UserInvalidRefreshTokenRepository{db: db}
@@ -78,10 +80,6 @@ func startUpRepositories(db *gorm.DB) {
 	SharingRepo = SharingRepository{db: db}
 
 	ThirdPartyOAuthTokenRepo = ThirdPartyOAuthTokenRepository{db: db}
-	FileRepo = FileRepository{db: db}
-	SharingRepo = SharingRepository{db: db}
-	UserRepo = UserRepository{db: db}
-	UserInvalidRefreshTokenRepo = UserInvalidRefreshTokenRepository{db: db}
 }
 
 func StartUp() error {
