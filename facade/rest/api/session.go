@@ -19,7 +19,7 @@ func GetSessionHandler(c *gin.Context) {
 
 // Login
 func PostSessionHandler(c *gin.Context) {
-	payload := dto.LoginDTO{}
+	payload := user.UserCredential{}
 	if err := c.ShouldBind(&payload); err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -82,7 +82,7 @@ func parseRefreshToken(c *gin.Context) (int64, string, error) {
 	}
 
 	token, err := user.ParseSessionToken(obj.RefreshToken)
-	claims, ok := token.Claims.(*dto.SessionTokenClaims)
+	claims, ok := token.Claims.(*user.SessionTokenClaims)
 	if err != nil || !ok || !token.Valid {
 		return 0, "", fmt.Errorf("invalid token")
 	}

@@ -9,7 +9,6 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"github.com/yzx9/otodo/acl/github"
-	"github.com/yzx9/otodo/application/dto"
 	"github.com/yzx9/otodo/infrastructure/config"
 	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/infrastructure/util"
@@ -20,9 +19,28 @@ const authorizationRegexString = `^[Bb]earer (?P<token>[\w-]+.[\w-]+.[\w-]+)$`
 
 var authorizationRegex = regexp.MustCompile(authorizationRegexString)
 
-func Login(payload dto.LoginDTO) (dto.SessionToken, error) {
-	write := func() (dto.SessionToken, error) {
-		return dto.SessionToken{}, util.NewErrorWithBadRequest("invalid credential")
+type UserCredential struct {
+	UserName              string `json:"userName"`
+	Password              string `json:"password"`
+	RefreshTokenExpiresIn int    `json:"refreshTokenExp"`
+}
+
+type SessionTokenClaims struct {
+	TokenClaims
+
+	RefreshTokenID string `json:"rti,omitempty"`
+}
+
+type SessionToken struct {
+	AccessToken  string `json:"accessToken"`
+	TokenType    string `json:"tokenType"`
+	ExpiresIn    int64  `json:"expiresIn"`
+	RefreshToken string `json:"refreshToken,omitempty"`
+}
+
+func Login(payload UserCredential) (SessionToken, error) {
+	write := func() (SessionToken, error) {
+		return SessionToken{}, util.NewErrorWithBadRequest("invalid credential")
 	}
 
 	user, err := repository.UserRepo.FindByUserName(payload.UserName)
@@ -43,20 +61,20 @@ func Login(payload dto.LoginDTO) (dto.SessionToken, error) {
 	return newSessionToken(user, payload.RefreshTokenExpiresIn), nil
 }
 
-func LoginByGithubOAuth(code, state string) (dto.SessionToken, error) {
+func LoginByGithubOAuth(code, state string) (SessionToken, error) {
 	token, err := FetchGithubOAuthToken(code, state)
 	if err != nil {
-		return dto.SessionToken{}, fmt.Errorf("fails to login: %w", err)
+		return SessionToken{}, fmt.Errorf("fails to login: %w", err)
 	}
 
 	profile, err := github.FetchGithubUserPublicProfile(token.Token)
 	if err != nil {
-		return dto.SessionToken{}, fmt.Errorf("fails to fetch github user: %w", err)
+		return SessionToken{}, fmt.Errorf("fails to fetch github user: %w", err)
 	}
 
 	user, err := getOrRegisterUserByGithub(profile)
 	if err != nil {
-		return dto.SessionToken{}, fmt.Errorf("fails to get user: %w", err)
+		return SessionToken{}, fmt.Errorf("fails to get user: %w", err)
 	}
 
 	go UpdateThirdPartyOAuthTokenAsync(&token)
@@ -70,17 +88,17 @@ func Logout(userID int64, refreshTokenID string) error {
 	return err
 }
 
-func NewAccessToken(userID int64, refreshTokenID string) (dto.SessionToken, error) {
+func NewAccessToken(userID int64, refreshTokenID string) (SessionToken, error) {
 	user, err := repository.UserRepo.Find(userID)
 	if err != nil {
-		return dto.SessionToken{}, fmt.Errorf("fails to get user, %w", err)
+		return SessionToken{}, fmt.Errorf("fails to get user, %w", err)
 	}
 
 	return newAccessToken(user, refreshTokenID), nil
 }
 
 func ParseSessionToken(token string) (*jwt.Token, error) {
-	return ParseToken(token, &dto.SessionTokenClaims{})
+	return ParseToken(token, &SessionTokenClaims{})
 }
 
 func ParseAccessToken(authorization string) (*jwt.Token, error) {
@@ -89,7 +107,7 @@ func ParseAccessToken(authorization string) (*jwt.Token, error) {
 		return nil, fmt.Errorf("unauthorized")
 	}
 
-	token, err := ParseToken(matches[1], &dto.SessionTokenClaims{})
+	token, err := ParseToken(matches[1], &SessionTokenClaims{})
 	if err != nil {
 		return nil, fmt.Errorf("fails to parse access token: %w", err)
 	}
@@ -102,7 +120,7 @@ func ShouldRefreshAccessToken(oldAccessToken *jwt.Token) bool {
 		return false
 	}
 
-	claims, ok := oldAccessToken.Claims.(*dto.SessionTokenClaims)
+	claims, ok := oldAccessToken.Claims.(*SessionTokenClaims)
 	if !ok || claims.ExpiresAt == 0 {
 		return false
 	}
@@ -113,17 +131,17 @@ func ShouldRefreshAccessToken(oldAccessToken *jwt.Token) bool {
 }
 
 // generate access token only
-func newAccessToken(user repository.User, refreshTokenID string) dto.SessionToken {
+func newAccessToken(user repository.User, refreshTokenID string) SessionToken {
 	exp := config.Session.AccessTokenExpiresIn
 	dur := time.Duration(exp * int(time.Second))
 
-	claims := dto.SessionTokenClaims{
+	claims := SessionTokenClaims{
 		TokenClaims:    NewClaims(user.ID, dur),
 		RefreshTokenID: refreshTokenID,
 	}
 	token := NewToken(claims)
 
-	return dto.SessionToken{
+	return SessionToken{
 		AccessToken: token,
 		TokenType:   tokenType,
 		ExpiresIn:   int64(exp),
@@ -131,11 +149,11 @@ func newAccessToken(user repository.User, refreshTokenID string) dto.SessionToke
 }
 
 // generate new access token and refresh token
-func newSessionToken(user repository.User, refreshTokenExp int) dto.SessionToken {
+func newSessionToken(user repository.User, refreshTokenExp int) SessionToken {
 	// refresh token
 	dur := time.Duration(refreshTokenExp * int(time.Second))
 
-	claims := dto.SessionTokenClaims{TokenClaims: NewClaims(user.ID, dur)}
+	claims := SessionTokenClaims{TokenClaims: NewClaims(user.ID, dur)}
 	claims.Id = uuid.NewString()
 	refreshToken := NewToken(claims)
 	refreshTokenID := claims.Id

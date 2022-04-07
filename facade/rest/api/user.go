@@ -4,14 +4,13 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yzx9/otodo/application/dto"
 	"github.com/yzx9/otodo/domain/user"
 	"github.com/yzx9/otodo/facade/rest/common"
 )
 
 // Register
 func PostUserHandler(c *gin.Context) {
-	payload := dto.CreateUserDTO{}
+	payload := user.NewUser{}
 	if err := c.ShouldBind(&payload); err != nil {
 		common.AbortWithError(c, err)
 		return

@@ -3,7 +3,6 @@ package common
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
-	"github.com/yzx9/otodo/application/dto"
 	"github.com/yzx9/otodo/domain/user"
 	"github.com/yzx9/otodo/infrastructure/errors"
 	"github.com/yzx9/otodo/infrastructure/util"
@@ -23,13 +22,13 @@ func GetAccessToken(c *gin.Context) (*jwt.Token, error) {
 	return token, nil
 }
 
-func GetAccessTokenClaims(c *gin.Context) (*dto.SessionTokenClaims, error) {
+func GetAccessTokenClaims(c *gin.Context) (*user.SessionTokenClaims, error) {
 	token, err := GetAccessToken(c)
 	if err != nil {
 		return nil, err
 	}
 
-	claims, ok := token.Claims.(*dto.SessionTokenClaims)
+	claims, ok := token.Claims.(*user.SessionTokenClaims)
 	if !ok {
 		return nil, util.NewError(errors.ErrUnauthorized, "invalid token")
 	}
@@ -52,9 +51,9 @@ func MustGetAccessToken(c *gin.Context) *jwt.Token {
 	return token
 }
 
-func MustGetAccessTokenClaims(c *gin.Context) *dto.SessionTokenClaims {
+func MustGetAccessTokenClaims(c *gin.Context) *user.SessionTokenClaims {
 	token := MustGetAccessToken(c)
-	claims, _ := token.Claims.(*dto.SessionTokenClaims)
+	claims, _ := token.Claims.(*user.SessionTokenClaims)
 	return claims
 }
 

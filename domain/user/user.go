@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/yzx9/otodo/acl/github"
-	"github.com/yzx9/otodo/application/dto"
 	"github.com/yzx9/otodo/infrastructure/config"
 	"github.com/yzx9/otodo/infrastructure/errors"
 	"github.com/yzx9/otodo/infrastructure/repository"
@@ -31,7 +30,13 @@ type User struct {
 	SharedTodoLists []*repository.TodoList
 }
 
-func CreateUser(payload dto.CreateUserDTO) (repository.User, error) {
+type NewUser struct {
+	UserName string `json:"userName"`
+	Password string `json:"password"`
+	Nickname string `json:"nickname"`
+}
+
+func CreateUser(payload NewUser) (repository.User, error) {
 	if len(payload.UserName) < 5 {
 		return repository.User{}, fmt.Errorf("user name too short: %v", payload.UserName)
 	}

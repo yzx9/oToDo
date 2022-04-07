@@ -5,13 +5,18 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
-	"github.com/yzx9/otodo/application/dto"
 	"github.com/yzx9/otodo/infrastructure/config"
 )
 
-func NewClaims(userID int64, exp time.Duration) dto.TokenClaims {
+type TokenClaims struct {
+	jwt.StandardClaims
+
+	UserID int64 `json:"uid"`
+}
+
+func NewClaims(userID int64, exp time.Duration) TokenClaims {
 	now := time.Now().UTC()
-	return dto.TokenClaims{
+	return TokenClaims{
 		StandardClaims: jwt.StandardClaims{
 			Issuer:    config.Secret.TokenIssuer,
 			IssuedAt:  now.Unix(),
