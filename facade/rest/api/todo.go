@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/yzx9/otodo/application/service"
 	todoAggregate "github.com/yzx9/otodo/domain/todo"
 	"github.com/yzx9/otodo/facade/rest/common"
 	"github.com/yzx9/otodo/infrastructure/repository"
@@ -35,7 +36,7 @@ func GetTodoHandler(c *gin.Context) {
 	}
 
 	userID := common.MustGetAccessUserID(c)
-	todo, err := todoAggregate.GetTodo(userID, todoID)
+	todo, err := service.GetTodo(userID, todoID)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return

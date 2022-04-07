@@ -33,20 +33,6 @@ func CreateTodoListSharedUser(userID int64, token string) error {
 	return nil
 }
 
-func GetTodoListSharedUsers(userID, todoListID int64) ([]repository.User, error) {
-	_, err := OwnOrSharedTodoList(userID, todoListID)
-	if err != nil {
-		return nil, err
-	}
-
-	users, err := repository.TodoListRepo.FindAllSharedUsers(todoListID)
-	if err != nil {
-		return nil, fmt.Errorf("fails to get todo list shared users: %w", err)
-	}
-
-	return users, nil
-}
-
 // Delete shared user from todo list,
 // can be called by owner to delete anyone,
 // or called by shared user to delete themselves

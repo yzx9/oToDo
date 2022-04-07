@@ -61,15 +61,6 @@ func CreateUser(payload dto.CreateUserDTO) (repository.User, error) {
 	return user, nil
 }
 
-func GetUser(userID int64) (repository.User, error) {
-	user, err := repository.UserRepo.Find(userID)
-	if err != nil {
-		return repository.User{}, fmt.Errorf("fails to get user: %w", err)
-	}
-
-	return user, nil
-}
-
 /**
  * Invalid User Refresh Token
  */

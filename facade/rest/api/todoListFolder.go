@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/yzx9/otodo/application/service"
 	"github.com/yzx9/otodo/domain/todolist"
 	"github.com/yzx9/otodo/facade/rest/common"
 	"github.com/yzx9/otodo/infrastructure/repository"
@@ -35,7 +36,7 @@ func GetTodoListFolderHandler(c *gin.Context) {
 	}
 
 	userID := common.MustGetAccessUserID(c)
-	folder, err := todolist.GetTodoListFolder(userID, id)
+	folder, err := service.GetTodoListFolder(userID, id)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return

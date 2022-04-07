@@ -41,22 +41,6 @@ func CreateTodoListSharing(userID, todoListID int64) (repository.Sharing, error)
 	return sharing, nil
 }
 
-func GetActiveTodoListSharings(userID, todoListID int64) ([]repository.Sharing, error) {
-	sharings, err := repository.SharingRepo.FindAllActiveOnes(userID, repository.SharingTypeTodoList)
-	if err != nil {
-		return nil, fmt.Errorf("fails to get sharing tokens: %w", err)
-	}
-
-	vec := make([]repository.Sharing, 0)
-	for i := range sharings {
-		if sharings[i].RelatedID == todoListID {
-			vec = append(vec, sharings[i])
-		}
-	}
-
-	return vec, nil
-}
-
 func DeleteTodoListSharing(userID int64, token string) error {
 	sharing, err := ValidSharing(token)
 	if err != nil {

@@ -36,21 +36,7 @@ func CreateFilePreSignIDWithExp(userID, fileID int64, exp int) (string, error) {
 	return base64.StdEncoding.EncodeToString([]byte(token)), nil
 }
 
-func GetPreSignFilePath(fileID string) (string, error) {
-	id, err := parseFilePreSignID(fileID)
-	if err != nil {
-		return "", util.NewErrorWithNotFound("file not found")
-	}
-
-	file, err := GetFile(id)
-	if err != nil {
-		return "", err
-	}
-
-	return getFilePath(file), nil
-}
-
-func parseFilePreSignID(filePresignedID string) (int64, error) {
+func ParseFilePreSignID(filePresignedID string) (int64, error) {
 	write := func() (int64, error) {
 		return 0, util.NewErrorWithPreconditionFailed("invalid presigned file id")
 	}

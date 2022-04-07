@@ -5,8 +5,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/application/dto"
+	"github.com/yzx9/otodo/application/service"
 	"github.com/yzx9/otodo/domain/todolist"
-	"github.com/yzx9/otodo/domain/user"
 	"github.com/yzx9/otodo/facade/rest/common"
 )
 
@@ -45,13 +45,13 @@ func GetSharingTodoListHandler(c *gin.Context) {
 		return
 	}
 
-	user, err := user.GetUser(sharing.UserID)
+	user, err := service.GetUser(sharing.UserID)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
 
-	list, err := todolist.ForceGetTodoList(sharing.RelatedID)
+	list, err := service.ForceGetTodoList(sharing.RelatedID)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return

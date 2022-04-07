@@ -16,19 +16,6 @@ func CreateTodoListFolder(userID int64, folder *repository.TodoListFolder) error
 	return nil
 }
 
-func GetTodoListFolder(userID, todoListFolderID int64) (repository.TodoListFolder, error) {
-	return OwnTodoListFolder(userID, todoListFolderID)
-}
-
-func GetTodoListFolders(userID int64) ([]repository.TodoListFolder, error) {
-	vec, err := repository.TodoListFolderRepo.FindAllByUser(userID)
-	if err != nil {
-		return nil, fmt.Errorf("fails to get todo list folder: %w", err)
-	}
-
-	return vec, nil
-}
-
 func DeleteTodoListFolder(userID, todoListFolderID int64) (repository.TodoListFolder, error) {
 	write := func(err error) (repository.TodoListFolder, error) {
 		return repository.TodoListFolder{}, err

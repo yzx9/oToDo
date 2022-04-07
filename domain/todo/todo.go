@@ -31,59 +31,6 @@ func CreateTodo(userID int64, todo *repository.Todo) error {
 	return nil
 }
 
-func GetTodo(userID, todoID int64) (repository.Todo, error) {
-	todo, err := OwnTodo(userID, todoID)
-	if err != nil {
-		return repository.Todo{}, fmt.Errorf("fails to get todo: %w", err)
-	}
-
-	return todo, nil
-}
-
-func GetTodos(userID, todoListID int64) ([]repository.Todo, error) {
-	if _, err := todolist.OwnOrSharedTodoList(userID, todoListID); err != nil {
-		return nil, err
-	}
-
-	return ForceGetTodos(todoListID)
-}
-
-func ForceGetTodos(todoListID int64) ([]repository.Todo, error) {
-	todos, err := repository.TodoRepo.FindAllByTodoList(todoListID)
-	if err != nil {
-		return nil, fmt.Errorf("fails to get todos: %w", err)
-	}
-
-	return todos, nil
-}
-
-func GetImportantTodos(userID int64) ([]repository.Todo, error) {
-	todos, err := repository.TodoRepo.FindAllImportantOnesByUser(userID)
-	if err != nil {
-		return nil, fmt.Errorf("fails to get important todos: %w", err)
-	}
-
-	return todos, nil
-}
-
-func GetPlannedTodos(userID int64) ([]repository.Todo, error) {
-	todos, err := repository.TodoRepo.FindAllPlanedOnesByUser(userID)
-	if err != nil {
-		return nil, fmt.Errorf("fails to get planed todos: %w", err)
-	}
-
-	return todos, nil
-}
-
-func GetNotNotifiedTodos(userID int64) ([]repository.Todo, error) {
-	todos, err := repository.TodoRepo.FindAllNotNotifiedOnesByUser(userID)
-	if err != nil {
-		return nil, fmt.Errorf("fails to get not-notified todos: %w", err)
-	}
-
-	return todos, nil
-}
-
 func UpdateTodo(userID int64, todo *repository.Todo) error {
 	// Limits
 	oldTodo, err := OwnTodo(userID, todo.ID)

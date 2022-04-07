@@ -88,20 +88,6 @@ func GetFile(fileID int64) (*repository.File, error) {
 }
 
 // Get file path, auto
-func GetFilePath(userID int64, fileID string) (string, error) {
-	id, err := strconv.ParseInt(fileID, 10, 64)
-	if err != nil {
-		return GetPreSignFilePath(fileID)
-	}
-
-	file, err := OwnFile(userID, id)
-	if err != nil {
-		return "", err
-	}
-
-	return getFilePath(file), nil
-}
-
 func OwnFile(userID, fileID int64) (*repository.File, error) {
 	file, err := GetFile(fileID)
 	if err != nil {
@@ -134,7 +120,7 @@ func applyFilePathTemplate(file *repository.File) string {
 	return template
 }
 
-func getFilePath(file *repository.File) string {
+func GetFilePath(file *repository.File) string {
 	// TODO[feat]: If exist multi servers, how to get file? maybe we need redirect
 	return file.FilePath
 }

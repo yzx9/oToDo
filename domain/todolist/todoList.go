@@ -22,30 +22,6 @@ func GetTodoList(userID, todoListID int64) (repository.TodoList, error) {
 	return OwnOrSharedTodoList(userID, todoListID)
 }
 
-func ForceGetTodoList(todoListID int64) (repository.TodoList, error) {
-	list, err := repository.TodoListRepo.Find(todoListID)
-	if err != nil {
-		return repository.TodoList{}, fmt.Errorf("fails to get todo list: %w", err)
-	}
-
-	return list, nil
-}
-
-func GetTodoLists(userID int64) ([]repository.TodoList, error) {
-	vec, err := repository.TodoListRepo.FindByUser(userID)
-	if err != nil {
-		return nil, fmt.Errorf("fails to get user todo lists: %w", err)
-	}
-
-	shared, err := repository.TodoListRepo.FindSharedOnesByUser(userID)
-	if err != nil {
-		return nil, fmt.Errorf("fails to get user shared todo lists: %w", err)
-	}
-
-	vec = append(vec, shared...)
-	return vec, nil
-}
-
 func UpdateTodoList(userID int64, todoList *repository.TodoList) error {
 	oldTodoList, err := OwnTodoList(userID, todoList.ID)
 	if err != nil {

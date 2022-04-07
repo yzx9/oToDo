@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/application/dto"
+	"github.com/yzx9/otodo/application/service"
 	fileAggregate "github.com/yzx9/otodo/domain/file"
 	"github.com/yzx9/otodo/facade/rest/common"
 	"github.com/yzx9/otodo/infrastructure/errors"
@@ -60,7 +61,7 @@ func GetFileHandler(c *gin.Context) {
 		userID = 0
 	}
 
-	filepath, err := fileAggregate.GetFilePath(userID, id)
+	filepath, err := service.GetFilePath(userID, id)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
