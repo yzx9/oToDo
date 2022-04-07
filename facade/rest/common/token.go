@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 	"github.com/yzx9/otodo/application/dto"
-	"github.com/yzx9/otodo/domain/aggregate/user"
+	"github.com/yzx9/otodo/domain/user"
 	"github.com/yzx9/otodo/infrastructure/errors"
 	"github.com/yzx9/otodo/infrastructure/util"
 )

@@ -1,4 +1,4 @@
-package bll
+package todolist
 
 import (
 	"fmt"

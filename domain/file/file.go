@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yzx9/otodo/bll"
+	"github.com/yzx9/otodo/domain/todo"
 	"github.com/yzx9/otodo/infrastructure/config"
 	"github.com/yzx9/otodo/infrastructure/errors"
 	"github.com/yzx9/otodo/infrastructure/repository"
@@ -34,7 +34,7 @@ func UploadPublicFile(file *multipart.FileHeader) (repository.File, error) {
 }
 
 func UploadTodoFile(userID, todoID int64, file *multipart.FileHeader) (repository.File, error) {
-	_, err := bll.OwnTodo(userID, todoID)
+	_, err := todo.OwnTodo(userID, todoID)
 	if err != nil {
 		return repository.File{}, err
 	}
@@ -113,7 +113,7 @@ func OwnFile(userID, fileID int64) (*repository.File, error) {
 		break
 
 	case repository.FileTypeTodo:
-		if _, err := bll.OwnTodo(userID, file.RelatedID); err != nil {
+		if _, err := todo.OwnTodo(userID, file.RelatedID); err != nil {
 			return nil, util.NewErrorWithForbidden("unable to get non-owned file: %w", err)
 		}
 

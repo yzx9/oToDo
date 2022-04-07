@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yzx9/otodo/bll"
+	todoAggregate "github.com/yzx9/otodo/domain/todo"
 	"github.com/yzx9/otodo/facade/rest/common"
 	"github.com/yzx9/otodo/infrastructure/repository"
 )
@@ -18,7 +18,7 @@ func PostTodoHandler(c *gin.Context) {
 	}
 
 	userID := common.MustGetAccessUserID(c)
-	if err := bll.CreateTodo(userID, &todo); err != nil {
+	if err := todoAggregate.CreateTodo(userID, &todo); err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
@@ -35,7 +35,7 @@ func GetTodoHandler(c *gin.Context) {
 	}
 
 	userID := common.MustGetAccessUserID(c)
-	todo, err := bll.GetTodo(userID, todoID)
+	todo, err := todoAggregate.GetTodo(userID, todoID)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -54,7 +54,7 @@ func PutTodoHandler(c *gin.Context) {
 	}
 
 	userID := common.MustGetAccessUserID(c)
-	if err = bll.UpdateTodo(userID, &todo); err != nil {
+	if err = todoAggregate.UpdateTodo(userID, &todo); err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
@@ -78,7 +78,7 @@ func DeleteTodoHandler(c *gin.Context) {
 	}
 
 	userID := common.MustGetAccessUserID(c)
-	todo, err := bll.DeleteTodo(userID, todoID)
+	todo, err := todoAggregate.DeleteTodo(userID, todoID)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return

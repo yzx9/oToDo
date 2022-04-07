@@ -4,8 +4,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yzx9/otodo/bll"
-	"github.com/yzx9/otodo/domain/aggregate/user"
+	"github.com/yzx9/otodo/domain/todo"
+	"github.com/yzx9/otodo/domain/todolist"
+	"github.com/yzx9/otodo/domain/user"
 	"github.com/yzx9/otodo/facade/rest/common"
 	"github.com/yzx9/otodo/infrastructure/repository"
 )
@@ -25,7 +26,7 @@ func GetCurrentUserHandler(c *gin.Context) {
 // Get menu
 func GetCurrentUserMenu(c *gin.Context) {
 	userID := common.MustGetAccessUserID(c)
-	menu, err := bll.GetTodoListMenu(userID)
+	menu, err := todolist.GetTodoListMenu(userID)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -37,7 +38,7 @@ func GetCurrentUserMenu(c *gin.Context) {
 // Get todo lists for current user
 func GetCurrentUserTodoListsHandler(c *gin.Context) {
 	userID := common.MustGetAccessUserID(c)
-	todos, err := bll.GetTodoLists(userID)
+	todos, err := todolist.GetTodoLists(userID)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -55,7 +56,7 @@ func GetCurrentUserBasicTodoListTodosHandler(c *gin.Context) {
 		return
 	}
 
-	todos, err := bll.ForceGetTodos(user.BasicTodoListID)
+	todos, err := todo.ForceGetTodos(user.BasicTodoListID)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -71,17 +72,17 @@ func GetCurrentUserDailyTodosHandler(c *gin.Context) {
 
 // Get planned todos for current user
 func GetCurrentUserPlannedTodosHandler(c *gin.Context) {
-	handleGetCurrentUserTodos(c, bll.GetPlannedTodos)
+	handleGetCurrentUserTodos(c, todo.GetPlannedTodos)
 }
 
 // Get important todos for current user
 func GetCurrentUserImportantTodosHandler(c *gin.Context) {
-	handleGetCurrentUserTodos(c, bll.GetImportantTodos)
+	handleGetCurrentUserTodos(c, todo.GetImportantTodos)
 }
 
 // Get not-notified todos for current user
 func GetCurrentUserNotNotifiedTodosHandler(c *gin.Context) {
-	handleGetCurrentUserTodos(c, bll.GetNotNotifiedTodos)
+	handleGetCurrentUserTodos(c, todo.GetNotNotifiedTodos)
 }
 
 func handleGetCurrentUserTodos(c *gin.Context, getTodos func(userID int64) ([]repository.Todo, error)) {
@@ -98,7 +99,7 @@ func handleGetCurrentUserTodos(c *gin.Context, getTodos func(userID int64) ([]re
 // Get todo list folders for current user
 func GetCurrentUserTodoListFoldersHandler(c *gin.Context) {
 	userID := common.MustGetAccessUserID(c)
-	folders, err := bll.GetTodoListFolders(userID)
+	folders, err := todolist.GetTodoListFolders(userID)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return

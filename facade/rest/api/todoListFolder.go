@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yzx9/otodo/bll"
+	"github.com/yzx9/otodo/domain/todolist"
 	"github.com/yzx9/otodo/facade/rest/common"
 	"github.com/yzx9/otodo/infrastructure/repository"
 )
@@ -18,7 +18,7 @@ func PostTodoListFolderHandler(c *gin.Context) {
 	}
 
 	userID := common.MustGetAccessUserID(c)
-	if err := bll.CreateTodoListFolder(userID, &folder); err != nil {
+	if err := todolist.CreateTodoListFolder(userID, &folder); err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
@@ -35,7 +35,7 @@ func GetTodoListFolderHandler(c *gin.Context) {
 	}
 
 	userID := common.MustGetAccessUserID(c)
-	folder, err := bll.GetTodoListFolder(userID, id)
+	folder, err := todolist.GetTodoListFolder(userID, id)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -53,7 +53,7 @@ func DeleteTodoListFolderHandler(c *gin.Context) {
 	}
 
 	userID := common.MustGetAccessUserID(c)
-	todo, err := bll.DeleteTodoListFolder(userID, id)
+	todo, err := todolist.DeleteTodoListFolder(userID, id)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return

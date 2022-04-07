@@ -1,15 +1,16 @@
-package bll
+package todo
 
 import (
 	"fmt"
 	"time"
 
+	"github.com/yzx9/otodo/domain/todolist"
 	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/infrastructure/util"
 )
 
 func CreateTodo(userID int64, todo *repository.Todo) error {
-	_, err := OwnOrSharedTodoList(userID, todo.TodoListID)
+	_, err := todolist.OwnOrSharedTodoList(userID, todo.TodoListID)
 	if err != nil {
 		return fmt.Errorf("fails to get todo list: %w", err)
 	}
@@ -40,7 +41,7 @@ func GetTodo(userID, todoID int64) (repository.Todo, error) {
 }
 
 func GetTodos(userID, todoListID int64) ([]repository.Todo, error) {
-	if _, err := OwnOrSharedTodoList(userID, todoListID); err != nil {
+	if _, err := todolist.OwnOrSharedTodoList(userID, todoListID); err != nil {
 		return nil, err
 	}
 
@@ -150,7 +151,7 @@ func OwnTodo(userID, todoID int64) (repository.Todo, error) {
 		return repository.Todo{}, fmt.Errorf("fails to get todo: %w", err)
 	}
 
-	if _, err = OwnOrSharedTodoList(userID, todo.TodoListID); err != nil {
+	if _, err = todolist.OwnOrSharedTodoList(userID, todo.TodoListID); err != nil {
 		return repository.Todo{}, util.NewErrorWithForbidden("unable to handle non-owned todo: %v", todo.ID)
 	}
 

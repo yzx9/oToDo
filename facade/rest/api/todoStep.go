@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/application/dto"
-	"github.com/yzx9/otodo/bll"
+	"github.com/yzx9/otodo/domain/todo"
 	"github.com/yzx9/otodo/facade/rest/common"
 	"github.com/yzx9/otodo/infrastructure/errors"
 	"github.com/yzx9/otodo/infrastructure/repository"
@@ -27,7 +27,7 @@ func PostTodoStepHandler(c *gin.Context) {
 	}
 
 	userID := common.MustGetAccessUserID(c)
-	step, err := bll.CreateTodoStep(userID, todoID, payload.Name)
+	step, err := todo.CreateTodoStep(userID, todoID, payload.Name)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -52,7 +52,7 @@ func PutTodoStepHandler(c *gin.Context) {
 
 	userID := common.MustGetAccessUserID(c)
 	step.ID = stepID
-	if err := bll.UpdateTodoStep(userID, &step); err != nil {
+	if err := todo.UpdateTodoStep(userID, &step); err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
@@ -75,7 +75,7 @@ func DeleteTodoStepHandler(c *gin.Context) {
 	}
 
 	userID := common.MustGetAccessUserID(c)
-	step, err := bll.DeleteTodoStep(userID, todoID, stepID)
+	step, err := todo.DeleteTodoStep(userID, todoID, stepID)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
