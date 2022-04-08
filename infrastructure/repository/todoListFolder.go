@@ -22,6 +22,10 @@ type TodoListFolderRepository struct {
 	db *gorm.DB
 }
 
+func NewTodoListFolderRepository(db *gorm.DB) TodoListFolderRepository {
+	return TodoListFolderRepository{db: db}
+}
+
 func (r TodoListFolderRepository) Save(todoListFolder *TodoListFolder) error {
 	re := r.db.Create(todoListFolder).Error
 	return util.WrapGormErr(re, "todo list folder")

@@ -33,6 +33,10 @@ type ThirdPartyOAuthTokenRepository struct {
 	db *gorm.DB
 }
 
+func NewThirdPartyOAuthTokenRepository(db *gorm.DB) ThirdPartyOAuthTokenRepository {
+	return ThirdPartyOAuthTokenRepository{db: db}
+}
+
 func (r ThirdPartyOAuthTokenRepository) Save(entity *ThirdPartyOAuthToken) error {
 	err := r.db.Save(entity).Error
 	return util.WrapGormErr(err, "third party token")

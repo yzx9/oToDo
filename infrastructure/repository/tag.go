@@ -22,6 +22,10 @@ type TagRepository struct {
 	db *gorm.DB
 }
 
+func NewTagRepository(db *gorm.DB) TagRepository {
+	return TagRepository{db: db}
+}
+
 func (r TagRepository) Save(tag *Tag) error {
 	err := r.db.Create(tag).Error
 	return util.WrapGormErr(err, "tag")
@@ -53,6 +57,10 @@ var TagTodoRepo TagTodoRepository
 
 type TagTodoRepository struct {
 	db *gorm.DB
+}
+
+func NewTagTodoRepository(db *gorm.DB) TagTodoRepository {
+	return TagTodoRepository{db: db}
 }
 
 func (r TagTodoRepository) Save(userID, todoID int64, tagName string) error {

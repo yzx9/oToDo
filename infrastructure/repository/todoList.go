@@ -34,6 +34,10 @@ type TodoListRepository struct {
 	db *gorm.DB
 }
 
+func NewTodoListRepository(db *gorm.DB) TodoListRepository {
+	return TodoListRepository{db: db}
+}
+
 func (r TodoListRepository) Save(todoList *TodoList) error {
 	re := r.db.Save(&todoList)
 	return util.WrapGormErr(re.Error, "todo list")
@@ -127,6 +131,10 @@ var TodoListSharingRepo TodoListSharingRepository
 
 type TodoListSharingRepository struct {
 	db *gorm.DB
+}
+
+func NewTodoListSharingRepository(db *gorm.DB) TodoListSharingRepository {
+	return TodoListSharingRepository{db: db}
 }
 
 func (r TodoListSharingRepository) SaveSharedUser(userID, todoListID int64) error {

@@ -20,6 +20,10 @@ type FileRepository struct {
 	db *gorm.DB
 }
 
+func NewFileRepository(db *gorm.DB) FileRepository {
+	return FileRepository{db: db}
+}
+
 func (r FileRepository) Save(f *file.File) error {
 	po := r.convertToPO(f)
 	err := r.db.Save(&po).Error

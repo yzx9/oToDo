@@ -29,6 +29,10 @@ type SharingRepository struct {
 	db *gorm.DB
 }
 
+func NewSharingRepository(db *gorm.DB) SharingRepository {
+	return SharingRepository{db: db}
+}
+
 func (r SharingRepository) Save(sharing *Sharing) error {
 	err := r.db.Save(&sharing).Error
 	return util.WrapGormErr(err, "sharing")

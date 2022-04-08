@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/bwmarrin/snowflake"
-	"github.com/yzx9/otodo/domain/file"
 	"github.com/yzx9/otodo/infrastructure/config"
 	"github.com/yzx9/otodo/infrastructure/errors"
 	"github.com/yzx9/otodo/infrastructure/util"
@@ -12,7 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func startUpDatabase() (*gorm.DB, error) {
+func StartUpDatabase() (*gorm.DB, error) {
 	// See https://github.com/go-sql-driver/mysql#dsn-data-source-name for details
 	c := config.Database
 	dsn := fmt.Sprintf("%v:%v@%v(%v:%v)/%v?charset=utf8mb4&parseTime=True&loc=Local", c.UserName, c.Password, c.Protocol, c.Host, c.Port, c.DatabaseName)
@@ -62,9 +61,6 @@ func startUpIDGenerator() error {
 }
 
 func startUpRepositories(db *gorm.DB) {
-	file.FileRepository = FileRepository{db: db}
-	file.TodoFileRepository = TodoFileRepository{db: db}
-
 	UserRepo = UserRepository{db: db}
 	UserInvalidRefreshTokenRepo = UserInvalidRefreshTokenRepository{db: db}
 
@@ -84,21 +80,21 @@ func startUpRepositories(db *gorm.DB) {
 	ThirdPartyOAuthTokenRepo = ThirdPartyOAuthTokenRepository{db: db}
 }
 
-func StartUp() error {
+func StartUp() (*gorm.DB, error) {
 	if err := startUpIDGenerator(); err != nil {
-		return err
+		return nil, err
 	}
 
-	db, err := startUpDatabase()
+	db, err := StartUpDatabase()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if err := autoMigrate(db); err != nil {
-		return util.NewError(errors.ErrDatabaseConnectFailed, "fails to migrate database: %w", err)
+		return nil, util.NewError(errors.ErrDatabaseConnectFailed, "fails to migrate database: %w", err)
 	}
 
 	startUpRepositories(db)
 
-	return nil
+	return db, nil
 }

@@ -43,7 +43,7 @@ func Login(payload UserCredential) (SessionTokens, error) {
 		return SessionTokens{}, util.NewErrorWithBadRequest("invalid credential")
 	}
 
-	user, err := repository.UserRepo.FindByUserName(payload.UserName)
+	user, err := UserRepo.FindByUserName(payload.UserName)
 	if err != nil || user.Password == nil {
 		return write()
 	}
@@ -89,7 +89,7 @@ func Logout(userID int64, refreshTokenID string) error {
 }
 
 func NewAccessToken(userID int64, refreshTokenID string) (SessionTokens, error) {
-	user, err := repository.UserRepo.Find(userID)
+	user, err := UserRepo.Find(userID)
 	if err != nil {
 		return SessionTokens{}, fmt.Errorf("fails to get user, %w", err)
 	}

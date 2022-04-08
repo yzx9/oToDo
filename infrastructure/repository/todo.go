@@ -42,6 +42,10 @@ type TodoRepository struct {
 	db *gorm.DB
 }
 
+func NewTodoRepository(db *gorm.DB) TodoRepository {
+	return TodoRepository{db: db}
+}
+
 func (r TodoRepository) Save(todo *Todo) error {
 	err := r.db.Save(todo).Error
 	return util.WrapGormErr(err, "todo")
@@ -59,7 +63,7 @@ func (r TodoRepository) Delete(id int64) error {
 	return util.WrapGormErr(err, "todo")
 }
 
-func (r *TodoRepository) DeleteAllByTodoList(todoListID int64) (int64, error) {
+func (r TodoRepository) DeleteAllByTodoList(todoListID int64) (int64, error) {
 	re := r.db.
 		Where(Todo{
 			TodoListID: todoListID,
@@ -148,6 +152,10 @@ func (r TodoRepository) FindAllNotNotifiedOnesByUser(userID int64) ([]Todo, erro
 
 type TodoFileRepository struct {
 	db *gorm.DB
+}
+
+func NewTodoFileRepository(db *gorm.DB) TodoFileRepository {
+	return TodoFileRepository{db: db}
 }
 
 func (r TodoFileRepository) Save(todoID, fileID int64) error {

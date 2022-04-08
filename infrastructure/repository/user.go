@@ -30,6 +30,10 @@ type UserRepository struct {
 	db *gorm.DB
 }
 
+func NewUserRepository(db *gorm.DB) UserRepository {
+	return UserRepository{db: db}
+}
+
 func (r UserRepository) Save(user *User) error {
 	err := r.db.Save(&user).Error
 	return util.WrapGormErr(err, "user")

@@ -33,6 +33,10 @@ type TodoRepeatPlanRepository struct {
 	db *gorm.DB
 }
 
+func NewTodoRepeatPlanRepository(db *gorm.DB) TodoRepeatPlanRepository {
+	return TodoRepeatPlanRepository{db: db}
+}
+
 func (r TodoRepeatPlanRepository) Save(plan *TodoRepeatPlan) error {
 	err := r.db.Save(plan).Error
 	return util.WrapGormErr(err, "todo repeat plan")

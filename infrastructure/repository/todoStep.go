@@ -24,6 +24,10 @@ type TodoStepRepository struct {
 	db *gorm.DB
 }
 
+func NewTodoStepRepository(db *gorm.DB) TodoStepRepository {
+	return TodoStepRepository{db: db}
+}
+
 func (r TodoStepRepository) Save(todoStep *TodoStep) error {
 	err := r.db.Save(&todoStep).Error
 	return util.WrapGormErr(err, "todo step")
