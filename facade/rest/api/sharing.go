@@ -4,9 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yzx9/otodo/application/dto"
 	"github.com/yzx9/otodo/application/service"
-	"github.com/yzx9/otodo/domain/todolist"
 	"github.com/yzx9/otodo/facade/rest/common"
 )
 
@@ -18,17 +16,13 @@ func GetSharingHandler(c *gin.Context) {
 		return
 	}
 
-	sharing, err := todolist.ValidSharing(token)
+	sharing, err := service.GetSharingInfo(token)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.SharingToken{
-		Token:     sharing.Token,
-		Type:      sharing.Type,
-		CreatedAt: sharing.CreatedAt,
-	})
+	c.JSON(http.StatusOK, sharing)
 }
 
 // Get todo list info by share token
@@ -39,26 +33,11 @@ func GetSharingTodoListHandler(c *gin.Context) {
 		return
 	}
 
-	sharing, err := todolist.ValidSharing(token)
+	info, err := service.GetSharingTodoListInfo(token)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
 
-	user, err := service.GetUser(sharing.UserID)
-	if err != nil {
-		common.AbortWithError(c, err)
-		return
-	}
-
-	list, err := service.ForceGetTodoList(sharing.RelatedID)
-	if err != nil {
-		common.AbortWithError(c, err)
-		return
-	}
-
-	c.JSON(http.StatusNotImplemented, dto.SharingTodoList{
-		UserNickname: user.Nickname,
-		TodoListName: list.Name,
-	})
+	c.JSON(http.StatusOK, info)
 }

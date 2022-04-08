@@ -3,6 +3,7 @@ package service
 import (
 	"strconv"
 
+	"github.com/yzx9/otodo/application/dto"
 	"github.com/yzx9/otodo/domain/file"
 	"github.com/yzx9/otodo/infrastructure/util"
 )
@@ -33,4 +34,15 @@ func GetPreSignFilePath(fileID string) (string, error) {
 	}
 
 	return file.GetFilePath(f), nil
+}
+
+func PreSignFile(payload dto.FilePreSign) (dto.FilePreSignResult, error) {
+	presigned, err := file.CreateFilePreSignID(payload.UserID, payload.FileID, payload.ExpiresIn)
+	if err != nil {
+		return dto.FilePreSignResult{}, err
+	}
+
+	return dto.FilePreSignResult{
+		FileID: presigned,
+	}, nil
 }

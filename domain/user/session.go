@@ -31,16 +31,16 @@ type SessionTokenClaims struct {
 	RefreshTokenID string `json:"rti,omitempty"`
 }
 
-type SessionToken struct {
+type SessionTokens struct {
 	AccessToken  string `json:"accessToken"`
 	TokenType    string `json:"tokenType"`
 	ExpiresIn    int64  `json:"expiresIn"`
 	RefreshToken string `json:"refreshToken,omitempty"`
 }
 
-func Login(payload UserCredential) (SessionToken, error) {
-	write := func() (SessionToken, error) {
-		return SessionToken{}, util.NewErrorWithBadRequest("invalid credential")
+func Login(payload UserCredential) (SessionTokens, error) {
+	write := func() (SessionTokens, error) {
+		return SessionTokens{}, util.NewErrorWithBadRequest("invalid credential")
 	}
 
 	user, err := repository.UserRepo.FindByUserName(payload.UserName)
@@ -61,20 +61,20 @@ func Login(payload UserCredential) (SessionToken, error) {
 	return newSessionToken(user, payload.RefreshTokenExpiresIn), nil
 }
 
-func LoginByGithubOAuth(code, state string) (SessionToken, error) {
+func LoginByGithubOAuth(code, state string) (SessionTokens, error) {
 	token, err := FetchGithubOAuthToken(code, state)
 	if err != nil {
-		return SessionToken{}, fmt.Errorf("fails to login: %w", err)
+		return SessionTokens{}, fmt.Errorf("fails to login: %w", err)
 	}
 
 	profile, err := github.FetchGithubUserPublicProfile(token.Token)
 	if err != nil {
-		return SessionToken{}, fmt.Errorf("fails to fetch github user: %w", err)
+		return SessionTokens{}, fmt.Errorf("fails to fetch github user: %w", err)
 	}
 
 	user, err := getOrRegisterUserByGithub(profile)
 	if err != nil {
-		return SessionToken{}, fmt.Errorf("fails to get user: %w", err)
+		return SessionTokens{}, fmt.Errorf("fails to get user: %w", err)
 	}
 
 	go UpdateThirdPartyOAuthTokenAsync(&token)
@@ -88,10 +88,10 @@ func Logout(userID int64, refreshTokenID string) error {
 	return err
 }
 
-func NewAccessToken(userID int64, refreshTokenID string) (SessionToken, error) {
+func NewAccessToken(userID int64, refreshTokenID string) (SessionTokens, error) {
 	user, err := repository.UserRepo.Find(userID)
 	if err != nil {
-		return SessionToken{}, fmt.Errorf("fails to get user, %w", err)
+		return SessionTokens{}, fmt.Errorf("fails to get user, %w", err)
 	}
 
 	return newAccessToken(user, refreshTokenID), nil
@@ -131,7 +131,7 @@ func ShouldRefreshAccessToken(oldAccessToken *jwt.Token) bool {
 }
 
 // generate access token only
-func newAccessToken(user repository.User, refreshTokenID string) SessionToken {
+func newAccessToken(user repository.User, refreshTokenID string) SessionTokens {
 	exp := config.Session.AccessTokenExpiresIn
 	dur := time.Duration(exp * int(time.Second))
 
@@ -141,7 +141,7 @@ func newAccessToken(user repository.User, refreshTokenID string) SessionToken {
 	}
 	token := NewToken(claims)
 
-	return SessionToken{
+	return SessionTokens{
 		AccessToken: token,
 		TokenType:   tokenType,
 		ExpiresIn:   int64(exp),
@@ -149,7 +149,7 @@ func newAccessToken(user repository.User, refreshTokenID string) SessionToken {
 }
 
 // generate new access token and refresh token
-func newSessionToken(user repository.User, refreshTokenExp int) SessionToken {
+func newSessionToken(user repository.User, refreshTokenExp int) SessionTokens {
 	// refresh token
 	dur := time.Duration(refreshTokenExp * int(time.Second))
 

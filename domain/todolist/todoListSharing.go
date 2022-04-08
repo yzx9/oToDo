@@ -11,7 +11,7 @@ import (
  * oTodo List Shared Users
  */
 func CreateTodoListSharedUser(userID int64, token string) error {
-	sharing, err := ValidSharing(token)
+	sharing, err := GetSharing(token)
 	if err != nil {
 		return err
 	}

@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/application/dto"
+	"github.com/yzx9/otodo/application/service"
 	"github.com/yzx9/otodo/domain/user"
 	"github.com/yzx9/otodo/facade/rest/common"
 	"github.com/yzx9/otodo/infrastructure/errors"
@@ -48,46 +49,20 @@ func DeleteSessionHandler(c *gin.Context) {
 
 // Create New Access Token by Refresh Token
 func PostSessionTokenHandler(c *gin.Context) {
-	userID, refreshTokenID, err := parseRefreshToken(c)
+	payload := struct {
+		RefreshToken string `json:"refreshToken"`
+	}{}
+	if err := c.ShouldBind(&payload); err != nil {
+		common.AbortWithError(c, fmt.Errorf("refreshToken required"))
+	}
+
+	token, err := service.CreateNewToken(payload.RefreshToken)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
 
-	valid, err := user.IsValidRefreshToken(userID, refreshTokenID)
-	if err != nil {
-		common.AbortWithError(c, err)
-		return
-	}
-
-	if !valid {
-		common.AbortWithError(c, fmt.Errorf("refresh token has been invalid"))
-		return
-	}
-
-	newToken, err := user.NewAccessToken(userID, refreshTokenID)
-	if err != nil {
-		msg := fmt.Sprintf("fails to refresh an token, %v", err.Error())
-		c.AbortWithStatusJSON(http.StatusBadRequest, msg)
-		return
-	}
-
-	c.JSON(http.StatusOK, newToken)
-}
-
-func parseRefreshToken(c *gin.Context) (int64, string, error) {
-	obj := dto.RefreshTokenDTO{}
-	if err := c.ShouldBind(&obj); err != nil {
-		return 0, "", fmt.Errorf("refresh_token required")
-	}
-
-	token, err := user.ParseSessionToken(obj.RefreshToken)
-	claims, ok := token.Claims.(*user.SessionTokenClaims)
-	if err != nil || !ok || !token.Valid {
-		return 0, "", fmt.Errorf("invalid token")
-	}
-
-	return claims.UserID, claims.RefreshTokenID, nil
+	c.JSON(http.StatusOK, token)
 }
 
 /**

@@ -9,7 +9,6 @@ import (
 )
 
 const AuthorizationHeaderKey = "Authorization"
-const contextAccessTokenKey = "access_token"
 
 func GetAccessToken(c *gin.Context) (*jwt.Token, error) {
 	authorization := c.Request.Header.Get(AuthorizationHeaderKey)
@@ -18,7 +17,6 @@ func GetAccessToken(c *gin.Context) (*jwt.Token, error) {
 		return nil, util.NewError(errors.ErrUnauthorized, "invalid token: %w", err)
 	}
 
-	c.Set(contextAccessTokenKey, token)
 	return token, nil
 }
 
@@ -46,8 +44,7 @@ func GetAccessUserID(c *gin.Context) (int64, error) {
 }
 
 func MustGetAccessToken(c *gin.Context) *jwt.Token {
-	value := c.MustGet(contextAccessTokenKey)
-	token, _ := value.(*jwt.Token)
+	token, _ := GetAccessToken(c)
 	return token
 }
 

@@ -11,12 +11,7 @@ import (
 // Configurable
 const fileSignedMaxExpiresIn = 6 * time.Hour
 
-func CreateFilePreSignID(userID, fileID int64) (string, error) {
-	const max = int(fileSignedMaxExpiresIn / time.Second)
-	return CreateFilePreSignIDWithExp(userID, fileID, max)
-}
-
-func CreateFilePreSignIDWithExp(userID, fileID int64, exp int) (string, error) {
+func CreateFilePreSignID(userID, fileID int64, exp int) (string, error) {
 	expiresIn := time.Duration(exp * int(time.Second))
 	if expiresIn > fileSignedMaxExpiresIn {
 		return "", util.NewErrorWithPreconditionFailed("expires is too long")

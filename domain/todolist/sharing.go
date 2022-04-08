@@ -42,7 +42,7 @@ func CreateTodoListSharing(userID, todoListID int64) (repository.Sharing, error)
 }
 
 func DeleteTodoListSharing(userID int64, token string) error {
-	sharing, err := ValidSharing(token)
+	sharing, err := GetSharing(token)
 	if err != nil {
 		return err
 	}
@@ -63,7 +63,7 @@ func DeleteTodoListSharing(userID int64, token string) error {
 	return nil
 }
 
-func ValidSharing(token string) (repository.Sharing, error) {
+func GetSharing(token string) (repository.Sharing, error) {
 	sharing, err := repository.SharingRepo.Find(token)
 	if err != nil {
 		return repository.Sharing{}, fmt.Errorf("invalid sharing token: %w", err)

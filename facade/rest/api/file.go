@@ -72,24 +72,25 @@ func GetFileHandler(c *gin.Context) {
 
 // Create presigned file id for open access
 func PostFilePreSignHandler(c *gin.Context) {
-	id, err := common.GetRequiredParamID(c, "id")
-	if err != nil {
-		common.AbortWithError(c, err)
-		return
-	}
-
-	payload := dto.FilePreSignDTO{}
+	payload := dto.FilePreSign{}
 	if err := c.ShouldBind(&payload); err != nil {
 		common.AbortWithError(c, util.NewError(errors.ErrPreconditionRequired, "expiresIn required"))
 		return
 	}
 
-	userID := common.MustGetAccessUserID(c)
-	presigned, err := file.CreateFilePreSignID(userID, id)
+	id, err := common.GetRequiredParamID(c, "id")
+	if err != nil {
+		common.AbortWithError(c, err)
+		return
+	}
+	payload.FileID = id
+
+	payload.UserID = common.MustGetAccessUserID(c)
+	file, err := service.PreSignFile(payload)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.FilePreSignResultDTO{FileID: presigned})
+	c.JSON(http.StatusOK, file)
 }

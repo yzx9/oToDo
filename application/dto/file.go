@@ -4,11 +4,13 @@ type FileDTO struct {
 	FileID int64 `json:"fileID"`
 }
 
-type FilePreSignDTO struct {
+type FilePreSign struct {
+	UserID    int64
+	FileID    int64
 	ExpiresIn int `json:"expiresIn"` // Unix
 }
 
-type FilePreSignResultDTO struct {
+type FilePreSignResult struct {
 	FileID string `json:"fileID"`
 }
 

@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 
+	"github.com/yzx9/otodo/application/dto"
 	"github.com/yzx9/otodo/domain/todolist"
 	"github.com/yzx9/otodo/infrastructure/repository"
 )
@@ -21,15 +22,6 @@ func GetActiveTodoListSharings(userID, todoListID int64) ([]repository.Sharing, 
 	}
 
 	return vec, nil
-}
-
-func ForceGetTodoList(todoListID int64) (repository.TodoList, error) {
-	list, err := repository.TodoListRepo.Find(todoListID)
-	if err != nil {
-		return repository.TodoList{}, fmt.Errorf("fails to get todo list: %w", err)
-	}
-
-	return list, nil
 }
 
 func GetTodoLists(userID int64) ([]repository.TodoList, error) {
@@ -72,4 +64,39 @@ func GetTodoListSharedUsers(userID, todoListID int64) ([]repository.User, error)
 	}
 
 	return users, nil
+}
+
+func GetSharingInfo(token string) (dto.SharingToken, error) {
+	sharing, err := todolist.GetSharing(token)
+	if err != nil {
+		return dto.SharingToken{}, err
+	}
+
+	return dto.SharingToken{
+		Token:     sharing.Token,
+		Type:      sharing.Type,
+		CreatedAt: sharing.CreatedAt,
+	}, nil
+}
+
+func GetSharingTodoListInfo(token string) (dto.SharingTodoList, error) {
+	sharing, err := todolist.GetSharing(token)
+	if err != nil {
+		return dto.SharingTodoList{}, err
+	}
+
+	user, err := GetUser(sharing.UserID)
+	if err != nil {
+		return dto.SharingTodoList{}, err
+	}
+
+	list, err := repository.TodoListRepo.Find(sharing.RelatedID)
+	if err != nil {
+		return dto.SharingTodoList{}, fmt.Errorf("fails to get todo list: %w", err)
+	}
+
+	return dto.SharingTodoList{
+		UserNickname: user.Nickname,
+		TodoListName: list.Name,
+	}, nil
 }
