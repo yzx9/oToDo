@@ -62,8 +62,8 @@ func startUpIDGenerator() error {
 }
 
 func startUpRepositories(db *gorm.DB) {
-	file.FileRepo = FileRepository{db: db}
-	file.TodoRepo = TodoRepository{db: db}
+	file.FileRepository = FileRepository{db: db}
+	file.TodoFileRepository = TodoFileRepository{db: db}
 
 	UserRepo = UserRepository{db: db}
 	UserInvalidRefreshTokenRepo = UserInvalidRefreshTokenRepository{db: db}
@@ -73,9 +73,11 @@ func startUpRepositories(db *gorm.DB) {
 	TodoRepeatPlanRepo = TodoRepeatPlanRepository{db: db}
 
 	TodoListRepo = TodoListRepository{db: db}
+	TodoListSharingRepo = TodoListSharingRepository{db: db}
 	TodoListFolderRepo = TodoListFolderRepository{db: db}
 
 	TagRepo = TagRepository{db: db}
+	TagTodoRepo = TagTodoRepository{db: db}
 
 	SharingRepo = SharingRepository{db: db}
 

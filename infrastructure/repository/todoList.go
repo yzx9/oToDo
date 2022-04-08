@@ -34,15 +34,34 @@ type TodoListRepository struct {
 	db *gorm.DB
 }
 
-func (r *TodoListRepository) Insert(todoList *TodoList) error {
+func (r TodoListRepository) Save(todoList *TodoList) error {
+	re := r.db.Save(&todoList)
+	return util.WrapGormErr(re.Error, "todo list")
+}
+
+func (r TodoListRepository) Delete(id int64) error {
 	err := r.db.
-		Create(todoList).
+		Delete(&Todo{
+			Entity: Entity{
+				ID: id,
+			},
+		}).
 		Error
 
 	return util.WrapGormErr(err, "todo list")
 }
 
-func (r *TodoListRepository) Find(id int64) (TodoList, error) {
+func (r TodoListRepository) DeleteAllByFolder(todoListFolderID int64) (int64, error) {
+	re := r.db.
+		Where(TodoList{
+			TodoListFolderID: todoListFolderID,
+		}).
+		Delete(TodoList{})
+
+	return re.RowsAffected, util.WrapGormErr(re.Error, "todo list")
+}
+
+func (r TodoListRepository) Find(id int64) (TodoList, error) {
 	var list TodoList
 	err := r.db.
 		Where(&TodoList{
@@ -56,7 +75,7 @@ func (r *TodoListRepository) Find(id int64) (TodoList, error) {
 	return list, util.WrapGormErr(err, "todo list")
 }
 
-func (r *TodoListRepository) FindByUser(userId int64) ([]TodoList, error) {
+func (r TodoListRepository) FindByUser(userId int64) ([]TodoList, error) {
 	var lists []TodoList
 	err := r.db.
 		Where(TodoList{
@@ -68,7 +87,7 @@ func (r *TodoListRepository) FindByUser(userId int64) ([]TodoList, error) {
 	return lists, util.WrapGormErr(err, "todo list")
 }
 
-func (r *TodoListRepository) FindByUserWithMenuFormat(userID int64) ([]TodoListMenuItem, error) {
+func (r TodoListRepository) FindByUserWithMenuFormat(userID int64) ([]TodoListMenuItem, error) {
 	var lists []TodoListMenuItem
 	err := r.db.
 		Model(TodoList{}).
@@ -85,34 +104,7 @@ func (r *TodoListRepository) FindByUserWithMenuFormat(userID int64) ([]TodoListM
 	return lists, util.WrapGormErr(err, "todo list")
 }
 
-func (r *TodoListRepository) Save(todoList *TodoList) error {
-	re := r.db.Save(&todoList)
-	return util.WrapGormErr(re.Error, "todo list")
-}
-
-func (r *TodoListRepository) Delete(id int64) error {
-	err := r.db.
-		Delete(&Todo{
-			Entity: Entity{
-				ID: id,
-			},
-		}).
-		Error
-
-	return util.WrapGormErr(err, "todo list")
-}
-
-func (r *TodoListRepository) DeleteAllByFolder(todoListFolderID int64) (int64, error) {
-	re := r.db.
-		Where(TodoList{
-			TodoListFolderID: todoListFolderID,
-		}).
-		Delete(TodoList{})
-
-	return re.RowsAffected, util.WrapGormErr(re.Error, "todo list")
-}
-
-func (r *TodoListRepository) Exist(id int64) (bool, error) {
+func (r TodoListRepository) Exist(id int64) (bool, error) {
 	var count int64
 	err := r.db.
 		Model(&TodoList{}).
@@ -131,7 +123,13 @@ func (r *TodoListRepository) Exist(id int64) (bool, error) {
  * Sharing
  */
 
-func (r *TodoListRepository) SaveSharedUser(userID, todoListID int64) error {
+var TodoListSharingRepo TodoListSharingRepository
+
+type TodoListSharingRepository struct {
+	db *gorm.DB
+}
+
+func (r TodoListSharingRepository) SaveSharedUser(userID, todoListID int64) error {
 	err := r.db.
 		Model(&User{
 			Entity: Entity{
@@ -148,7 +146,7 @@ func (r *TodoListRepository) SaveSharedUser(userID, todoListID int64) error {
 	return util.WrapGormErr(err, "todo list shared user")
 }
 
-func (r *TodoListRepository) FindSharedOnesByUser(userID int64) ([]TodoList, error) {
+func (r TodoListSharingRepository) FindSharedOnesByUser(userID int64) ([]TodoList, error) {
 	var lists []TodoList
 	err := r.db.
 		Model(&User{
@@ -162,7 +160,7 @@ func (r *TodoListRepository) FindSharedOnesByUser(userID int64) ([]TodoList, err
 	return lists, util.WrapGormErr(err, "user shared todo list")
 }
 
-func (r *TodoListRepository) FindAllSharedUsers(todoListID int64) ([]User, error) {
+func (r TodoListSharingRepository) FindAllSharedUsers(todoListID int64) ([]User, error) {
 	var users []User
 	err := r.db.
 		Model(&TodoList{
@@ -176,7 +174,7 @@ func (r *TodoListRepository) FindAllSharedUsers(todoListID int64) ([]User, error
 	return users, util.WrapGormErr(err, "todo list shared users")
 }
 
-func (r *TodoListRepository) DeleteSharedUser(userID, todoListID int64) error {
+func (r TodoListSharingRepository) DeleteSharedUser(userID, todoListID int64) error {
 	err := r.db.
 		Model(&TodoList{
 			Entity: Entity{
@@ -193,7 +191,7 @@ func (r *TodoListRepository) DeleteSharedUser(userID, todoListID int64) error {
 	return util.WrapGormErr(err, "todo list shared users")
 }
 
-func (r *TodoListRepository) ExistSharing(userID, todoListID int64) (bool, error) {
+func (r TodoListSharingRepository) ExistSharing(userID, todoListID int64) (bool, error) {
 	// TODO[pref]: count in db
 	var lists []TodoList
 	err := r.db.

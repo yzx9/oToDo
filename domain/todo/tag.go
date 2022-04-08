@@ -50,12 +50,12 @@ func UpdateTag(todo *repository.Todo, oldTodoTitle string) error {
 				}
 			}
 
-			if err := repository.TagRepo.SaveTodo(userID, todo.ID, tagName); err != nil {
+			if err := repository.TagTodoRepo.Save(userID, todo.ID, tagName); err != nil {
 				return fmt.Errorf("fails to update tag: %w", err)
 			}
 		} else {
 			// Remove old tag
-			if err := repository.TagRepo.DeleteTodo(userID, todo.ID, tagName); err != nil {
+			if err := repository.TagTodoRepo.Delete(userID, todo.ID, tagName); err != nil {
 				return fmt.Errorf("fails to update tag: %w", err)
 			}
 		}

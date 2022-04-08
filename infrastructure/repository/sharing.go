@@ -29,12 +29,25 @@ type SharingRepository struct {
 	db *gorm.DB
 }
 
-func (r *SharingRepository) Save(sharing *Sharing) error {
+func (r SharingRepository) Save(sharing *Sharing) error {
 	err := r.db.Save(&sharing).Error
 	return util.WrapGormErr(err, "sharing")
 }
 
-func (r *SharingRepository) Find(token string) (Sharing, error) {
+func (r SharingRepository) DeleteAllByUserAndType(userID int64, sharingType SharingType) (int64, error) {
+	// Here we inactive sharing instead of not delete
+	re := r.db.
+		Where(Sharing{
+			UserID: userID,
+			Type:   sharingType,
+			Active: true,
+		}).
+		Update("active", false)
+
+	return re.RowsAffected, util.WrapGormErr(re.Error, "sharing")
+}
+
+func (r SharingRepository) Find(token string) (Sharing, error) {
 	var sharing Sharing
 	err := r.db.
 		Where(&Sharing{
@@ -46,7 +59,7 @@ func (r *SharingRepository) Find(token string) (Sharing, error) {
 	return sharing, util.WrapGormErr(err, "sharing")
 }
 
-func (r *SharingRepository) FindByUser(userID int64, sharingType SharingType) ([]Sharing, error) {
+func (r SharingRepository) FindByUser(userID int64, sharingType SharingType) ([]Sharing, error) {
 	var sharings []Sharing
 	err := r.db.
 		Where(&Sharing{
@@ -59,7 +72,7 @@ func (r *SharingRepository) FindByUser(userID int64, sharingType SharingType) ([
 	return sharings, util.WrapGormErr(err, "sharing")
 }
 
-func (r *SharingRepository) FindAllActiveOnes(userID int64, sharingType SharingType) ([]Sharing, error) {
+func (r SharingRepository) FindAllActiveOnes(userID int64, sharingType SharingType) ([]Sharing, error) {
 	var sharings []Sharing
 	err := r.db.
 		Where(&Sharing{
@@ -73,7 +86,7 @@ func (r *SharingRepository) FindAllActiveOnes(userID int64, sharingType SharingT
 	return sharings, util.WrapGormErr(err, "sharing")
 }
 
-func (r *SharingRepository) ExistActiveOne(userID int64, sharingType SharingType) (bool, error) {
+func (r SharingRepository) ExistActiveOne(userID int64, sharingType SharingType) (bool, error) {
 	var count int64
 	err := r.db.
 		Where(&Sharing{
@@ -85,17 +98,4 @@ func (r *SharingRepository) ExistActiveOne(userID int64, sharingType SharingType
 		Error
 
 	return count != 0, util.WrapGormErr(err, "sharing")
-}
-
-func (r *SharingRepository) DeleteSharings(userID int64, sharingType SharingType) (int64, error) {
-	// Here we inactive sharing instead of not delete
-	re := r.db.
-		Where(Sharing{
-			UserID: userID,
-			Type:   sharingType,
-			Active: true,
-		}).
-		Update("active", false)
-
-	return re.RowsAffected, util.WrapGormErr(re.Error, "sharing")
 }

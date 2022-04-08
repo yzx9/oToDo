@@ -25,7 +25,7 @@ func CreateTodoListSharedUser(userID int64, token string) error {
 		return nil
 	}
 
-	err = repository.TodoListRepo.SaveSharedUser(userID, sharing.RelatedID)
+	err = repository.TodoListSharingRepo.SaveSharedUser(userID, sharing.RelatedID)
 	if err != nil {
 		return fmt.Errorf("fails to create todo list shared user: %w", err)
 	}
@@ -46,7 +46,7 @@ func DeleteTodoListSharedUser(operatorID, userID, todoListID int64) error {
 		return util.NewErrorWithForbidden("unable to delete shared user")
 	}
 
-	if err := repository.TodoListRepo.DeleteSharedUser(userID, todoListID); err != nil {
+	if err := repository.TodoListSharingRepo.DeleteSharedUser(userID, todoListID); err != nil {
 		return fmt.Errorf("fails to delete todo list shared users: %w", err)
 	}
 
@@ -54,7 +54,7 @@ func DeleteTodoListSharedUser(operatorID, userID, todoListID int64) error {
 }
 
 func ExistTodoListSharing(userID, todoListID int64) (bool, error) {
-	exist, err := repository.TodoListRepo.ExistSharing(userID, todoListID)
+	exist, err := repository.TodoListSharingRepo.ExistSharing(userID, todoListID)
 	if err != nil {
 		return false, fmt.Errorf("fails to valid sharing: %w", err)
 	}

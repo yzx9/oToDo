@@ -1,16 +1,16 @@
 package file
 
 // TODO Create Aggregate Root
-var FileRepo FileRepository
+var FileRepository fileRepository
 
-var TodoRepo TodoRepository // TODO remove
+var TodoFileRepository todoFileRepository // TODO move to todo domain
 
-type FileRepository interface {
+type fileRepository interface {
 	Save(file *File) error
 
 	Find(id int64) (*File, error)
 }
 
-type TodoRepository interface {
-	SaveFile(todoID, fileID int64) error
+type todoFileRepository interface {
+	Save(todoID, fileID int64) error
 }

@@ -156,7 +156,7 @@ func createBasicTodoList(user *repository.User) (repository.TodoList, error) {
 		IsBasic: true,
 		UserID:  user.ID,
 	}
-	if err := repository.TodoListRepo.Insert(&basicTodoList); err != nil {
+	if err := repository.TodoListRepo.Save(&basicTodoList); err != nil {
 		return repository.TodoList{}, fmt.Errorf("fails to create user basic todo list: %w", err)
 	}
 

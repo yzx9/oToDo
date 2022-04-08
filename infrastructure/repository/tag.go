@@ -22,12 +22,12 @@ type TagRepository struct {
 	db *gorm.DB
 }
 
-func (r *TagRepository) Save(tag *Tag) error {
+func (r TagRepository) Save(tag *Tag) error {
 	err := r.db.Create(tag).Error
 	return util.WrapGormErr(err, "tag")
 }
 
-func (r *TagRepository) Find(userID int64, tagName string) (Tag, error) {
+func (r TagRepository) Find(userID int64, tagName string) (Tag, error) {
 	var tag Tag
 	err := r.db.
 		Scopes(filterTag(userID, tagName)).
@@ -37,7 +37,7 @@ func (r *TagRepository) Find(userID int64, tagName string) (Tag, error) {
 	return tag, util.WrapGormErr(err, "tag")
 }
 
-func (r *TagRepository) FindAllByUser(userID int64) ([]Tag, error) {
+func (r TagRepository) FindAllByUser(userID int64) ([]Tag, error) {
 	var tags []Tag
 	err := r.db.
 		Where(Tag{
@@ -49,7 +49,13 @@ func (r *TagRepository) FindAllByUser(userID int64) ([]Tag, error) {
 	return tags, util.WrapGormErr(err, "tag")
 }
 
-func (r *TagRepository) SaveTodo(userID, todoID int64, tagName string) error {
+var TagTodoRepo TagTodoRepository
+
+type TagTodoRepository struct {
+	db *gorm.DB
+}
+
+func (r TagTodoRepository) Save(userID, todoID int64, tagName string) error {
 	err := r.db.
 		Scopes(filterTag(userID, tagName)).
 		Association("Todos").
@@ -62,7 +68,7 @@ func (r *TagRepository) SaveTodo(userID, todoID int64, tagName string) error {
 	return util.WrapGormErr(err, "tag todos")
 }
 
-func (r *TagRepository) DeleteTodo(userID, todoID int64, tagName string) error {
+func (r TagTodoRepository) Delete(userID, todoID int64, tagName string) error {
 	err := r.db.
 		Scopes(filterTag(userID, tagName)).
 		Association("Todos").
@@ -75,7 +81,7 @@ func (r *TagRepository) DeleteTodo(userID, todoID int64, tagName string) error {
 	return util.WrapGormErr(err, "tag todos")
 }
 
-func (r *TagRepository) Exist(userID int64, tagName string) (bool, error) {
+func (r TagRepository) Exist(userID int64, tagName string) (bool, error) {
 	var count int64
 	err := r.db.
 		Scopes(filterTag(userID, tagName)).

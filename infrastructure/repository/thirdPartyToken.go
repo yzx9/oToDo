@@ -33,13 +33,13 @@ type ThirdPartyOAuthTokenRepository struct {
 	db *gorm.DB
 }
 
-func (r *ThirdPartyOAuthTokenRepository) Save(entity *ThirdPartyOAuthToken) error {
+func (r ThirdPartyOAuthTokenRepository) Save(entity *ThirdPartyOAuthToken) error {
 	err := r.db.Save(entity).Error
 	return util.WrapGormErr(err, "third party token")
 }
 
 // TODO: change primary key to userID+Type
-func (r *ThirdPartyOAuthTokenRepository) SaveByUserIDAndType(entity *ThirdPartyOAuthToken) error {
+func (r ThirdPartyOAuthTokenRepository) SaveByUserIDAndType(entity *ThirdPartyOAuthToken) error {
 	err := r.db.
 		Where(&ThirdPartyOAuthToken{
 			UserID: entity.UserID,
@@ -51,7 +51,7 @@ func (r *ThirdPartyOAuthTokenRepository) SaveByUserIDAndType(entity *ThirdPartyO
 	return util.WrapGormErr(err, "third party token")
 }
 
-func (r *ThirdPartyOAuthTokenRepository) ExistActiveOne(userID int64, tokenType ThirdPartyTokenType) (bool, error) {
+func (r ThirdPartyOAuthTokenRepository) ExistActiveOne(userID int64, tokenType ThirdPartyTokenType) (bool, error) {
 	var count int64
 	err := r.db.
 		Model(ThirdPartyOAuthToken{}).

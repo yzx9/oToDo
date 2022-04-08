@@ -8,10 +8,11 @@ import (
 )
 
 func CreateTodoList(userID int64, todoList *repository.TodoList) error {
+	todoList.ID = 0
 	todoList.IsBasic = false
 	todoList.UserID = userID
 	todoList.TodoListFolderID = 0
-	if err := repository.TodoListRepo.Insert(todoList); err != nil {
+	if err := repository.TodoListRepo.Save(todoList); err != nil {
 		return fmt.Errorf("fails to create todo list: %w", err)
 	}
 

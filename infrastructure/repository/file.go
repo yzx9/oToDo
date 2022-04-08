@@ -43,7 +43,7 @@ func (r FileRepository) Find(id int64) (*file.File, error) {
 }
 
 // TODO mapper
-func (r *FileRepository) convertToPO(f *file.File) File {
+func (r FileRepository) convertToPO(f *file.File) File {
 	return File{
 		Entity: Entity{
 			ID:        f.ID,
@@ -58,7 +58,8 @@ func (r *FileRepository) convertToPO(f *file.File) File {
 	}
 }
 
-func (r *FileRepository) convertToEntity(f File) file.File {
+// TODO mapper
+func (r FileRepository) convertToEntity(f File) file.File {
 	return file.File{
 		ID:           f.ID,
 		CreatedAt:    f.CreatedAt,

@@ -23,7 +23,7 @@ func CreateTodoListSharing(userID, todoListID int64) (repository.Sharing, error)
 	}
 
 	// Only allow one sharing active
-	if _, err = repository.SharingRepo.DeleteSharings(userID, repository.SharingTypeTodoList); err != nil {
+	if _, err = repository.SharingRepo.DeleteAllByUserAndType(userID, repository.SharingTypeTodoList); err != nil {
 		return repository.Sharing{}, fmt.Errorf("fails to delete old sharing tokens: %w", err)
 	}
 

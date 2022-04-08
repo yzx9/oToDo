@@ -30,12 +30,12 @@ type UserRepository struct {
 	db *gorm.DB
 }
 
-func (r *UserRepository) Save(user *User) error {
+func (r UserRepository) Save(user *User) error {
 	err := r.db.Save(&user).Error
 	return util.WrapGormErr(err, "user")
 }
 
-func (r *UserRepository) Find(id int64) (User, error) {
+func (r UserRepository) Find(id int64) (User, error) {
 	var user User
 	err := r.db.
 		Where(&User{
@@ -49,7 +49,7 @@ func (r *UserRepository) Find(id int64) (User, error) {
 	return user, util.WrapGormErr(err, "user")
 }
 
-func (r *UserRepository) FindByUserName(username string) (User, error) {
+func (r UserRepository) FindByUserName(username string) (User, error) {
 	var user User
 	err := r.db.
 		Where(User{
@@ -61,7 +61,7 @@ func (r *UserRepository) FindByUserName(username string) (User, error) {
 	return user, util.WrapGormErr(err, "user")
 }
 
-func (r *UserRepository) FindByGithubID(githubID int64) (User, error) {
+func (r UserRepository) FindByGithubID(githubID int64) (User, error) {
 	var user User
 	err := r.db.
 		Where(User{
@@ -73,7 +73,7 @@ func (r *UserRepository) FindByGithubID(githubID int64) (User, error) {
 	return user, util.WrapGormErr(err, "user")
 }
 
-func (r *UserRepository) FindByTodo(todoID int64) (User, error) {
+func (r UserRepository) FindByTodo(todoID int64) (User, error) {
 	var todo Todo
 	err := r.db.
 		Where(&Todo{
@@ -92,7 +92,7 @@ func (r *UserRepository) FindByTodo(todoID int64) (User, error) {
 	return r.Find(todo.UserID)
 }
 
-func (r *UserRepository) ExistByUserName(username string) (bool, error) {
+func (r UserRepository) ExistByUserName(username string) (bool, error) {
 	var count int64
 	err := r.db.
 		Model(&User{}).
@@ -105,7 +105,7 @@ func (r *UserRepository) ExistByUserName(username string) (bool, error) {
 	return count != 0, util.WrapGormErr(err, "user")
 }
 
-func (r *UserRepository) ExistByGithubID(githubID int64) (bool, error) {
+func (r UserRepository) ExistByGithubID(githubID int64) (bool, error) {
 	var count int64
 	err := r.db.
 		Model(&User{}).

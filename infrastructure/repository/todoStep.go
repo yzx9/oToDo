@@ -24,12 +24,24 @@ type TodoStepRepository struct {
 	db *gorm.DB
 }
 
-func (r *TodoStepRepository) Save(todoStep *TodoStep) error {
+func (r TodoStepRepository) Save(todoStep *TodoStep) error {
 	err := r.db.Save(&todoStep).Error
 	return util.WrapGormErr(err, "todo step")
 }
 
-func (r *TodoStepRepository) Find(id int64) (TodoStep, error) {
+func (r TodoStepRepository) Delete(id int64) error {
+	err := r.db.
+		Delete(&TodoStep{
+			Entity: Entity{
+				ID: id,
+			},
+		}).
+		Error
+
+	return util.WrapGormErr(err, "todo step")
+}
+
+func (r TodoStepRepository) Find(id int64) (TodoStep, error) {
 	var step TodoStep
 	err := r.db.
 		Where(&TodoStep{
@@ -43,7 +55,7 @@ func (r *TodoStepRepository) Find(id int64) (TodoStep, error) {
 	return step, util.WrapGormErr(err, "todo step")
 }
 
-func (r *TodoStepRepository) FindAllByTodo(todoID int64) ([]TodoStep, error) {
+func (r TodoStepRepository) FindAllByTodo(todoID int64) ([]TodoStep, error) {
 	var steps []TodoStep
 	err := r.db.
 		Where(TodoStep{
@@ -53,15 +65,4 @@ func (r *TodoStepRepository) FindAllByTodo(todoID int64) ([]TodoStep, error) {
 		Error
 
 	return steps, util.WrapGormErr(err, "todo step")
-}
-func (r *TodoStepRepository) Delete(id int64) error {
-	err := r.db.
-		Delete(&TodoStep{
-			Entity: Entity{
-				ID: id,
-			},
-		}).
-		Error
-
-	return util.WrapGormErr(err, "todo step")
 }

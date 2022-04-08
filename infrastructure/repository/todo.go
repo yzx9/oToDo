@@ -42,85 +42,12 @@ type TodoRepository struct {
 	db *gorm.DB
 }
 
-func (r *TodoRepository) Save(todo *Todo) error {
+func (r TodoRepository) Save(todo *Todo) error {
 	err := r.db.Save(todo).Error
 	return util.WrapGormErr(err, "todo")
 }
 
-func (r *TodoRepository) Find(id int64) (Todo, error) {
-	var todo Todo
-	err := r.db.
-		Scopes(preloadTodoInfo).
-		Where(&Todo{
-			Entity: Entity{
-				ID: id,
-			},
-		}).
-		First(&todo).
-		Error
-
-	return todo, util.WrapGormErr(err, "todo")
-}
-
-func (r *TodoRepository) FindAllByTodoList(todoListID int64) ([]Todo, error) {
-	var todos []Todo
-	err := r.db.
-		Scopes(preloadTodoInfo).
-		Where(Todo{
-			TodoListID: todoListID,
-		}).
-		Find(&todos).
-		Error
-
-	return todos, util.WrapGormErr(err, "todos")
-}
-
-func (r *TodoRepository) FindAllByUser(userID int64) ([]Todo, error) {
-	var todos []Todo
-	err := r.db.
-		Scopes(filterTodoUser(userID)).
-		Find(&todos).
-		Error
-
-	return todos, util.WrapGormErr(err, "all todos")
-}
-
-func (r *TodoRepository) FindAllImportantOnesByUser(userID int64) ([]Todo, error) {
-	var todos []Todo
-	err := r.db.
-		Scopes(filterTodoUser(userID)).
-		Where("Importance", true).
-		Find(&todos).
-		Error
-
-	return todos, util.WrapGormErr(err, "important todos")
-}
-
-func (r *TodoRepository) FindAllPlanedOnesByUser(userID int64) ([]Todo, error) {
-	var todos []Todo
-	err := r.db.
-		Scopes(filterTodoUser(userID)).
-		Not("deadline", nil).
-		Order("deadline").
-		Find(&todos).
-		Error
-
-	return todos, util.WrapGormErr(err, "planed todos")
-}
-
-func (r *TodoRepository) FindAllNotNotifiedOnesByUser(userID int64) ([]Todo, error) {
-	var todos []Todo
-	err := r.db.
-		Scopes(filterTodoUser(userID)).
-		Not("notified", false).
-		Order("notify_at").
-		Find(&todos).
-		Error
-
-	return todos, util.WrapGormErr(err, "not notified todos")
-}
-
-func (r *TodoRepository) Delete(id int64) error {
+func (r TodoRepository) Delete(id int64) error {
 	err := r.db.
 		Delete(&Todo{
 			Entity: Entity{
@@ -142,11 +69,88 @@ func (r *TodoRepository) DeleteAllByTodoList(todoListID int64) (int64, error) {
 	return re.RowsAffected, util.WrapGormErr(re.Error, "todo")
 }
 
+func (r TodoRepository) Find(id int64) (Todo, error) {
+	var todo Todo
+	err := r.db.
+		Scopes(preloadTodoInfo).
+		Where(&Todo{
+			Entity: Entity{
+				ID: id,
+			},
+		}).
+		First(&todo).
+		Error
+
+	return todo, util.WrapGormErr(err, "todo")
+}
+
+func (r TodoRepository) FindAllByTodoList(todoListID int64) ([]Todo, error) {
+	var todos []Todo
+	err := r.db.
+		Scopes(preloadTodoInfo).
+		Where(Todo{
+			TodoListID: todoListID,
+		}).
+		Find(&todos).
+		Error
+
+	return todos, util.WrapGormErr(err, "todos")
+}
+
+func (r TodoRepository) FindAllByUser(userID int64) ([]Todo, error) {
+	var todos []Todo
+	err := r.db.
+		Scopes(filterTodoUser(userID)).
+		Find(&todos).
+		Error
+
+	return todos, util.WrapGormErr(err, "all todos")
+}
+
+func (r TodoRepository) FindAllImportantOnesByUser(userID int64) ([]Todo, error) {
+	var todos []Todo
+	err := r.db.
+		Scopes(filterTodoUser(userID)).
+		Where("Importance", true).
+		Find(&todos).
+		Error
+
+	return todos, util.WrapGormErr(err, "important todos")
+}
+
+func (r TodoRepository) FindAllPlanedOnesByUser(userID int64) ([]Todo, error) {
+	var todos []Todo
+	err := r.db.
+		Scopes(filterTodoUser(userID)).
+		Not("deadline", nil).
+		Order("deadline").
+		Find(&todos).
+		Error
+
+	return todos, util.WrapGormErr(err, "planed todos")
+}
+
+func (r TodoRepository) FindAllNotNotifiedOnesByUser(userID int64) ([]Todo, error) {
+	var todos []Todo
+	err := r.db.
+		Scopes(filterTodoUser(userID)).
+		Not("notified", false).
+		Order("notify_at").
+		Find(&todos).
+		Error
+
+	return todos, util.WrapGormErr(err, "not notified todos")
+}
+
 /**
- * oTodo File
+ * File
  */
 
-func (r TodoRepository) SaveFile(todoID, fileID int64) error {
+type TodoFileRepository struct {
+	db *gorm.DB
+}
+
+func (r TodoFileRepository) Save(todoID, fileID int64) error {
 	err := r.db.
 		Where(Todo{
 			Entity: Entity{
@@ -163,7 +167,7 @@ func (r TodoRepository) SaveFile(todoID, fileID int64) error {
 	return util.WrapGormErr(err, "todo file")
 }
 
-func (r *TodoRepository) FindAllByTodo(todoID int64) ([]File, error) {
+func (r TodoFileRepository) FindAllByTodo(todoID int64) ([]File, error) {
 	var files []File
 	err := r.db.
 		Where(Todo{
