@@ -40,10 +40,11 @@ func startUpDomain(db *gorm.DB) error {
 	todolist.SharingRepository = repository.NewSharingRepository(db)
 	todolist.TodoListSharingRepository = repository.NewTodoListSharingRepository(db)
 
-	user.UserRepo = repository.NewUserRepository(db)
-	user.UserInvalidRefreshTokenRepo = repository.NewUserInvalidRefreshTokenRepository(db)
-	user.ThirdPartyOAuthTokenRepo = repository.NewThirdPartyOAuthTokenRepository(db)
-	user.TodoListRepo = repository.NewTodoListRepository(db)
+	user.UserRepository = repository.NewUserRepository(db)
+	user.UserInvalidRefreshTokenRepository = repository.NewUserInvalidRefreshTokenRepository(db)
+	user.ThirdPartyOAuthTokenRepository = repository.NewThirdPartyOAuthTokenRepository(db)
+	// TODO[bug]: cycle deps
+	// user.TodoListRepo = repository.NewTodoListRepository(db)
 
 	return nil
 }

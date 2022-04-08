@@ -7,13 +7,13 @@ import (
 	"github.com/yzx9/otodo/infrastructure/repository"
 )
 
-func GetUser(userID int64) (repository.User, error) {
-	user, err := repository.UserRepo.Find(userID)
+func GetUser(userID int64) (user.User, error) {
+	u, err := repository.UserRepo.Find(userID)
 	if err != nil {
-		return repository.User{}, fmt.Errorf("fails to get user: %w", err)
+		return user.User{}, fmt.Errorf("fails to get user: %w", err)
 	}
 
-	return user, nil
+	return u, nil
 }
 
 func CreateNewToken(refreshToken string) (user.SessionTokens, error) {

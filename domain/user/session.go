@@ -10,7 +10,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/yzx9/otodo/acl/github"
 	"github.com/yzx9/otodo/infrastructure/config"
-	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/infrastructure/util"
 )
 
@@ -43,7 +42,7 @@ func Login(payload UserCredential) (SessionTokens, error) {
 		return SessionTokens{}, util.NewErrorWithBadRequest("invalid credential")
 	}
 
-	user, err := UserRepo.FindByUserName(payload.UserName)
+	user, err := UserRepository.FindByUserName(payload.UserName)
 	if err != nil || user.Password == nil {
 		return write()
 	}
@@ -89,7 +88,7 @@ func Logout(userID int64, refreshTokenID string) error {
 }
 
 func NewAccessToken(userID int64, refreshTokenID string) (SessionTokens, error) {
-	user, err := UserRepo.Find(userID)
+	user, err := UserRepository.Find(userID)
 	if err != nil {
 		return SessionTokens{}, fmt.Errorf("fails to get user, %w", err)
 	}
@@ -131,7 +130,7 @@ func ShouldRefreshAccessToken(oldAccessToken *jwt.Token) bool {
 }
 
 // generate access token only
-func newAccessToken(user repository.User, refreshTokenID string) SessionTokens {
+func newAccessToken(user User, refreshTokenID string) SessionTokens {
 	exp := config.Session.AccessTokenExpiresIn
 	dur := time.Duration(exp * int(time.Second))
 
@@ -149,7 +148,7 @@ func newAccessToken(user repository.User, refreshTokenID string) SessionTokens {
 }
 
 // generate new access token and refresh token
-func newSessionToken(user repository.User, refreshTokenExp int) SessionTokens {
+func newSessionToken(user User, refreshTokenExp int) SessionTokens {
 	// refresh token
 	dur := time.Duration(refreshTokenExp * int(time.Second))
 

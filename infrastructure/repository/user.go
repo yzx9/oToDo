@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"github.com/yzx9/otodo/domain/user"
 	"github.com/yzx9/otodo/infrastructure/util"
 	"gorm.io/gorm"
 )
@@ -34,50 +35,52 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 	return UserRepository{db: db}
 }
 
-func (r UserRepository) Save(user *User) error {
-	err := r.db.Save(&user).Error
+func (r UserRepository) Save(entity *user.User) error {
+	po := r.convertToPO(entity)
+	err := r.db.Save(&po).Error
+	entity.ID = po.ID
 	return util.WrapGormErr(err, "user")
 }
 
-func (r UserRepository) Find(id int64) (User, error) {
-	var user User
+func (r UserRepository) Find(id int64) (user.User, error) {
+	var po User
 	err := r.db.
 		Where(&User{
 			Entity: Entity{
 				ID: id,
 			},
 		}).
-		First(&user).
+		First(&po).
 		Error
 
-	return user, util.WrapGormErr(err, "user")
+	return r.convertToEntity(po), util.WrapGormErr(err, "user")
 }
 
-func (r UserRepository) FindByUserName(username string) (User, error) {
-	var user User
+func (r UserRepository) FindByUserName(username string) (user.User, error) {
+	var po User
 	err := r.db.
 		Where(User{
 			Name: username,
 		}).
-		First(&user).
+		First(&po).
 		Error
 
-	return user, util.WrapGormErr(err, "user")
+	return r.convertToEntity(po), util.WrapGormErr(err, "user")
 }
 
-func (r UserRepository) FindByGithubID(githubID int64) (User, error) {
-	var user User
+func (r UserRepository) FindByGithubID(githubID int64) (user.User, error) {
+	var po User
 	err := r.db.
 		Where(User{
 			GithubID: githubID,
 		}).
-		First(&user).
+		First(&po).
 		Error
 
-	return user, util.WrapGormErr(err, "user")
+	return r.convertToEntity(po), util.WrapGormErr(err, "user")
 }
 
-func (r UserRepository) FindByTodo(todoID int64) (User, error) {
+func (r UserRepository) FindByTodo(todoID int64) (user.User, error) {
 	var todo Todo
 	err := r.db.
 		Where(&Todo{
@@ -90,7 +93,7 @@ func (r UserRepository) FindByTodo(todoID int64) (User, error) {
 		Error
 
 	if err != nil {
-		return User{}, util.WrapGormErr(err, "todo")
+		return user.User{}, util.WrapGormErr(err, "todo")
 	}
 
 	return r.Find(todo.UserID)
@@ -120,4 +123,52 @@ func (r UserRepository) ExistByGithubID(githubID int64) (bool, error) {
 		Error
 
 	return count != 0, util.WrapGormErr(err, "user")
+}
+
+func (r UserRepository) convertToPO(entity *user.User) User {
+	return User{
+		Entity: Entity{
+			ID:        entity.ID,
+			CreatedAt: entity.CreatedAt,
+			UpdatedAt: entity.UpdatedAt,
+		},
+
+		Name:      entity.Name,
+		Nickname:  entity.Nickname,
+		Password:  entity.Password,
+		Email:     entity.Email,
+		Telephone: entity.Telephone,
+		Avatar:    entity.Avatar,
+		GithubID:  entity.GithubID,
+
+		BasicTodoListID: entity.BasicTodoListID,
+		BasicTodoList:   nil, // TODO
+
+		TodoLists: nil, // TODO
+
+		SharedTodoLists: nil, // TODO
+	}
+}
+
+func (r UserRepository) convertToEntity(po User) user.User {
+	return user.User{
+		ID:        po.ID,
+		CreatedAt: po.CreatedAt,
+		UpdatedAt: po.UpdatedAt,
+
+		Name:      po.Name,
+		Nickname:  po.Nickname,
+		Password:  po.Password,
+		Email:     po.Email,
+		Telephone: po.Telephone,
+		Avatar:    po.Avatar,
+		GithubID:  po.GithubID,
+
+		BasicTodoListID: po.BasicTodoListID,
+		BasicTodoList:   nil, // TODO
+
+		TodoLists: nil, // TODO
+
+		SharedTodoLists: nil, // TODO
+	}
 }

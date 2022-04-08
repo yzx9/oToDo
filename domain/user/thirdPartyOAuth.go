@@ -6,7 +6,6 @@ import (
 
 	"github.com/yzx9/otodo/acl/github"
 	"github.com/yzx9/otodo/infrastructure/config"
-	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/infrastructure/util"
 )
 
@@ -15,16 +14,29 @@ const OAuthStateLen = 10
 // TODO[perf]: redis
 var oauthStates = make(map[string]time.Time)
 
-func UpdateThirdPartyOAuthToken(token *repository.ThirdPartyOAuthToken) error {
+type ThirdPartyOAuthToken struct {
+	ID        int64
+	CreatedAt time.Time
+	UpdatedAt time.Time
+
+	Active bool
+	Type   int8
+	Token  string
+	Scope  string
+
+	UserID int64
+}
+
+func UpdateThirdPartyOAuthToken(token *ThirdPartyOAuthToken) error {
 	// TODO[bug]: handle error
-	exist, err := ThirdPartyOAuthTokenRepo.ExistActiveOne(token.UserID, repository.ThirdPartyTokenType(token.Type))
+	exist, err := ThirdPartyOAuthTokenRepository.ExistActiveOne(token.UserID, ThirdPartyTokenType(token.Type))
 	if err != nil {
 		return fmt.Errorf("fails to update third party oauth token: %w", err)
 	}
 
-	save := ThirdPartyOAuthTokenRepo.SaveByUserIDAndType
+	save := ThirdPartyOAuthTokenRepository.SaveByUserIDAndType
 	if !exist {
-		save = ThirdPartyOAuthTokenRepo.Save
+		save = ThirdPartyOAuthTokenRepository.Save
 	}
 
 	if err := save(token); err != nil {
@@ -34,7 +46,7 @@ func UpdateThirdPartyOAuthToken(token *repository.ThirdPartyOAuthToken) error {
 	return nil
 }
 
-func UpdateThirdPartyOAuthTokenAsync(token *repository.ThirdPartyOAuthToken) {
+func UpdateThirdPartyOAuthTokenAsync(token *ThirdPartyOAuthToken) {
 	if err := UpdateThirdPartyOAuthToken(token); err != nil {
 		// TODO[bug]: handle error
 		fmt.Println(err)
@@ -53,10 +65,10 @@ func CreateGithubOAuthURI() (string, error) {
 	return uri, nil
 }
 
-func FetchGithubOAuthToken(code, state string) (repository.ThirdPartyOAuthToken, error) {
+func FetchGithubOAuthToken(code, state string) (ThirdPartyOAuthToken, error) {
 	c := config.GitHub
-	write := func(err error) (repository.ThirdPartyOAuthToken, error) {
-		return repository.ThirdPartyOAuthToken{}, err
+	write := func(err error) (ThirdPartyOAuthToken, error) {
+		return ThirdPartyOAuthToken{}, err
 	}
 
 	// Check state
@@ -72,9 +84,9 @@ func FetchGithubOAuthToken(code, state string) (repository.ThirdPartyOAuthToken,
 		return write(util.NewErrorWithUnknown("fails to fetch github oauth token"))
 	}
 
-	return repository.ThirdPartyOAuthToken{
+	return ThirdPartyOAuthToken{
 		Active: true,
-		Type:   int8(repository.ThirdPartyTokenTypeGithubAccessToken),
+		Type:   int8(ThirdPartyTokenTypeGithubAccessToken),
 		Token:  payload.AccessToken,
 		Scope:  payload.Scope,
 	}, nil

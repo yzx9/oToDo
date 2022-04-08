@@ -1,14 +1,9 @@
 package repository
 
 import (
+	"github.com/yzx9/otodo/domain/user"
 	"github.com/yzx9/otodo/infrastructure/util"
 	"gorm.io/gorm"
-)
-
-type ThirdPartyTokenType int8
-
-const (
-	ThirdPartyTokenTypeGithubAccessToken ThirdPartyTokenType = 10*iota + 11
 )
 
 type ThirdPartyOAuthToken struct {
@@ -37,25 +32,29 @@ func NewThirdPartyOAuthTokenRepository(db *gorm.DB) ThirdPartyOAuthTokenReposito
 	return ThirdPartyOAuthTokenRepository{db: db}
 }
 
-func (r ThirdPartyOAuthTokenRepository) Save(entity *ThirdPartyOAuthToken) error {
-	err := r.db.Save(entity).Error
+func (r ThirdPartyOAuthTokenRepository) Save(entity *user.ThirdPartyOAuthToken) error {
+	po := r.convertToPO(*entity)
+	err := r.db.Save(&po).Error
+	entity.ID = po.ID
 	return util.WrapGormErr(err, "third party token")
 }
 
 // TODO: change primary key to userID+Type
-func (r ThirdPartyOAuthTokenRepository) SaveByUserIDAndType(entity *ThirdPartyOAuthToken) error {
+func (r ThirdPartyOAuthTokenRepository) SaveByUserIDAndType(entity *user.ThirdPartyOAuthToken) error {
+	po := r.convertToPO(*entity)
 	err := r.db.
 		Where(&ThirdPartyOAuthToken{
 			UserID: entity.UserID,
 			Type:   entity.Type,
 		}).
-		Save(entity).
+		Save(&po).
 		Error
 
+	entity.ID = po.ID
 	return util.WrapGormErr(err, "third party token")
 }
 
-func (r ThirdPartyOAuthTokenRepository) ExistActiveOne(userID int64, tokenType ThirdPartyTokenType) (bool, error) {
+func (r ThirdPartyOAuthTokenRepository) ExistActiveOne(userID int64, tokenType user.ThirdPartyTokenType) (bool, error) {
 	var count int64
 	err := r.db.
 		Model(ThirdPartyOAuthToken{}).
@@ -72,4 +71,36 @@ func (r ThirdPartyOAuthTokenRepository) ExistActiveOne(userID int64, tokenType T
 	}
 
 	return count != 0, nil
+}
+
+func (r ThirdPartyOAuthTokenRepository) convertToPO(entity user.ThirdPartyOAuthToken) ThirdPartyOAuthToken {
+	return ThirdPartyOAuthToken{
+		Entity: Entity{
+			ID:        entity.ID,
+			CreatedAt: entity.CreatedAt,
+			UpdatedAt: entity.UpdatedAt,
+		},
+
+		Active: entity.Active,
+		Type:   entity.Type,
+		Token:  entity.Token,
+		Scope:  entity.Scope,
+
+		UserID: entity.UserID,
+	}
+}
+
+func (r ThirdPartyOAuthTokenRepository) convertToEntity(po ThirdPartyOAuthToken) user.ThirdPartyOAuthToken {
+	return user.ThirdPartyOAuthToken{
+		ID:        po.ID,
+		CreatedAt: po.CreatedAt,
+		UpdatedAt: po.UpdatedAt,
+
+		Active: po.Active,
+		Type:   po.Type,
+		Token:  po.Token,
+		Scope:  po.Scope,
+
+		UserID: po.UserID,
+	}
 }
