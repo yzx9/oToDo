@@ -28,8 +28,8 @@ func UpdateTag(todo *Todo, oldTodoTitle string) error {
 		return nil
 	}
 
-	tags := getTags(todo.Title)
-	oldTags := getTags(oldTodoTitle)
+	tags := parseTags(todo.Title)
+	oldTags := parseTags(oldTodoTitle)
 
 	// diff, avoid duplicate tag in title
 	for tagName := range oldTags {
@@ -85,7 +85,7 @@ func UpdateTagAsync(todo *Todo, oldTodoTitle string) {
 
 var tagRegex = regexp.MustCompile(`^#(?P<tag>\\S{1,16}) `)
 
-func getTags(title string) map[string]bool {
+func parseTags(title string) map[string]bool {
 	tags := make(map[string]bool)
 	for {
 		matches := tagRegex.FindStringSubmatch(title)

@@ -37,8 +37,7 @@ type Todo struct {
 }
 
 func CreateTodo(userID int64, todo *Todo) error {
-	_, err := todolist.OwnOrSharedTodoList(userID, todo.TodoListID)
-	if err != nil {
+	if _, err := todolist.OwnOrSharedTodoList(userID, todo.TodoListID); err != nil {
 		return fmt.Errorf("fails to get todo list: %w", err)
 	}
 

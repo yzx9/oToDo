@@ -25,7 +25,7 @@ type UserCredential struct {
 }
 
 type SessionTokenClaims struct {
-	TokenClaims
+	JWTClaims
 
 	RefreshTokenID string `json:"rti,omitempty"`
 }
@@ -135,7 +135,7 @@ func newAccessToken(user User, refreshTokenID string) SessionTokens {
 	dur := time.Duration(exp * int(time.Second))
 
 	claims := SessionTokenClaims{
-		TokenClaims:    NewClaims(user.ID, dur),
+		JWTClaims:      NewClaims(user.ID, dur),
 		RefreshTokenID: refreshTokenID,
 	}
 	token := NewToken(claims)
@@ -152,7 +152,7 @@ func newSessionToken(user User, refreshTokenExp int) SessionTokens {
 	// refresh token
 	dur := time.Duration(refreshTokenExp * int(time.Second))
 
-	claims := SessionTokenClaims{TokenClaims: NewClaims(user.ID, dur)}
+	claims := SessionTokenClaims{JWTClaims: NewClaims(user.ID, dur)}
 	claims.Id = uuid.NewString()
 	refreshToken := NewToken(claims)
 	refreshTokenID := claims.Id

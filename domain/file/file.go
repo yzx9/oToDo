@@ -31,6 +31,11 @@ type File struct {
 	RelatedID    int64  `json:"-"` // Depend on access type
 }
 
+func GetFile(fileID int64) (*File, error) {
+	file, err := FileRepository.Find(fileID)
+	return file, fmt.Errorf("fails to get file: %w", err)
+}
+
 func UploadPublicFile(file *multipart.FileHeader) (File, error) {
 	// only support img now
 	if !supportedFileTypeRegex.MatchString(file.Filename) {
@@ -41,13 +46,12 @@ func UploadPublicFile(file *multipart.FileHeader) (File, error) {
 		FileName:   file.Filename,
 		AccessType: int8(FileTypePublic),
 	}
-	err := uploadFile(file, &record)
+	err := record.upload(file)
 	return record, err
 }
 
 func UploadTodoFile(userID, todoID int64, file *multipart.FileHeader) (File, error) {
-	_, err := todo.OwnTodo(userID, todoID)
-	if err != nil {
+	if _, err := todo.OwnTodo(userID, todoID); err != nil {
 		return File{}, err
 	}
 
@@ -56,7 +60,7 @@ func UploadTodoFile(userID, todoID int64, file *multipart.FileHeader) (File, err
 		AccessType: int8(FileTypeTodo),
 		RelatedID:  todoID,
 	}
-	if err := uploadFile(file, &record); err != nil {
+	if err := record.upload(file); err != nil {
 		return File{}, err
 	}
 
@@ -67,7 +71,7 @@ func UploadTodoFile(userID, todoID int64, file *multipart.FileHeader) (File, err
 	return record, nil
 }
 
-func uploadFile(file *multipart.FileHeader, record *File) error {
+func (record *File) upload(file *multipart.FileHeader) error {
 	write := func(err error) error {
 		return fmt.Errorf("fails to upload file: %w", err)
 	}
@@ -82,7 +86,7 @@ func uploadFile(file *multipart.FileHeader, record *File) error {
 
 	// TODO[pref]: avoid duplicate save, remove :id in template?
 	record.FileServerID = config.Server.ID
-	record.FilePath = applyFilePathTemplate(record)
+	record.FilePath = record.newFilePath()
 	if err := util.SaveFile(file, record.FilePath); err != nil {
 		return write(err)
 	}
@@ -92,11 +96,6 @@ func uploadFile(file *multipart.FileHeader, record *File) error {
 	}
 
 	return nil
-}
-
-func GetFile(fileID int64) (*File, error) {
-	file, err := FileRepository.Find(fileID)
-	return file, fmt.Errorf("fails to get file: %w", err)
 }
 
 // Get file path, auto
@@ -122,7 +121,7 @@ func OwnFile(userID, fileID int64) (*File, error) {
 	return file, nil
 }
 
-func applyFilePathTemplate(file *File) string {
+func (file *File) newFilePath() string {
 	template := config.Server.FilePathTemplate
 	template = strings.ReplaceAll(template, ":id", strconv.FormatInt(file.ID, 10))
 	template = strings.ReplaceAll(template, ":ext", filepath.Ext(file.FileName))
@@ -132,7 +131,7 @@ func applyFilePathTemplate(file *File) string {
 	return template
 }
 
-func GetFilePath(file *File) string {
+func (file *File) GetFilePath() string {
 	// TODO[feat]: If exist multi servers, how to get file? maybe we need redirect
 	return file.FilePath
 }

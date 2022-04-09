@@ -8,15 +8,15 @@ import (
 	"github.com/yzx9/otodo/infrastructure/config"
 )
 
-type TokenClaims struct {
+type JWTClaims struct {
 	jwt.StandardClaims
 
 	UserID int64 `json:"uid"`
 }
 
-func NewClaims(userID int64, exp time.Duration) TokenClaims {
+func NewClaims(userID int64, exp time.Duration) JWTClaims {
 	now := time.Now().UTC()
-	return TokenClaims{
+	return JWTClaims{
 		StandardClaims: jwt.StandardClaims{
 			Issuer:    config.Secret.TokenIssuer,
 			IssuedAt:  now.Unix(),

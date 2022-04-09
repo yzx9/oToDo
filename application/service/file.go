@@ -19,7 +19,7 @@ func GetFilePath(userID int64, fileID string) (string, error) {
 		return "", err
 	}
 
-	return file.GetFilePath(f), nil
+	return f.GetFilePath(), nil
 }
 
 func GetPreSignFilePath(fileID string) (string, error) {
@@ -33,7 +33,7 @@ func GetPreSignFilePath(fileID string) (string, error) {
 		return "", err
 	}
 
-	return file.GetFilePath(f), nil
+	return f.GetFilePath(), nil
 }
 
 func PreSignFile(payload dto.FilePreSign) (dto.FilePreSignResult, error) {

@@ -12,7 +12,7 @@ import (
 const fileSignedMaxExpiresIn = 6 * time.Hour
 
 type FilePreSignClaims struct {
-	user.TokenClaims
+	user.JWTClaims
 
 	UserID int64 `json:"uid"`
 	FileID int64 `json:"fileID"`
@@ -30,9 +30,9 @@ func CreateFilePreSignID(userID, fileID int64, exp int) (string, error) {
 	}
 
 	token := user.NewToken(FilePreSignClaims{
-		TokenClaims: user.NewClaims(userID, expiresIn),
-		UserID:      userID,
-		FileID:      fileID,
+		JWTClaims: user.NewClaims(userID, expiresIn),
+		UserID:    userID,
+		FileID:    fileID,
 	})
 	return base64.StdEncoding.EncodeToString([]byte(token)), nil
 }

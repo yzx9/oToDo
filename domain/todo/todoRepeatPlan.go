@@ -19,7 +19,7 @@ type TodoRepeatPlan struct {
 }
 
 func CreateTodoRepeatPlan(plan TodoRepeatPlan) (TodoRepeatPlan, error) {
-	if !isValidTodoRepeatPlan(plan) {
+	if !plan.IsValid() {
 		return TodoRepeatPlan{}, nil
 	}
 
@@ -32,7 +32,7 @@ func CreateTodoRepeatPlan(plan TodoRepeatPlan) (TodoRepeatPlan, error) {
 }
 
 func UpdateTodoRepeatPlan(plan, oldPlan TodoRepeatPlan) (TodoRepeatPlan, error) {
-	if !isValidTodoRepeatPlan(plan) || isSameTodoRepeatPlan(plan, oldPlan) {
+	if !plan.IsValid() || plan.IsSame(oldPlan) {
 		return oldPlan, nil
 	}
 
@@ -58,7 +58,7 @@ func CreateRepeatTodoIfNeed(todo Todo) (bool, Todo, error) {
 		return false, Todo{}, nil
 	}
 
-	nextDeadline := getTodoNextRepeatTime(todo)
+	nextDeadline := todo.getNextRepeatTime()
 	if todo.TodoRepeatPlan.Before.Before(nextDeadline) {
 		return false, Todo{}, nil
 	}
@@ -72,7 +72,7 @@ func CreateRepeatTodoIfNeed(todo Todo) (bool, Todo, error) {
 	return true, todo, nil
 }
 
-func isValidTodoRepeatPlan(plan TodoRepeatPlan) bool {
+func (plan TodoRepeatPlan) IsValid() bool {
 	t := TodoRepeatPlanType(plan.Type)
 	if t != TodoRepeatPlanTypeDay &&
 		t != TodoRepeatPlanTypeMonth &&
@@ -89,7 +89,7 @@ func isValidTodoRepeatPlan(plan TodoRepeatPlan) bool {
 	return plan.Interval > 0
 }
 
-func isSameTodoRepeatPlan(plan, oldPlan TodoRepeatPlan) bool {
+func (plan TodoRepeatPlan) IsSame(oldPlan TodoRepeatPlan) bool {
 	if plan.Type != oldPlan.Type ||
 		plan.Interval != oldPlan.Interval ||
 		plan.Before != oldPlan.Before {
@@ -105,7 +105,7 @@ func isSameTodoRepeatPlan(plan, oldPlan TodoRepeatPlan) bool {
 	return true
 }
 
-func getTodoNextRepeatTime(todo Todo) time.Time {
+func (todo Todo) getNextRepeatTime() time.Time {
 	deadline := *todo.Deadline
 	interval := todo.TodoRepeatPlan.Interval
 
