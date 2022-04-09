@@ -5,11 +5,38 @@ import (
 	"time"
 
 	"github.com/yzx9/otodo/domain/todolist"
-	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/infrastructure/util"
 )
 
-func CreateTodo(userID int64, todo *repository.Todo) error {
+type Todo struct {
+	ID        int64
+	CreatedAt time.Time
+	UpdatedAt time.Time
+
+	Title      string
+	Memo       string
+	Importance bool
+	Deadline   *time.Time
+	Notified   bool
+	NotifyAt   *time.Time
+	Done       bool
+	DoneAt     *time.Time
+
+	UserID int64
+
+	TodoListID int64
+
+	Files []int64
+
+	Steps []int64
+
+	TodoRepeatPlanID int64
+	TodoRepeatPlan   TodoRepeatPlan
+
+	NextID *int64 // next todo id if repeat
+}
+
+func CreateTodo(userID int64, todo *Todo) error {
 	_, err := todolist.OwnOrSharedTodoList(userID, todo.TodoListID)
 	if err != nil {
 		return fmt.Errorf("fails to get todo list: %w", err)
@@ -31,7 +58,7 @@ func CreateTodo(userID int64, todo *repository.Todo) error {
 	return nil
 }
 
-func UpdateTodo(userID int64, todo *repository.Todo) error {
+func UpdateTodo(userID int64, todo *Todo) error {
 	// Limits
 	oldTodo, err := OwnTodo(userID, todo.ID)
 	if err != nil {
@@ -77,14 +104,14 @@ func UpdateTodo(userID int64, todo *repository.Todo) error {
 	return nil
 }
 
-func DeleteTodo(userID, todoID int64) (repository.Todo, error) {
+func DeleteTodo(userID, todoID int64) (Todo, error) {
 	todo, err := OwnTodo(userID, todoID)
 	if err != nil {
-		return repository.Todo{}, err
+		return Todo{}, err
 	}
 
 	if err = TodoRepository.Delete(todoID); err != nil {
-		return repository.Todo{}, fmt.Errorf("fails to delete todo: %w", err)
+		return Todo{}, fmt.Errorf("fails to delete todo: %w", err)
 	}
 
 	go UpdateTagAsync(&todo, "")
@@ -92,14 +119,14 @@ func DeleteTodo(userID, todoID int64) (repository.Todo, error) {
 	return todo, nil
 }
 
-func OwnTodo(userID, todoID int64) (repository.Todo, error) {
+func OwnTodo(userID, todoID int64) (Todo, error) {
 	todo, err := TodoRepository.Find(todoID)
 	if err != nil {
-		return repository.Todo{}, fmt.Errorf("fails to get todo: %w", err)
+		return Todo{}, fmt.Errorf("fails to get todo: %w", err)
 	}
 
 	if _, err = todolist.OwnOrSharedTodoList(userID, todo.TodoListID); err != nil {
-		return repository.Todo{}, util.NewErrorWithForbidden("unable to handle non-owned todo: %v", todo.ID)
+		return Todo{}, util.NewErrorWithForbidden("unable to handle non-owned todo: %v", todo.ID)
 	}
 
 	return todo, nil

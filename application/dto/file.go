@@ -13,10 +13,3 @@ type FilePreSign struct {
 type FilePreSignResult struct {
 	FileID string `json:"fileID"`
 }
-
-type FilePreSignClaims struct {
-	TokenClaims
-
-	UserID int64 `json:"uid"`
-	FileID int64 `json:"fileID"`
-}

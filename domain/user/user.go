@@ -164,7 +164,6 @@ func createUser(user *User) error {
 // TODO move to todo list domain
 func createBasicTodoList(user *User) (todolist.TodoList, error) {
 	basicTodoList := todolist.TodoList{
-		// TODO[bug]: cycle dep
 		Name:    "Todos", // TODO i18n
 		IsBasic: true,
 		UserID:  user.ID,
@@ -173,8 +172,7 @@ func createBasicTodoList(user *User) (todolist.TodoList, error) {
 		return todolist.TodoList{}, fmt.Errorf("fails to create user basic todo list: %w", err)
 	}
 
-	// TODO[bug]: cycle dep
-	// user.BasicTodoListID = basicTodoList.ID
+	user.BasicTodoListID = basicTodoList.ID
 	if err := UserRepository.Save(user); err != nil {
 		return todolist.TodoList{}, fmt.Errorf("fails to create user basic todo list: %w", err)
 	}

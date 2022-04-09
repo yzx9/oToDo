@@ -4,13 +4,25 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"time"
 
-	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/infrastructure/util"
 )
 
+type Tag struct {
+	ID        int64
+	CreatedAt time.Time
+	UpdatedAt time.Time
+
+	Name string
+
+	UserID int64
+
+	Todos []int64
+}
+
 // Update tag, should be called with `go UpdateTagAsync()`
-func UpdateTag(todo *repository.Todo, oldTodoTitle string) error {
+func UpdateTag(todo *Todo, oldTodoTitle string) error {
 	// TODO[bug]: handle error
 	if todo.Title == oldTodoTitle {
 		return nil
@@ -40,10 +52,10 @@ func UpdateTag(todo *repository.Todo, oldTodoTitle string) error {
 			}
 
 			if !exist {
-				tag := repository.Tag{
+				tag := Tag{
 					Name:   tagName,
 					UserID: userID,
-					Todos:  make([]repository.Todo, 0),
+					Todos:  make([]int64, 0),
 				}
 				if err := TagRepository.Save(&tag); err != nil {
 					return fmt.Errorf("fails to create tag: %w", err)
@@ -64,7 +76,7 @@ func UpdateTag(todo *repository.Todo, oldTodoTitle string) error {
 	return nil
 }
 
-func UpdateTagAsync(todo *repository.Todo, oldTodoTitle string) {
+func UpdateTagAsync(todo *Todo, oldTodoTitle string) {
 	if err := UpdateTag(todo, oldTodoTitle); err != nil {
 		// TODO[bug]: handle error
 		fmt.Println(err)

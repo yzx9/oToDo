@@ -8,13 +8,13 @@ import (
 	"github.com/yzx9/otodo/infrastructure/repository"
 )
 
-func GetTodo(userID, todoID int64) (repository.Todo, error) {
-	todo, err := todo.OwnTodo(userID, todoID)
+func GetTodo(userID, todoID int64) (todo.Todo, error) {
+	entity, err := todo.OwnTodo(userID, todoID)
 	if err != nil {
-		return repository.Todo{}, fmt.Errorf("fails to get todo: %w", err)
+		return todo.Todo{}, fmt.Errorf("fails to get todo: %w", err)
 	}
 
-	return todo, nil
+	return entity, nil
 }
 
 func GetTodos(userID, todoListID int64) ([]repository.Todo, error) {
@@ -34,7 +34,7 @@ func ForceGetTodos(todoListID int64) ([]repository.Todo, error) {
 	return todos, nil
 }
 
-func GetImportantTodos(userID int64) ([]repository.Todo, error) {
+func GetImportantTodos(userID int64) ([]todo.Todo, error) {
 	todos, err := repository.TodoRepo.FindAllImportantOnesByUser(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get important todos: %w", err)
@@ -43,7 +43,7 @@ func GetImportantTodos(userID int64) ([]repository.Todo, error) {
 	return todos, nil
 }
 
-func GetPlannedTodos(userID int64) ([]repository.Todo, error) {
+func GetPlannedTodos(userID int64) ([]todo.Todo, error) {
 	todos, err := repository.TodoRepo.FindAllPlanedOnesByUser(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get planed todos: %w", err)
@@ -52,7 +52,7 @@ func GetPlannedTodos(userID int64) ([]repository.Todo, error) {
 	return todos, nil
 }
 
-func GetNotNotifiedTodos(userID int64) ([]repository.Todo, error) {
+func GetNotNotifiedTodos(userID int64) ([]todo.Todo, error) {
 	todos, err := repository.TodoRepo.FindAllNotNotifiedOnesByUser(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get not-notified todos: %w", err)

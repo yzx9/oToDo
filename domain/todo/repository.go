@@ -1,7 +1,5 @@
 package todo
 
-import "github.com/yzx9/otodo/infrastructure/repository"
-
 var TodoRepository todoRepository
 var TodoStepRepository todoStepRepository
 var TodoRepeatPlanRepository todoRepeatPlanRepository
@@ -9,31 +7,31 @@ var TagRepository tagRepository
 var TagTodoRepository tagTodoRepository
 
 type todoRepository interface {
-	Save(todo *repository.Todo) error
+	Save(todo *Todo) error
 
 	Delete(id int64) error
 
-	Find(id int64) (repository.Todo, error)
+	Find(id int64) (Todo, error)
 }
 
 type todoStepRepository interface {
-	Save(todoStep *repository.TodoStep) error
+	Save(entity *TodoStep) error
 
 	Delete(id int64) error
 
-	Find(id int64) (repository.TodoStep, error)
+	Find(id int64) (TodoStep, error)
 }
 
 type todoRepeatPlanRepository interface {
-	Save(plan *repository.TodoRepeatPlan) error
+	Save(entity *TodoRepeatPlan) error
 
 	Delete(id int64) error
 
-	Find(id int64) (repository.TodoRepeatPlan, error)
+	Find(id int64) (TodoRepeatPlan, error)
 }
 
 type tagRepository interface {
-	Save(tag *repository.Tag) error
+	Save(tag *Tag) error
 
 	Exist(userID int64, tagName string) (bool, error)
 }

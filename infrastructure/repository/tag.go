@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"github.com/yzx9/otodo/domain/todo"
 	"github.com/yzx9/otodo/infrastructure/util"
 	"gorm.io/gorm"
 )
@@ -8,12 +9,12 @@ import (
 type Tag struct {
 	Entity
 
-	Name string `json:"name" gorm:"size:32;index:idx_tags_user,unique"`
+	Name string `gorm:"size:32;index:idx_tags_user,unique"`
 
-	UserID int64 `json:"userID" gorm:"index:idx_tags_user,unique"`
-	User   User  `json:"-"`
+	UserID int64 `gorm:"index:idx_tags_user,unique"`
+	User   User
 
-	Todos []Todo `json:"-" gorm:"many2many:tag_todos;"`
+	Todos []Todo `gorm:"many2many:tag_todos;"`
 }
 
 var TagRepo TagRepository
@@ -26,22 +27,24 @@ func NewTagRepository(db *gorm.DB) TagRepository {
 	return TagRepository{db: db}
 }
 
-func (r TagRepository) Save(tag *Tag) error {
-	err := r.db.Create(tag).Error
+func (r TagRepository) Save(entity *todo.Tag) error {
+	po := r.convertToPO(entity)
+	err := r.db.Save(&po).Error
+	entity.ID = po.ID
 	return util.WrapGormErr(err, "tag")
 }
 
-func (r TagRepository) Find(userID int64, tagName string) (Tag, error) {
-	var tag Tag
+func (r TagRepository) Find(userID int64, tagName string) (todo.Tag, error) {
+	var po Tag
 	err := r.db.
 		Scopes(filterTag(userID, tagName)).
-		First(&tag).
+		First(&po).
 		Error
 
-	return tag, util.WrapGormErr(err, "tag")
+	return r.convertToEntity(po), util.WrapGormErr(err, "tag")
 }
 
-func (r TagRepository) FindAllByUser(userID int64) ([]Tag, error) {
+func (r TagRepository) FindAllByUser(userID int64) ([]todo.Tag, error) {
 	var tags []Tag
 	err := r.db.
 		Where(Tag{
@@ -50,7 +53,48 @@ func (r TagRepository) FindAllByUser(userID int64) ([]Tag, error) {
 		Find(&tags).
 		Error
 
-	return tags, util.WrapGormErr(err, "tag")
+	return r.convertToEntities(tags), util.WrapGormErr(err, "tag")
+}
+
+func (r TagRepository) convertToPO(entity *todo.Tag) Tag {
+	return Tag{
+		Entity: Entity{
+			ID:        entity.ID,
+			CreatedAt: entity.CreatedAt,
+			UpdatedAt: entity.UpdatedAt,
+		},
+
+		Name:   entity.Name,
+		UserID: entity.UserID,
+		Todos:  nil, // TODO
+	}
+}
+
+func (r TagRepository) convertToEntity(po Tag) todo.Tag {
+	return todo.Tag{
+		ID:        po.ID,
+		CreatedAt: po.CreatedAt,
+		UpdatedAt: po.UpdatedAt,
+
+		Name: po.Name,
+
+		UserID: po.UserID,
+
+		Todos: nil, // TODO
+	}
+}
+
+func (r TagRepository) convertToEntities(POs []Tag) []todo.Tag {
+	if POs == nil {
+		return nil
+	}
+
+	entities := make([]todo.Tag, len(POs))
+	for i := range entities {
+		entities = append(entities, r.convertToEntity(POs[i]))
+	}
+
+	return entities
 }
 
 var TagTodoRepo TagTodoRepository

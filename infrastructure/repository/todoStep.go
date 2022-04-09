@@ -3,6 +3,7 @@ package repository
 import (
 	"time"
 
+	"github.com/yzx9/otodo/domain/todo"
 	"github.com/yzx9/otodo/infrastructure/util"
 	"gorm.io/gorm"
 )
@@ -10,12 +11,12 @@ import (
 type TodoStep struct {
 	Entity
 
-	Name   string     `json:"name" gorm:"-"`
-	Done   bool       `json:"done"`
-	DoneAt *time.Time `json:"doneAt"`
+	Name   string
+	Done   bool
+	DoneAt *time.Time
 
-	TodoID int64 `json:"todoID"`
-	Todo   Todo  `json:"-"`
+	TodoID int64
+	Todo   Todo
 }
 
 var TodoStepRepo TodoStepRepository
@@ -28,8 +29,10 @@ func NewTodoStepRepository(db *gorm.DB) TodoStepRepository {
 	return TodoStepRepository{db: db}
 }
 
-func (r TodoStepRepository) Save(todoStep *TodoStep) error {
-	err := r.db.Save(&todoStep).Error
+func (r TodoStepRepository) Save(entity *todo.TodoStep) error {
+	po := r.convertToPO(entity)
+	err := r.db.Save(&po).Error
+	entity.ID = po.ID
 	return util.WrapGormErr(err, "todo step")
 }
 
@@ -45,28 +48,70 @@ func (r TodoStepRepository) Delete(id int64) error {
 	return util.WrapGormErr(err, "todo step")
 }
 
-func (r TodoStepRepository) Find(id int64) (TodoStep, error) {
-	var step TodoStep
+func (r TodoStepRepository) Find(id int64) (todo.TodoStep, error) {
+	var entity TodoStep
 	err := r.db.
 		Where(&TodoStep{
 			Entity: Entity{
 				ID: id,
 			},
 		}).
-		First(&step).
+		First(&entity).
 		Error
 
-	return step, util.WrapGormErr(err, "todo step")
+	return r.convertToEntity(entity), util.WrapGormErr(err, "todo step")
 }
 
-func (r TodoStepRepository) FindAllByTodo(todoID int64) ([]TodoStep, error) {
-	var steps []TodoStep
+func (r TodoStepRepository) FindAllByTodo(todoID int64) ([]todo.TodoStep, error) {
+	var POs []TodoStep
 	err := r.db.
 		Where(TodoStep{
 			TodoID: todoID,
 		}).
-		Find(&steps).
+		Find(&POs).
 		Error
 
-	return steps, util.WrapGormErr(err, "todo step")
+	return r.convertToEntities(POs), util.WrapGormErr(err, "todo step")
+}
+
+func (r TodoStepRepository) convertToPO(entity *todo.TodoStep) TodoStep {
+	return TodoStep{
+		Entity: Entity{
+			ID:        entity.ID,
+			CreatedAt: entity.CreatedAt,
+			UpdatedAt: entity.UpdatedAt,
+		},
+		Name:   entity.Name,
+		Done:   entity.Done,
+		DoneAt: entity.DoneAt,
+
+		TodoID: entity.TodoID,
+	}
+}
+
+func (r TodoStepRepository) convertToEntity(po TodoStep) todo.TodoStep {
+	return todo.TodoStep{
+		ID:        po.ID,
+		CreatedAt: po.CreatedAt,
+		UpdatedAt: po.UpdatedAt,
+
+		Name:   po.Name,
+		Done:   po.Done,
+		DoneAt: po.DoneAt,
+
+		TodoID: po.TodoID,
+	}
+}
+
+func (r TodoStepRepository) convertToEntities(POs []TodoStep) []todo.TodoStep {
+	if POs == nil {
+		return nil
+	}
+
+	entities := make([]todo.TodoStep, len(POs))
+	for i := range entities {
+		entities = append(entities, r.convertToEntity(POs[i]))
+	}
+
+	return entities
 }

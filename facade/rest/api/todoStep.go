@@ -8,7 +8,6 @@ import (
 	"github.com/yzx9/otodo/domain/todo"
 	"github.com/yzx9/otodo/facade/rest/common"
 	"github.com/yzx9/otodo/infrastructure/errors"
-	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/infrastructure/util"
 )
 
@@ -38,7 +37,7 @@ func PostTodoStepHandler(c *gin.Context) {
 
 // Update todo step
 func PutTodoStepHandler(c *gin.Context) {
-	step := repository.TodoStep{}
+	step := todo.TodoStep{}
 	if err := c.ShouldBind(&step); err != nil {
 		common.AbortWithError(c, err)
 		return

@@ -3,6 +3,7 @@ package repository
 import (
 	"time"
 
+	"github.com/yzx9/otodo/domain/todo"
 	"github.com/yzx9/otodo/infrastructure/util"
 	"gorm.io/gorm"
 )
@@ -10,30 +11,30 @@ import (
 type Todo struct {
 	Entity
 
-	Title      string     `json:"title" gorm:"size:128"`
-	Memo       string     `json:"memo"`
-	Importance bool       `json:"importance"`
-	Deadline   *time.Time `json:"deadline"`
-	Notified   bool       `json:"notified"`
-	NotifyAt   *time.Time `json:"notifyAt"`
-	Done       bool       `json:"done"`
-	DoneAt     *time.Time `json:"doneAt"`
+	Title      string `gorm:"size:128"`
+	Memo       string
+	Importance bool
+	Deadline   *time.Time
+	Notified   bool
+	NotifyAt   *time.Time
+	Done       bool
+	DoneAt     *time.Time
 
-	UserID int64 `json:"userID"`
-	User   User  `json:"-"`
+	UserID int64
+	User   User
 
-	TodoListID int64    `json:"todolistID"`
-	TodoList   TodoList `json:"-"`
+	TodoListID int64
+	TodoList   TodoList
 
-	Files []File `json:"files" gorm:"many2many:todo_files"`
+	Files []File `gorm:"many2many:todo_files"`
 
-	Steps []TodoStep `json:"steps"`
+	Steps []TodoStep
 
-	TodoRepeatPlanID int64          `json:"-"`
-	TodoRepeatPlan   TodoRepeatPlan `json:"todoRepeatPlan"`
+	TodoRepeatPlanID int64
+	TodoRepeatPlan   TodoRepeatPlan
 
-	NextID *int64 `json:"nextID"` // next todo id if repeat
-	Next   *Todo  `json:"-"`
+	NextID *int64 // next todo id if repeat
+	Next   *Todo
 }
 
 var TodoRepo TodoRepository
@@ -46,8 +47,10 @@ func NewTodoRepository(db *gorm.DB) TodoRepository {
 	return TodoRepository{db: db}
 }
 
-func (r TodoRepository) Save(todo *Todo) error {
-	err := r.db.Save(todo).Error
+func (r TodoRepository) Save(entity *todo.Todo) error {
+	po := r.convertToPO(entity)
+	err := r.db.Save(&po).Error
+	entity.ID = po.ID
 	return util.WrapGormErr(err, "todo")
 }
 
@@ -73,8 +76,8 @@ func (r TodoRepository) DeleteAllByTodoList(todoListID int64) (int64, error) {
 	return re.RowsAffected, util.WrapGormErr(re.Error, "todo")
 }
 
-func (r TodoRepository) Find(id int64) (Todo, error) {
-	var todo Todo
+func (r TodoRepository) Find(id int64) (todo.Todo, error) {
+	var po Todo
 	err := r.db.
 		Scopes(preloadTodoInfo).
 		Where(&Todo{
@@ -82,10 +85,10 @@ func (r TodoRepository) Find(id int64) (Todo, error) {
 				ID: id,
 			},
 		}).
-		First(&todo).
+		First(&po).
 		Error
 
-	return todo, util.WrapGormErr(err, "todo")
+	return r.convertToEntity(po), util.WrapGormErr(err, "todo")
 }
 
 func (r TodoRepository) FindAllByTodoList(todoListID int64) ([]Todo, error) {
@@ -101,49 +104,120 @@ func (r TodoRepository) FindAllByTodoList(todoListID int64) ([]Todo, error) {
 	return todos, util.WrapGormErr(err, "todos")
 }
 
-func (r TodoRepository) FindAllByUser(userID int64) ([]Todo, error) {
-	var todos []Todo
+func (r TodoRepository) FindAllByUser(userID int64) ([]todo.Todo, error) {
+	var POs []Todo
 	err := r.db.
 		Scopes(filterTodoUser(userID)).
-		Find(&todos).
+		Find(&POs).
 		Error
 
-	return todos, util.WrapGormErr(err, "all todos")
+	return r.convertToEntities(POs), util.WrapGormErr(err, "all todos")
 }
 
-func (r TodoRepository) FindAllImportantOnesByUser(userID int64) ([]Todo, error) {
-	var todos []Todo
+func (r TodoRepository) FindAllImportantOnesByUser(userID int64) ([]todo.Todo, error) {
+	var POs []Todo
 	err := r.db.
 		Scopes(filterTodoUser(userID)).
 		Where("Importance", true).
-		Find(&todos).
+		Find(&POs).
 		Error
 
-	return todos, util.WrapGormErr(err, "important todos")
+	return r.convertToEntities(POs), util.WrapGormErr(err, "important todos")
 }
 
-func (r TodoRepository) FindAllPlanedOnesByUser(userID int64) ([]Todo, error) {
-	var todos []Todo
+func (r TodoRepository) FindAllPlanedOnesByUser(userID int64) ([]todo.Todo, error) {
+	var POs []Todo
 	err := r.db.
 		Scopes(filterTodoUser(userID)).
 		Not("deadline", nil).
 		Order("deadline").
-		Find(&todos).
+		Find(&POs).
 		Error
 
-	return todos, util.WrapGormErr(err, "planed todos")
+	if err != nil {
+		return nil, util.WrapGormErr(err, "not notified todos")
+	}
+
+	return r.convertToEntities(POs), util.WrapGormErr(err, "planed todos")
 }
 
-func (r TodoRepository) FindAllNotNotifiedOnesByUser(userID int64) ([]Todo, error) {
-	var todos []Todo
+func (r TodoRepository) FindAllNotNotifiedOnesByUser(userID int64) ([]todo.Todo, error) {
+	var POs []Todo
 	err := r.db.
 		Scopes(filterTodoUser(userID)).
 		Not("notified", false).
 		Order("notify_at").
-		Find(&todos).
+		Find(&POs).
 		Error
 
-	return todos, util.WrapGormErr(err, "not notified todos")
+	if err != nil {
+		return nil, util.WrapGormErr(err, "not notified todos")
+	}
+
+	return r.convertToEntities(POs), nil
+}
+
+func (r TodoRepository) convertToPO(entity *todo.Todo) Todo {
+	return Todo{
+		Entity: Entity{
+			ID:        entity.ID,
+			CreatedAt: entity.CreatedAt,
+			UpdatedAt: entity.UpdatedAt,
+		},
+
+		Title:      entity.Title,
+		Memo:       entity.Memo,
+		Importance: entity.Importance,
+		Deadline:   entity.Deadline,
+		Notified:   entity.Notified,
+		NotifyAt:   entity.NotifyAt,
+		Done:       entity.Done,
+		DoneAt:     entity.DoneAt,
+
+		UserID:           entity.UserID,
+		TodoListID:       entity.TodoListID,
+		Files:            nil, // TODO
+		Steps:            nil, // TODO
+		TodoRepeatPlanID: entity.TodoRepeatPlanID,
+		NextID:           entity.NextID,
+	}
+}
+
+func (r TodoRepository) convertToEntity(po Todo) todo.Todo {
+	return todo.Todo{
+		ID:        po.ID,
+		CreatedAt: po.CreatedAt,
+		UpdatedAt: po.UpdatedAt,
+
+		Title:      po.Title,
+		Memo:       po.Memo,
+		Importance: po.Importance,
+		Deadline:   po.Deadline,
+		Notified:   po.Notified,
+		NotifyAt:   po.NotifyAt,
+		Done:       po.Done,
+		DoneAt:     po.DoneAt,
+
+		UserID:           po.UserID,
+		TodoListID:       po.TodoListID,
+		Files:            nil, // TODO
+		Steps:            nil, // TODO
+		TodoRepeatPlanID: po.TodoRepeatPlanID,
+		NextID:           po.NextID,
+	}
+}
+
+func (r TodoRepository) convertToEntities(POs []Todo) []todo.Todo {
+	if POs == nil {
+		return nil
+	}
+
+	entities := make([]todo.Todo, len(POs))
+	for i := range entities {
+		entities = append(entities, r.convertToEntity(POs[i]))
+	}
+
+	return entities
 }
 
 /**

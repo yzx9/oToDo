@@ -3,17 +3,9 @@ package repository
 import (
 	"time"
 
+	"github.com/yzx9/otodo/domain/todo"
 	"github.com/yzx9/otodo/infrastructure/util"
 	"gorm.io/gorm"
-)
-
-type TodoRepeatPlanType string
-
-const (
-	TodoRepeatPlanTypeDay   TodoRepeatPlanType = "day"
-	TodoRepeatPlanTypeWeek  TodoRepeatPlanType = "week"
-	TodoRepeatPlanTypeMonth TodoRepeatPlanType = "month"
-	TodoRepeatPlanTypeYear  TodoRepeatPlanType = "year"
 )
 
 type TodoRepeatPlan struct {
@@ -37,8 +29,10 @@ func NewTodoRepeatPlanRepository(db *gorm.DB) TodoRepeatPlanRepository {
 	return TodoRepeatPlanRepository{db: db}
 }
 
-func (r TodoRepeatPlanRepository) Save(plan *TodoRepeatPlan) error {
-	err := r.db.Save(plan).Error
+func (r TodoRepeatPlanRepository) Save(entity *todo.TodoRepeatPlan) error {
+	po := r.convertToPO(entity)
+	err := r.db.Save(&po).Error
+	entity.ID = po.ID
 	return util.WrapGormErr(err, "todo repeat plan")
 }
 
@@ -54,16 +48,48 @@ func (r TodoRepeatPlanRepository) Delete(id int64) error {
 	return util.WrapGormErr(err, "todo repeat plan")
 }
 
-func (r TodoRepeatPlanRepository) Find(id int64) (TodoRepeatPlan, error) {
-	var plan TodoRepeatPlan
+func (r TodoRepeatPlanRepository) Find(id int64) (todo.TodoRepeatPlan, error) {
+	var po TodoRepeatPlan
 	err := r.db.
 		Where(&TodoRepeatPlan{
 			Entity: Entity{
 				ID: id,
 			},
 		}).
-		First(&plan).
+		First(&po).
 		Error
 
-	return plan, util.WrapGormErr(err, "todo repeat plan")
+	return r.convertToEntity(po), util.WrapGormErr(err, "todo repeat plan")
+}
+
+func (r TodoRepeatPlanRepository) convertToPO(entity *todo.TodoRepeatPlan) TodoRepeatPlan {
+	return TodoRepeatPlan{
+		Entity: Entity{
+			ID:        entity.ID,
+			CreatedAt: entity.CreatedAt,
+			UpdatedAt: entity.UpdatedAt,
+		},
+
+		Type:     entity.Type,
+		Interval: entity.Interval,
+		Before:   entity.Before,
+		Weekday:  entity.Weekday,
+
+		Todos: nil, // TODO
+	}
+}
+
+func (r TodoRepeatPlanRepository) convertToEntity(po TodoRepeatPlan) todo.TodoRepeatPlan {
+	return todo.TodoRepeatPlan{
+		ID:        po.ID,
+		CreatedAt: po.CreatedAt,
+		UpdatedAt: po.UpdatedAt,
+
+		Type:     po.Type,
+		Interval: po.Interval,
+		Before:   po.Before,
+		Weekday:  po.Weekday,
+
+		Todos: nil, // TODO
+	}
 }

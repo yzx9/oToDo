@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/yzx9/otodo/domain/todo"
 	"github.com/yzx9/otodo/infrastructure/config"
 	"github.com/yzx9/otodo/infrastructure/errors"
 	"github.com/yzx9/otodo/infrastructure/util"
@@ -45,11 +46,10 @@ func UploadPublicFile(file *multipart.FileHeader) (File, error) {
 }
 
 func UploadTodoFile(userID, todoID int64, file *multipart.FileHeader) (File, error) {
-	// TODO[bug]: following code make cycle dep
-	// _, err := todo.OwnTodo(userID, todoID)
-	// if err != nil {
-	// 	return File{}, err
-	// }
+	_, err := todo.OwnTodo(userID, todoID)
+	if err != nil {
+		return File{}, err
+	}
 
 	record := File{
 		FileName:   file.Filename,
@@ -111,10 +111,9 @@ func OwnFile(userID, fileID int64) (*File, error) {
 		break
 
 	case FileTypeTodo:
-		// TODO[bug]: following code make cycle dep
-		// if _, err := todo.OwnTodo(userID, file.RelatedID); err != nil {
-		// 	return nil, util.NewErrorWithForbidden("unable to get non-owned file: %w", err)
-		// }
+		if _, err := todo.OwnTodo(userID, file.RelatedID); err != nil {
+			return nil, util.NewErrorWithForbidden("unable to get non-owned file: %w", err)
+		}
 
 	default:
 		return nil, fmt.Errorf("invalid file access type: %v", file.AccessType)

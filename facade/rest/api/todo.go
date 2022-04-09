@@ -5,14 +5,14 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/application/service"
+	"github.com/yzx9/otodo/domain/todo"
 	todoAggregate "github.com/yzx9/otodo/domain/todo"
 	"github.com/yzx9/otodo/facade/rest/common"
-	"github.com/yzx9/otodo/infrastructure/repository"
 )
 
 // Create todo
 func PostTodoHandler(c *gin.Context) {
-	todo := repository.Todo{}
+	todo := todo.Todo{}
 	if err := c.ShouldBind(&todo); err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -47,7 +47,7 @@ func GetTodoHandler(c *gin.Context) {
 
 // Update todo fully
 func PutTodoHandler(c *gin.Context) {
-	todo := repository.Todo{}
+	todo := todo.Todo{}
 	err := c.ShouldBind(&todo)
 	if err != nil {
 		common.AbortWithError(c, err)

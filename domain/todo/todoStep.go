@@ -4,28 +4,39 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/infrastructure/util"
 )
 
-func CreateTodoStep(userID, todoID int64, name string) (repository.TodoStep, error) {
+type TodoStep struct {
+	ID        int64
+	CreatedAt time.Time
+	UpdatedAt time.Time
+
+	Name   string
+	Done   bool
+	DoneAt *time.Time
+
+	TodoID int64
+}
+
+func CreateTodoStep(userID, todoID int64, name string) (TodoStep, error) {
 	_, err := OwnTodo(userID, todoID)
 	if err != nil {
-		return repository.TodoStep{}, util.NewErrorWithNotFound("todo not found: %v", todoID)
+		return TodoStep{}, util.NewErrorWithNotFound("todo not found: %v", todoID)
 	}
 
-	step := repository.TodoStep{
+	step := TodoStep{
 		Name:   name,
 		TodoID: todoID,
 	}
 	if err = TodoStepRepository.Save(&step); err != nil {
-		return repository.TodoStep{}, util.NewErrorWithUnknown("fails to create todo step")
+		return TodoStep{}, util.NewErrorWithUnknown("fails to create todo step")
 	}
 
 	return step, nil
 }
 
-func UpdateTodoStep(userID int64, step *repository.TodoStep) error {
+func UpdateTodoStep(userID int64, step *TodoStep) error {
 	oldStep, err := OwnTodoStep(userID, step.ID)
 	if err != nil {
 		return err
@@ -46,28 +57,28 @@ func UpdateTodoStep(userID int64, step *repository.TodoStep) error {
 	return nil
 }
 
-func DeleteTodoStep(userID, todoID, todoStepID int64) (repository.TodoStep, error) {
+func DeleteTodoStep(userID, todoID, todoStepID int64) (TodoStep, error) {
 	step, err := OwnTodoStep(userID, todoStepID)
 	if err != nil {
-		return repository.TodoStep{}, err
+		return TodoStep{}, err
 	}
 
 	if step.TodoID != todoID {
-		return repository.TodoStep{}, util.NewErrorWithNotFound("todo step not found in todo: %v", todoStepID)
+		return TodoStep{}, util.NewErrorWithNotFound("todo step not found in todo: %v", todoStepID)
 	}
 
 	return step, TodoStepRepository.Delete(todoStepID)
 }
 
-func OwnTodoStep(userID, todoStepID int64) (repository.TodoStep, error) {
+func OwnTodoStep(userID, todoStepID int64) (TodoStep, error) {
 	step, err := TodoStepRepository.Find(todoStepID)
 	if err != nil {
-		return repository.TodoStep{}, fmt.Errorf("fails to get todo step: %w", err)
+		return TodoStep{}, fmt.Errorf("fails to get todo step: %w", err)
 	}
 
 	_, err = OwnTodo(userID, step.TodoID)
 	if err != nil {
-		return repository.TodoStep{}, util.NewErrorWithForbidden("unable to handle non-owned todo: %v", step.ID)
+		return TodoStep{}, util.NewErrorWithForbidden("unable to handle non-owned todo: %v", step.ID)
 	}
 
 	return step, nil

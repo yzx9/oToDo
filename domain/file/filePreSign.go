@@ -2,14 +2,21 @@ package file
 
 import (
 	"encoding/base64"
-	"fmt"
 	"time"
 
+	"github.com/yzx9/otodo/domain/user"
 	"github.com/yzx9/otodo/infrastructure/util"
 )
 
 // Configurable
 const fileSignedMaxExpiresIn = 6 * time.Hour
+
+type FilePreSignClaims struct {
+	user.TokenClaims
+
+	UserID int64 `json:"uid"`
+	FileID int64 `json:"fileID"`
+}
 
 func CreateFilePreSignID(userID, fileID int64, exp int) (string, error) {
 	expiresIn := time.Duration(exp * int(time.Second))
@@ -22,38 +29,33 @@ func CreateFilePreSignID(userID, fileID int64, exp int) (string, error) {
 		return "", err
 	}
 
-	// TODO[bug]: following code make cycle dep
-	// token := user.NewToken(dto.FilePreSignClaims{
-	// 	TokenClaims: user.NewClaims(userID, expiresIn),
-	// 	UserID:      userID,
-	// 	FileID:      fileID,
-	// })
-	token := ""
+	token := user.NewToken(FilePreSignClaims{
+		TokenClaims: user.NewClaims(userID, expiresIn),
+		UserID:      userID,
+		FileID:      fileID,
+	})
 	return base64.StdEncoding.EncodeToString([]byte(token)), nil
 }
 
 func ParseFilePreSignID(filePresignedID string) (int64, error) {
-	return 0, fmt.Errorf("TODO: resolve cycle dep")
+	write := func() (int64, error) {
+		return 0, util.NewErrorWithPreconditionFailed("invalid presigned file id")
+	}
 
-	// write := func() (int64, error) {
-	// 	return 0, util.NewErrorWithPreconditionFailed("invalid presigned file id")
-	// }
+	payload, err := base64.StdEncoding.DecodeString(filePresignedID)
+	if err != nil {
+		return write()
+	}
 
-	// payload, err := base64.StdEncoding.DecodeString(filePresignedID)
-	// if err != nil {
-	// 	return write()
-	// }
+	token, err := user.ParseToken(string(payload), &FilePreSignClaims{})
+	if err != nil || !token.Valid {
+		return write()
+	}
 
-	// TODO[bug]: following code make cycle dep
-	// token, err := user.ParseToken(string(payload), &dto.FilePreSignClaims{})
-	// if err != nil || !token.Valid {
-	// 	return write()
-	// }
+	claims, ok := token.Claims.(*FilePreSignClaims)
+	if !ok {
+		return write()
+	}
 
-	// claims, ok := token.Claims.(*dto.FilePreSignClaims)
-	// if !ok {
-	// 	return write()
-	// }
-
-	// return claims.FileID, nil
+	return claims.FileID, nil
 }
