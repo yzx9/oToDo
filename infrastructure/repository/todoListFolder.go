@@ -17,8 +17,6 @@ type TodoListFolder struct {
 	TodoLists []TodoList
 }
 
-var TodoListFolderRepo TodoListFolderRepository
-
 type TodoListFolderRepository struct {
 	db *gorm.DB
 }

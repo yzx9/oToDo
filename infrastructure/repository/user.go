@@ -25,8 +25,6 @@ type User struct {
 	SharedTodoLists []*TodoList `json:"-" gorm:"many2many:todo_list_shared_users"`
 }
 
-var UserRepo UserRepository
-
 type UserRepository struct {
 	db *gorm.DB
 }
@@ -171,4 +169,17 @@ func (r UserRepository) convertToEntity(po User) user.User {
 
 		SharedTodoLists: nil, // TODO
 	}
+}
+
+func (r UserRepository) convertToEntities(POs []User) []user.User {
+	if POs == nil {
+		return nil
+	}
+
+	entities := make([]user.User, len(POs))
+	for i := range entities {
+		entities = append(entities, r.convertToEntity(POs[i]))
+	}
+
+	return entities
 }

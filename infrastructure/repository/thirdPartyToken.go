@@ -22,8 +22,6 @@ func (ThirdPartyOAuthToken) TableName() string {
 	return "third_party_oauth_tokens"
 }
 
-var ThirdPartyOAuthTokenRepo ThirdPartyOAuthTokenRepository
-
 type ThirdPartyOAuthTokenRepository struct {
 	db *gorm.DB
 }

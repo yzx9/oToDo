@@ -3,6 +3,7 @@ package crosscutting
 import (
 	"fmt"
 
+	"github.com/yzx9/otodo/application/service"
 	"github.com/yzx9/otodo/domain/file"
 	"github.com/yzx9/otodo/domain/todo"
 	"github.com/yzx9/otodo/domain/todolist"
@@ -19,6 +20,10 @@ func StartUp() error {
 
 	if err := startUpDomain(db); err != nil {
 		return fmt.Errorf("fails to start-up domain: %w", err)
+	}
+
+	if err := startUpApplication(db); err != nil {
+		return fmt.Errorf("fails to start-up application: %w", err)
 	}
 
 	return nil
@@ -43,8 +48,17 @@ func startUpDomain(db *gorm.DB) error {
 	user.UserRepository = repository.NewUserRepository(db)
 	user.UserInvalidRefreshTokenRepository = repository.NewUserInvalidRefreshTokenRepository(db)
 	user.ThirdPartyOAuthTokenRepository = repository.NewThirdPartyOAuthTokenRepository(db)
-	// TODO[bug]: cycle deps
-	// user.TodoListRepo = repository.NewTodoListRepository(db)
+	user.TodoListRepo = repository.NewTodoListRepository(db)
+
+	return nil
+}
+
+func startUpApplication(db *gorm.DB) error {
+	service.UserRepository = repository.NewUserRepository(db)
+	service.TodoRepository = repository.NewTodoRepository(db)
+	service.TodoListRepository = repository.NewTodoListRepository(db)
+	service.TodoListFolderRepository = repository.NewTodoListFolderRepository(db)
+	service.SharingRepository = repository.NewSharingRepository(db)
 
 	return nil
 }

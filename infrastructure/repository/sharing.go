@@ -18,8 +18,6 @@ type Sharing struct {
 	User   User
 }
 
-var SharingRepo SharingRepository
-
 type SharingRepository struct {
 	db *gorm.DB
 }
@@ -82,7 +80,7 @@ func (r SharingRepository) FindByUser(userID int64, sharingType todolist.Sharing
 	return entities, nil
 }
 
-func (r SharingRepository) FindAllActiveOnes(userID int64, sharingType todolist.SharingType) ([]todolist.Sharing, error) {
+func (r SharingRepository) FindAllActive(userID int64, sharingType todolist.SharingType) ([]todolist.Sharing, error) {
 	var POs []Sharing
 	err := r.db.
 		Where(&Sharing{

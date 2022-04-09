@@ -5,11 +5,11 @@ import (
 
 	"github.com/yzx9/otodo/application/dto"
 	"github.com/yzx9/otodo/domain/todolist"
-	"github.com/yzx9/otodo/infrastructure/repository"
+	"github.com/yzx9/otodo/domain/user"
 )
 
 func GetActiveTodoListSharings(userID, todoListID int64) ([]todolist.Sharing, error) {
-	sharings, err := repository.SharingRepo.FindAllActiveOnes(userID, todolist.SharingTypeTodoList)
+	sharings, err := SharingRepository.FindAllActive(userID, todolist.SharingTypeTodoList)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get sharing tokens: %w", err)
 	}
@@ -25,18 +25,17 @@ func GetActiveTodoListSharings(userID, todoListID int64) ([]todolist.Sharing, er
 }
 
 func GetTodoLists(userID int64) ([]todolist.TodoList, error) {
-	vec, err := repository.TodoListRepo.FindByUser(userID)
+	vec, err := TodoListRepository.FindAllByUser(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get user todo lists: %w", err)
 	}
 
-	// TODO[bug]
-	// shared, err := repository.TodoListSharingRepo.FindSharedOnesByUser(userID)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("fails to get user shared todo lists: %w", err)
-	// }
+	shared, err := TodoListRepository.FindAllSharedByUser(userID)
+	if err != nil {
+		return nil, fmt.Errorf("fails to get user shared todo lists: %w", err)
+	}
 
-	// vec = append(vec, shared...)
+	vec = append(vec, shared...)
 	return vec, nil
 }
 
@@ -45,7 +44,7 @@ func GetTodoListFolder(userID, todoListFolderID int64) (todolist.TodoListFolder,
 }
 
 func GetTodoListFolders(userID int64) ([]todolist.TodoListFolder, error) {
-	vec, err := repository.TodoListFolderRepo.FindAllByUser(userID)
+	vec, err := TodoListFolderRepository.FindAllByUser(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get todo list folder: %w", err)
 	}
@@ -53,13 +52,12 @@ func GetTodoListFolders(userID int64) ([]todolist.TodoListFolder, error) {
 	return vec, nil
 }
 
-func GetTodoListSharedUsers(userID, todoListID int64) ([]repository.User, error) {
-	_, err := todolist.OwnOrSharedTodoList(userID, todoListID)
-	if err != nil {
+func GetTodoListSharedUsers(userID, todoListID int64) ([]user.User, error) {
+	if _, err := todolist.OwnOrSharedTodoList(userID, todoListID); err != nil {
 		return nil, err
 	}
 
-	users, err := repository.TodoListSharingRepo.FindAllSharedUsers(todoListID)
+	users, err := TodoListSharingRepository.FindAllSharedUsers(todoListID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get todo list shared users: %w", err)
 	}
@@ -91,7 +89,7 @@ func GetSharingTodoListInfo(token string) (dto.SharingTodoList, error) {
 		return dto.SharingTodoList{}, err
 	}
 
-	list, err := repository.TodoListRepo.Find(sharing.RelatedID)
+	list, err := TodoListRepository.Find(sharing.RelatedID)
 	if err != nil {
 		return dto.SharingTodoList{}, fmt.Errorf("fails to get todo list: %w", err)
 	}

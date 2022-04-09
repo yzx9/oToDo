@@ -17,8 +17,6 @@ type Tag struct {
 	Todos []Todo `gorm:"many2many:tag_todos;"`
 }
 
-var TagRepo TagRepository
-
 type TagRepository struct {
 	db *gorm.DB
 }
@@ -96,8 +94,6 @@ func (r TagRepository) convertToEntities(POs []Tag) []todo.Tag {
 
 	return entities
 }
-
-var TagTodoRepo TagTodoRepository
 
 type TagTodoRepository struct {
 	db *gorm.DB

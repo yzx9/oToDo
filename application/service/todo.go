@@ -5,7 +5,6 @@ import (
 
 	"github.com/yzx9/otodo/domain/todo"
 	"github.com/yzx9/otodo/domain/todolist"
-	"github.com/yzx9/otodo/infrastructure/repository"
 )
 
 func GetTodo(userID, todoID int64) (todo.Todo, error) {
@@ -17,7 +16,7 @@ func GetTodo(userID, todoID int64) (todo.Todo, error) {
 	return entity, nil
 }
 
-func GetTodos(userID, todoListID int64) ([]repository.Todo, error) {
+func GetTodos(userID, todoListID int64) ([]todo.Todo, error) {
 	if _, err := todolist.OwnOrSharedTodoList(userID, todoListID); err != nil {
 		return nil, err
 	}
@@ -25,8 +24,8 @@ func GetTodos(userID, todoListID int64) ([]repository.Todo, error) {
 	return ForceGetTodos(todoListID)
 }
 
-func ForceGetTodos(todoListID int64) ([]repository.Todo, error) {
-	todos, err := repository.TodoRepo.FindAllByTodoList(todoListID)
+func ForceGetTodos(todoListID int64) ([]todo.Todo, error) {
+	todos, err := TodoRepository.FindAllByTodoList(todoListID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get todos: %w", err)
 	}
@@ -35,7 +34,7 @@ func ForceGetTodos(todoListID int64) ([]repository.Todo, error) {
 }
 
 func GetImportantTodos(userID int64) ([]todo.Todo, error) {
-	todos, err := repository.TodoRepo.FindAllImportantOnesByUser(userID)
+	todos, err := TodoRepository.FindAllImportantOnesByUser(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get important todos: %w", err)
 	}
@@ -44,7 +43,7 @@ func GetImportantTodos(userID int64) ([]todo.Todo, error) {
 }
 
 func GetPlannedTodos(userID int64) ([]todo.Todo, error) {
-	todos, err := repository.TodoRepo.FindAllPlanedOnesByUser(userID)
+	todos, err := TodoRepository.FindAllPlanedOnesByUser(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get planed todos: %w", err)
 	}
@@ -53,7 +52,7 @@ func GetPlannedTodos(userID int64) ([]todo.Todo, error) {
 }
 
 func GetNotNotifiedTodos(userID int64) ([]todo.Todo, error) {
-	todos, err := repository.TodoRepo.FindAllNotNotifiedOnesByUser(userID)
+	todos, err := TodoRepository.FindAllNotNotifiedOnesByUser(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get not-notified todos: %w", err)
 	}

@@ -91,17 +91,17 @@ func (r TodoRepository) Find(id int64) (todo.Todo, error) {
 	return r.convertToEntity(po), util.WrapGormErr(err, "todo")
 }
 
-func (r TodoRepository) FindAllByTodoList(todoListID int64) ([]Todo, error) {
-	var todos []Todo
+func (r TodoRepository) FindAllByTodoList(todoListID int64) ([]todo.Todo, error) {
+	var POs []Todo
 	err := r.db.
 		Scopes(preloadTodoInfo).
 		Where(Todo{
 			TodoListID: todoListID,
 		}).
-		Find(&todos).
+		Find(&POs).
 		Error
 
-	return todos, util.WrapGormErr(err, "todos")
+	return r.convertToEntities(POs), util.WrapGormErr(err, "todos")
 }
 
 func (r TodoRepository) FindAllByUser(userID int64) ([]todo.Todo, error) {

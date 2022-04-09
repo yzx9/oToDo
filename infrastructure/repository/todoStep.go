@@ -19,8 +19,6 @@ type TodoStep struct {
 	Todo   Todo
 }
 
-var TodoStepRepo TodoStepRepository
-
 type TodoStepRepository struct {
 	db *gorm.DB
 }

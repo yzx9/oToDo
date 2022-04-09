@@ -1,7 +1,9 @@
 package repository
 
 import (
+	"github.com/yzx9/otodo/application/dto"
 	"github.com/yzx9/otodo/domain/todolist"
+	"github.com/yzx9/otodo/domain/user"
 	"github.com/yzx9/otodo/infrastructure/util"
 	"gorm.io/gorm"
 )
@@ -21,15 +23,6 @@ type TodoList struct {
 
 	SharedUsers []*User `gorm:"many2many:todo_list_shared_users"`
 }
-
-type TodoListMenuItem struct {
-	ID               int64  `json:"id"`
-	Name             string `json:"name"`
-	Count            int    `json:"count"`
-	TodoListFolderID int64  `json:"-"`
-}
-
-var TodoListRepo TodoListRepository
 
 type TodoListRepository struct {
 	db *gorm.DB
@@ -82,11 +75,11 @@ func (r TodoListRepository) Find(id int64) (todolist.TodoList, error) {
 	return r.convertToEntity(PO), util.WrapGormErr(err, "todo list")
 }
 
-func (r TodoListRepository) FindByUser(userId int64) ([]todolist.TodoList, error) {
+func (r TodoListRepository) FindAllByUser(userID int64) ([]todolist.TodoList, error) {
 	var POs []TodoList
 	err := r.db.
 		Where(TodoList{
-			UserID: userId,
+			UserID: userID,
 		}).
 		Find(&POs).
 		Error
@@ -95,16 +88,25 @@ func (r TodoListRepository) FindByUser(userId int64) ([]todolist.TodoList, error
 		return nil, util.WrapGormErr(err, "todo list")
 	}
 
-	entities := make([]todolist.TodoList, len(POs))
-	for i := range POs {
-		entities = append(entities, r.convertToEntity(POs[i]))
-	}
-
-	return entities, nil
+	return r.convertToEntities(POs), nil
 }
 
-func (r TodoListRepository) FindByUserWithMenuFormat(userID int64) ([]TodoListMenuItem, error) {
-	var lists []TodoListMenuItem
+func (r TodoListRepository) FindAllSharedByUser(userID int64) ([]todolist.TodoList, error) {
+	var POs []TodoList
+	err := r.db.
+		Model(&User{
+			Entity: Entity{
+				ID: userID,
+			},
+		}).
+		Association("SharedTodoLists").
+		Find(&POs)
+
+	return r.convertToEntities(POs), util.WrapGormErr(err, "user shared todo list")
+}
+
+func (r TodoListRepository) FindByUserWithMenuFormat(userID int64) ([]dto.TodoListMenuItem, error) {
+	var items []dto.TodoListMenuItem
 	err := r.db.
 		Model(TodoList{}).
 		Where(TodoList{
@@ -114,10 +116,10 @@ func (r TodoListRepository) FindByUserWithMenuFormat(userID int64) ([]TodoListMe
 			IsBasic: true, // Skip basic todo list
 		}).
 		Select("id", "name", "todo_list_folder_id", "(SELECT count(todos.id) FROM todos WHERE todos.todo_list_id = todo_lists.id) as count").
-		Find(&lists).
+		Find(&items).
 		Error
 
-	return lists, util.WrapGormErr(err, "todo list")
+	return items, util.WrapGormErr(err, "todo list")
 }
 
 func (r TodoListRepository) Exist(id int64) (bool, error) {
@@ -166,11 +168,22 @@ func (r TodoListRepository) convertToEntity(po TodoList) todolist.TodoList {
 	}
 }
 
+func (r TodoListRepository) convertToEntities(POs []TodoList) []todolist.TodoList {
+	if POs == nil {
+		return nil
+	}
+
+	entities := make([]todolist.TodoList, len(POs))
+	for i := range entities {
+		entities = append(entities, r.convertToEntity(POs[i]))
+	}
+
+	return entities
+}
+
 /**
  * Sharing
  */
-
-var TodoListSharingRepo TodoListSharingRepository
 
 type TodoListSharingRepository struct {
 	db *gorm.DB
@@ -197,22 +210,8 @@ func (r TodoListSharingRepository) SaveSharedUser(userID, todoListID int64) erro
 	return util.WrapGormErr(err, "todo list shared user")
 }
 
-func (r TodoListSharingRepository) FindSharedOnesByUser(userID int64) ([]TodoList, error) {
-	var lists []TodoList
-	err := r.db.
-		Model(&User{
-			Entity: Entity{
-				ID: userID,
-			},
-		}).
-		Association("SharedTodoLists").
-		Find(&lists)
-
-	return lists, util.WrapGormErr(err, "user shared todo list")
-}
-
-func (r TodoListSharingRepository) FindAllSharedUsers(todoListID int64) ([]User, error) {
-	var users []User
+func (r TodoListSharingRepository) FindAllSharedUsers(todoListID int64) ([]user.User, error) {
+	var POs []User
 	err := r.db.
 		Model(&TodoList{
 			Entity: Entity{
@@ -220,9 +219,11 @@ func (r TodoListSharingRepository) FindAllSharedUsers(todoListID int64) ([]User,
 			},
 		}).
 		Association("SharedUsers").
-		Find(&users)
+		Find(&POs)
 
-	return users, util.WrapGormErr(err, "todo list shared users")
+	// TODO: change to dep
+	userRepo := NewUserRepository(r.db)
+	return userRepo.convertToEntities(POs), util.WrapGormErr(err, "todo list shared users")
 }
 
 func (r TodoListSharingRepository) DeleteSharedUser(userID, todoListID int64) error {

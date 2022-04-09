@@ -15,8 +15,6 @@ type UserInvalidRefreshToken struct {
 	TokenID string `json:"tokenID" gorm:"type:char(36);"`
 }
 
-var UserInvalidRefreshTokenRepo UserInvalidRefreshTokenRepository
-
 type UserInvalidRefreshTokenRepository struct {
 	db *gorm.DB
 }

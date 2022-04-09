@@ -4,11 +4,10 @@ import (
 	"fmt"
 
 	"github.com/yzx9/otodo/domain/user"
-	"github.com/yzx9/otodo/infrastructure/repository"
 )
 
 func GetUser(userID int64) (user.User, error) {
-	u, err := repository.UserRepo.Find(userID)
+	u, err := UserRepository.Find(userID)
 	if err != nil {
 		return user.User{}, fmt.Errorf("fails to get user: %w", err)
 	}

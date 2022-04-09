@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/yzx9/otodo/application/dto"
-	"github.com/yzx9/otodo/infrastructure/repository"
 )
 
 // Get Menu, folder+list tree
@@ -14,7 +13,7 @@ func GetMenu(userID int64) ([]dto.TodoListMenuItem, error) {
 		return nil, fmt.Errorf("fails to get user menu: %w", err)
 	}
 
-	lists, err := repository.TodoListRepo.FindByUserWithMenuFormat(userID)
+	lists, err := TodoListRepository.FindByUserWithMenuFormat(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get user menu: %w", err)
 	}
