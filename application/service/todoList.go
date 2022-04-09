@@ -8,13 +8,13 @@ import (
 	"github.com/yzx9/otodo/infrastructure/repository"
 )
 
-func GetActiveTodoListSharings(userID, todoListID int64) ([]repository.Sharing, error) {
-	sharings, err := repository.SharingRepo.FindAllActiveOnes(userID, repository.SharingTypeTodoList)
+func GetActiveTodoListSharings(userID, todoListID int64) ([]todolist.Sharing, error) {
+	sharings, err := repository.SharingRepo.FindAllActiveOnes(userID, todolist.SharingTypeTodoList)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get sharing tokens: %w", err)
 	}
 
-	vec := make([]repository.Sharing, 0)
+	vec := make([]todolist.Sharing, 0)
 	for i := range sharings {
 		if sharings[i].RelatedID == todoListID {
 			vec = append(vec, sharings[i])
@@ -24,26 +24,27 @@ func GetActiveTodoListSharings(userID, todoListID int64) ([]repository.Sharing, 
 	return vec, nil
 }
 
-func GetTodoLists(userID int64) ([]repository.TodoList, error) {
+func GetTodoLists(userID int64) ([]todolist.TodoList, error) {
 	vec, err := repository.TodoListRepo.FindByUser(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get user todo lists: %w", err)
 	}
 
-	shared, err := repository.TodoListSharingRepo.FindSharedOnesByUser(userID)
-	if err != nil {
-		return nil, fmt.Errorf("fails to get user shared todo lists: %w", err)
-	}
+	// TODO[bug]
+	// shared, err := repository.TodoListSharingRepo.FindSharedOnesByUser(userID)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("fails to get user shared todo lists: %w", err)
+	// }
 
-	vec = append(vec, shared...)
+	// vec = append(vec, shared...)
 	return vec, nil
 }
 
-func GetTodoListFolder(userID, todoListFolderID int64) (repository.TodoListFolder, error) {
+func GetTodoListFolder(userID, todoListFolderID int64) (todolist.TodoListFolder, error) {
 	return todolist.OwnTodoListFolder(userID, todoListFolderID)
 }
 
-func GetTodoListFolders(userID int64) ([]repository.TodoListFolder, error) {
+func GetTodoListFolders(userID int64) ([]todolist.TodoListFolder, error) {
 	vec, err := repository.TodoListFolderRepo.FindAllByUser(userID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get todo list folder: %w", err)

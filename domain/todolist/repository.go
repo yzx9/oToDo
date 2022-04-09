@@ -1,7 +1,5 @@
 package todolist
 
-import "github.com/yzx9/otodo/infrastructure/repository"
-
 var TodoRepository todoRepository
 var TodoListRepository todoListRepository
 var TodoListFolderRepository todoListFolderRepository
@@ -13,29 +11,29 @@ type todoRepository interface {
 }
 
 type todoListRepository interface {
-	Save(todoList *repository.TodoList) error
+	Save(entity *TodoList) error
 
 	Delete(id int64) error
 
 	DeleteAllByFolder(todoListFolderID int64) (int64, error)
 
-	Find(id int64) (repository.TodoList, error)
+	Find(id int64) (TodoList, error)
 }
 
 type todoListFolderRepository interface {
-	Save(todoListFolder *repository.TodoListFolder) error
+	Save(entity *TodoListFolder) error
 
 	Delete(id int64) error
 
-	Find(id int64) (repository.TodoListFolder, error)
+	Find(id int64) (TodoListFolder, error)
 }
 
 type sharingRepository interface {
-	Save(sharing *repository.Sharing) error
+	Save(entity *Sharing) error
 
-	DeleteAllByUserAndType(userID int64, sharingType repository.SharingType) (int64, error)
+	DeleteAllByUserAndType(userID int64, sharingType SharingType) (int64, error)
 
-	Find(token string) (repository.Sharing, error)
+	Find(token string) (Sharing, error)
 }
 
 type todoListSharingRepository interface {

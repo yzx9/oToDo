@@ -3,7 +3,6 @@ package todolist
 import (
 	"fmt"
 
-	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/infrastructure/util"
 )
 
@@ -63,20 +62,20 @@ func ExistTodoListSharing(userID, todoListID int64) (bool, error) {
 }
 
 // owner or shared user
-func OwnOrSharedTodoList(userID, todoListID int64) (repository.TodoList, error) {
+func OwnOrSharedTodoList(userID, todoListID int64) (TodoList, error) {
 	todoList, err := TodoListRepository.Find(todoListID)
 	if err != nil {
-		return repository.TodoList{}, fmt.Errorf("fails to get todo list: %v", todoListID)
+		return TodoList{}, fmt.Errorf("fails to get todo list: %v", todoListID)
 	}
 
 	if todoList.UserID != userID {
 		sharing, err := ExistTodoListSharing(userID, todoListID)
 		if err != nil {
-			return repository.TodoList{}, fmt.Errorf("fails to get todo list sharing: %v", todoListID)
+			return TodoList{}, fmt.Errorf("fails to get todo list sharing: %v", todoListID)
 		}
 
 		if !sharing {
-			return repository.TodoList{}, util.NewErrorWithForbidden("unable to handle unauthorized todo list: %v", todoListID)
+			return TodoList{}, util.NewErrorWithForbidden("unable to handle unauthorized todo list: %v", todoListID)
 		}
 	}
 

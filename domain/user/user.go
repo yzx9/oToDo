@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/yzx9/otodo/acl/github"
+	"github.com/yzx9/otodo/domain/todolist"
 	"github.com/yzx9/otodo/infrastructure/config"
 	"github.com/yzx9/otodo/infrastructure/errors"
 	"github.com/yzx9/otodo/infrastructure/util"
@@ -25,11 +26,11 @@ type User struct {
 	GithubID  int64
 
 	BasicTodoListID int64
-	BasicTodoList   *TodoList
+	BasicTodoList   *todolist.TodoList
 
-	TodoLists []TodoList
+	TodoLists []todolist.TodoList
 
-	SharedTodoLists []*TodoList
+	SharedTodoLists []*todolist.TodoList
 }
 
 type NewUser struct {
@@ -160,21 +161,22 @@ func createUser(user *User) error {
 	return nil
 }
 
-func createBasicTodoList(user *User) (TodoList, error) {
-	basicTodoList := TodoList{
+// TODO move to todo list domain
+func createBasicTodoList(user *User) (todolist.TodoList, error) {
+	basicTodoList := todolist.TodoList{
 		// TODO[bug]: cycle dep
-		// Name:    "Todos", // TODO i18n
-		// IsBasic: true,
-		// UserID:  user.ID,
+		Name:    "Todos", // TODO i18n
+		IsBasic: true,
+		UserID:  user.ID,
 	}
 	if err := TodoListRepo.Save(&basicTodoList); err != nil {
-		return TodoList{}, fmt.Errorf("fails to create user basic todo list: %w", err)
+		return todolist.TodoList{}, fmt.Errorf("fails to create user basic todo list: %w", err)
 	}
 
 	// TODO[bug]: cycle dep
 	// user.BasicTodoListID = basicTodoList.ID
 	if err := UserRepository.Save(user); err != nil {
-		return TodoList{}, fmt.Errorf("fails to create user basic todo list: %w", err)
+		return todolist.TodoList{}, fmt.Errorf("fails to create user basic todo list: %w", err)
 	}
 
 	return basicTodoList, nil

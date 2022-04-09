@@ -1,12 +1,14 @@
 package user
 
+import "github.com/yzx9/otodo/domain/todolist"
+
 var UserRepository userRepository
 var UserInvalidRefreshTokenRepository userInvalidRefreshTokenRepository
 var ThirdPartyOAuthTokenRepository thirdPartyOAuthTokenRepository
 var TodoListRepo todoListRepository
 
 type userRepository interface {
-	Save(user *User) error
+	Save(entity *User) error
 
 	Find(id int64) (User, error)
 
@@ -36,7 +38,5 @@ type thirdPartyOAuthTokenRepository interface {
 }
 
 type todoListRepository interface {
-	Save(todoList *TodoList) error
+	Save(entity *todolist.TodoList) error
 }
-
-type TodoList struct{}

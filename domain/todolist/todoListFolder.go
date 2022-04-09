@@ -2,12 +2,24 @@ package todolist
 
 import (
 	"fmt"
+	"time"
 
-	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/infrastructure/util"
 )
 
-func CreateTodoListFolder(userID int64, folder *repository.TodoListFolder) error {
+type TodoListFolder struct {
+	ID        int64
+	CreatedAt time.Time
+	UpdatedAt time.Time
+
+	Name string
+
+	UserID int64
+
+	TodoLists []int64 // TODO
+}
+
+func CreateTodoListFolder(userID int64, folder *TodoListFolder) error {
 	folder.UserID = userID
 	if err := TodoListFolderRepository.Save(folder); err != nil {
 		return fmt.Errorf("fails to create todo list folder: %w", err)
@@ -16,9 +28,9 @@ func CreateTodoListFolder(userID int64, folder *repository.TodoListFolder) error
 	return nil
 }
 
-func DeleteTodoListFolder(userID, todoListFolderID int64) (repository.TodoListFolder, error) {
-	write := func(err error) (repository.TodoListFolder, error) {
-		return repository.TodoListFolder{}, err
+func DeleteTodoListFolder(userID, todoListFolderID int64) (TodoListFolder, error) {
+	write := func(err error) (TodoListFolder, error) {
+		return TodoListFolder{}, err
 	}
 
 	folder, err := OwnTodoListFolder(userID, todoListFolderID)
@@ -40,14 +52,14 @@ func DeleteTodoListFolder(userID, todoListFolderID int64) (repository.TodoListFo
 }
 
 // Verify permission
-func OwnTodoListFolder(userID, todoListFolderID int64) (repository.TodoListFolder, error) {
+func OwnTodoListFolder(userID, todoListFolderID int64) (TodoListFolder, error) {
 	todoListFolder, err := TodoListFolderRepository.Find(todoListFolderID)
 	if err != nil {
-		return repository.TodoListFolder{}, fmt.Errorf("fails to get todo list folder: %v", todoListFolderID)
+		return TodoListFolder{}, fmt.Errorf("fails to get todo list folder: %v", todoListFolderID)
 	}
 
 	if todoListFolder.UserID != userID {
-		return repository.TodoListFolder{}, util.NewErrorWithForbidden("unable to handle non-owned todo list folder: %v", todoListFolderID)
+		return TodoListFolder{}, util.NewErrorWithForbidden("unable to handle non-owned todo list folder: %v", todoListFolderID)
 	}
 
 	return todoListFolder, nil

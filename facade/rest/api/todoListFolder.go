@@ -7,12 +7,11 @@ import (
 	"github.com/yzx9/otodo/application/service"
 	"github.com/yzx9/otodo/domain/todolist"
 	"github.com/yzx9/otodo/facade/rest/common"
-	"github.com/yzx9/otodo/infrastructure/repository"
 )
 
 // Create todo list folder
 func PostTodoListFolderHandler(c *gin.Context) {
-	folder := repository.TodoListFolder{}
+	folder := todolist.TodoListFolder{}
 	if err := c.ShouldBind(&folder); err != nil {
 		common.AbortWithError(c, err)
 		return
