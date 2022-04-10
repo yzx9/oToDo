@@ -1,7 +1,6 @@
 package service
 
 import (
-	"github.com/yzx9/otodo/application/dto"
 	"github.com/yzx9/otodo/domain/todo"
 	"github.com/yzx9/otodo/domain/todolist"
 	"github.com/yzx9/otodo/domain/user"
@@ -30,8 +29,6 @@ type todoRepository interface {
 
 type todoListRepository interface {
 	Find(id int64) (todolist.TodoList, error)
-
-	FindByUserWithMenuFormat(userID int64) ([]dto.TodoListMenuItem, error)
 
 	FindAllByUser(userID int64) ([]todolist.TodoList, error)
 

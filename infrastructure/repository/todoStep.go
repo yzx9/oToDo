@@ -102,14 +102,5 @@ func (r TodoStepRepository) convertToEntity(po TodoStep) todo.TodoStep {
 }
 
 func (r TodoStepRepository) convertToEntities(POs []TodoStep) []todo.TodoStep {
-	if POs == nil {
-		return nil
-	}
-
-	entities := make([]todo.TodoStep, len(POs))
-	for i := range entities {
-		entities = append(entities, r.convertToEntity(POs[i]))
-	}
-
-	return entities
+	return util.Map(r.convertToEntity, POs)
 }

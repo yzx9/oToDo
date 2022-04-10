@@ -18,6 +18,8 @@ type todoListRepository interface {
 	DeleteAllByFolder(todoListFolderID int64) (int64, error)
 
 	Find(id int64) (TodoList, error)
+
+	FindByUserOnMenuFormat(userID int64) ([]MenuItem, error)
 }
 
 type todoListFolderRepository interface {
@@ -26,6 +28,8 @@ type todoListFolderRepository interface {
 	Delete(id int64) error
 
 	Find(id int64) (TodoListFolder, error)
+
+	FindAllByUser(userId int64) ([]TodoListFolder, error)
 }
 
 type sharingRepository interface {

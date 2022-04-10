@@ -83,16 +83,7 @@ func (r TagRepository) convertToEntity(po Tag) todo.Tag {
 }
 
 func (r TagRepository) convertToEntities(POs []Tag) []todo.Tag {
-	if POs == nil {
-		return nil
-	}
-
-	entities := make([]todo.Tag, len(POs))
-	for i := range entities {
-		entities = append(entities, r.convertToEntity(POs[i]))
-	}
-
-	return entities
+	return util.Map(r.convertToEntity, POs)
 }
 
 type TagTodoRepository struct {

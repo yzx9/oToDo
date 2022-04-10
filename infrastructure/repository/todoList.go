@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"github.com/yzx9/otodo/application/dto"
 	"github.com/yzx9/otodo/domain/todolist"
 	"github.com/yzx9/otodo/domain/user"
 	"github.com/yzx9/otodo/infrastructure/util"
@@ -105,8 +104,8 @@ func (r TodoListRepository) FindAllSharedByUser(userID int64) ([]todolist.TodoLi
 	return r.convertToEntities(POs), util.WrapGormErr(err, "user shared todo list")
 }
 
-func (r TodoListRepository) FindByUserWithMenuFormat(userID int64) ([]dto.TodoListMenuItem, error) {
-	var items []dto.TodoListMenuItem
+func (r TodoListRepository) FindByUserOnMenuFormat(userID int64) ([]todolist.MenuItem, error) {
+	var items []todolist.MenuItem
 	err := r.db.
 		Model(TodoList{}).
 		Where(TodoList{
@@ -169,16 +168,7 @@ func (r TodoListRepository) convertToEntity(po TodoList) todolist.TodoList {
 }
 
 func (r TodoListRepository) convertToEntities(POs []TodoList) []todolist.TodoList {
-	if POs == nil {
-		return nil
-	}
-
-	entities := make([]todolist.TodoList, len(POs))
-	for i := range entities {
-		entities = append(entities, r.convertToEntity(POs[i]))
-	}
-
-	return entities
+	return util.Map(r.convertToEntity, POs)
 }
 
 /**

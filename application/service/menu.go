@@ -1,56 +1,34 @@
 package service
 
 import (
-	"fmt"
-
 	"github.com/yzx9/otodo/application/dto"
+	"github.com/yzx9/otodo/domain/todolist"
+	"github.com/yzx9/otodo/infrastructure/util"
 )
 
 // Get Menu, folder+list tree
-func GetMenu(userID int64) ([]dto.TodoListMenuItem, error) {
-	folders, err := GetTodoListFolders(userID)
+func GetMenu(userID int64) ([]dto.MenuItem, error) {
+	menu, err := todolist.GetMenu(userID)
 	if err != nil {
-		return nil, fmt.Errorf("fails to get user menu: %w", err)
+		return nil, err
 	}
 
-	lists, err := TodoListRepository.FindByUserWithMenuFormat(userID)
-	if err != nil {
-		return nil, fmt.Errorf("fails to get user menu: %w", err)
-	}
+	items := make([]dto.MenuItem, len(menu))
 
-	// TODO[feat]: Sortable
-	menu := make([]dto.TodoListMenuItem, 0)
-	for i := range folders {
-		menu = append(menu, dto.TodoListMenuItem{
-			ID:       folders[i].ID,
-			Name:     folders[i].Name,
-			Count:    0,
-			IsLeaf:   false,
-			Children: make([]dto.TodoListMenuItem, 0),
-		})
-	}
+	var assembler func(a todolist.MenuItem) dto.MenuItem
+	assembler = func(a todolist.MenuItem) dto.MenuItem {
+		return dto.MenuItem{
+			ID:    a.ID,
+			Name:  a.Name,
+			Count: a.Count,
 
-	for i := range lists {
-		item := dto.TodoListMenuItem{
-			ID:     lists[i].ID,
-			Name:   lists[i].Name,
-			Count:  lists[i].Count,
-			IsLeaf: true,
+			IsLeaf:   a.IsLeaf,
+			Children: util.Map(assembler, a.Children),
 		}
-
-		if lists[i].TodoListFolderID == 0 {
-			menu = append(menu, item)
-			continue
-		}
-
-		for j := range menu {
-			if menu[j].ID == lists[i].TodoListFolderID {
-				menu[j].Count += lists[i].Count
-				menu[j].Children = append(menu[j].Children, item)
-			}
-		}
-		// TODO[bug]: need log if data inconsistency
+	}
+	for _, a := range menu {
+		items = append(items, assembler(a))
 	}
 
-	return menu, nil
+	return items, nil
 }

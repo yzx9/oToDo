@@ -208,16 +208,7 @@ func (r TodoRepository) convertToEntity(po Todo) todo.Todo {
 }
 
 func (r TodoRepository) convertToEntities(POs []Todo) []todo.Todo {
-	if POs == nil {
-		return nil
-	}
-
-	entities := make([]todo.Todo, len(POs))
-	for i := range entities {
-		entities = append(entities, r.convertToEntity(POs[i]))
-	}
-
-	return entities
+	return util.Map(r.convertToEntity, POs)
 }
 
 /**

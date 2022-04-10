@@ -1,11 +1,10 @@
 package dto
 
-type TodoListMenuItem struct {
-	ID               int64  `json:"id"`
-	Name             string `json:"name"`
-	Count            int    `json:"count"`
-	TodoListFolderID int64  `json:"-"`
+type MenuItem struct {
+	ID    int64  `json:"id"`
+	Name  string `json:"name"`
+	Count int    `json:"count"`
 
-	IsLeaf   bool               `json:"isLeaf"`
-	Children []TodoListMenuItem `json:"children"`
+	IsLeaf   bool       `json:"isLeaf"`
+	Children []MenuItem `json:"children"`
 }
