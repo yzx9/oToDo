@@ -5,7 +5,7 @@ func Map[T, R any](mapper func(T) R, slice []T) []R {
 		return nil
 	}
 
-	re := make([]R, len(slice))
+	re := make([]R, 0, len(slice))
 	for i := range slice {
 		re = append(re, mapper(slice[i]))
 	}

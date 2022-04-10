@@ -13,6 +13,10 @@ func init() {
 
 // RandomString returns a random string with a fixed length
 func RandomString(n int, allowedChars ...[]rune) string {
+	if n <= 0 {
+		return ""
+	}
+
 	var letters []rune
 
 	if len(allowedChars) == 0 {
