@@ -1,60 +1,40 @@
 package common
 
 import (
+	"fmt"
+	"regexp"
+
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt"
-	"github.com/yzx9/otodo/domain/user"
-	"github.com/yzx9/otodo/infrastructure/errors"
-	"github.com/yzx9/otodo/infrastructure/util"
+	"github.com/yzx9/otodo/facade/rest/middleware"
 )
 
 const AuthorizationHeaderKey = "Authorization"
+const authorizationRegexString = `^[Bb]earer (?P<token>[\w-]+.[\w-]+.[\w-]+)$`
 
-func GetAccessToken(c *gin.Context) (*jwt.Token, error) {
-	authorization := c.Request.Header.Get(AuthorizationHeaderKey)
-	token, err := user.ParseAccessToken(authorization)
-	if err != nil {
-		return nil, util.NewError(errors.ErrUnauthorized, "invalid token: %w", err)
-	}
+var authorizationRegex = regexp.MustCompile(authorizationRegexString)
 
-	return token, nil
-}
-
-func GetAccessTokenClaims(c *gin.Context) (*user.SessionTokenClaims, error) {
-	token, err := GetAccessToken(c)
-	if err != nil {
-		return nil, err
-	}
-
-	claims, ok := token.Claims.(*user.SessionTokenClaims)
+func GetAccessToken(c *gin.Context) (string, error) {
+	token, ok := c.Keys[middleware.ContextKeyAccessToken]
 	if !ok {
-		return nil, util.NewError(errors.ErrUnauthorized, "invalid token")
+		return "", fmt.Errorf("unauthorized")
 	}
 
-	return claims, nil
+	return token.(string), nil
 }
 
 func GetAccessUserID(c *gin.Context) (int64, error) {
-	claims, err := GetAccessTokenClaims(c)
-	if err != nil {
-		return 0, err
+	userID, ok := c.Keys[middleware.ContextKeyUserID]
+	if !ok {
+		return 0, fmt.Errorf("unauthorized")
 	}
 
-	return claims.UserID, nil
+	return userID.(int64), nil
 }
 
-func MustGetAccessToken(c *gin.Context) *jwt.Token {
-	token, _ := GetAccessToken(c)
-	return token
-}
-
-func MustGetAccessTokenClaims(c *gin.Context) *user.SessionTokenClaims {
-	token := MustGetAccessToken(c)
-	claims, _ := token.Claims.(*user.SessionTokenClaims)
-	return claims
+func MustGetAccessToken(c *gin.Context) string {
+	return c.Keys[middleware.ContextKeyAccessToken].(string)
 }
 
 func MustGetAccessUserID(c *gin.Context) int64 {
-	claims := MustGetAccessTokenClaims(c)
-	return claims.UserID
+	return c.Keys[middleware.ContextKeyUserID].(int64)
 }

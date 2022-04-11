@@ -98,17 +98,6 @@ func CreateUserInvalidRefreshToken(userID int64, tokenID string) (UserInvalidRef
 	return model, nil
 }
 
-// Verify is it an valid token.
-// Note: This func don't check token expire time
-func IsValidRefreshToken(userID int64, tokenID string) (bool, error) {
-	valid, err := UserInvalidRefreshTokenRepository.Exist(userID, tokenID)
-	if err != nil {
-		return false, fmt.Errorf("fails to get user refresh token: %w", err)
-	}
-
-	return valid, nil
-}
-
 /**
  * OAuth
  */

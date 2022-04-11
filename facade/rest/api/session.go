@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/application/dto"
 	"github.com/yzx9/otodo/application/service"
-	"github.com/yzx9/otodo/domain/user"
 	"github.com/yzx9/otodo/facade/rest/common"
 	"github.com/yzx9/otodo/infrastructure/errors"
 	"github.com/yzx9/otodo/infrastructure/util"
@@ -20,13 +19,13 @@ func GetSessionHandler(c *gin.Context) {
 
 // Login
 func PostSessionHandler(c *gin.Context) {
-	payload := user.UserCredential{}
-	if err := c.ShouldBind(&payload); err != nil {
+	dto := dto.UserCredential{}
+	if err := c.ShouldBind(&dto); err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
 
-	tokens, err := user.Login(payload)
+	tokens, err := service.Login(dto)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -37,13 +36,8 @@ func PostSessionHandler(c *gin.Context) {
 
 // Logout, unactive refresh token
 func DeleteSessionHandler(c *gin.Context) {
-	claims := common.MustGetAccessTokenClaims(c)
-	err := user.Logout(claims.UserID, claims.RefreshTokenID)
-	if err != nil {
-		// TODO log
-		fmt.Println(err.Error())
-	}
-
+	token := common.MustGetAccessToken(c)
+	service.Logout(token)
 	c.JSON(http.StatusOK, gin.H{"message": "see you"})
 }
 
@@ -70,13 +64,13 @@ func PostSessionTokenHandler(c *gin.Context) {
  */
 
 func GetSessionOAuthGithub(c *gin.Context) {
-	uri, err := user.CreateGithubOAuthURI()
+	dto, err := service.CreateGithubOAuthURI()
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.OAuthRedirector{RedirectURI: uri})
+	c.JSON(http.StatusOK, dto)
 }
 
 func PostSessionOAuthGithub(c *gin.Context) {
@@ -86,7 +80,7 @@ func PostSessionOAuthGithub(c *gin.Context) {
 		return
 	}
 
-	tokens, err := user.LoginByGithubOAuth(payload.Code, payload.State)
+	tokens, err := service.LoginByGithubOAuth(payload.Code, payload.State)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
