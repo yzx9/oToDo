@@ -18,11 +18,10 @@ type ThirdPartyOAuthToken struct {
 	ID        int64
 	CreatedAt time.Time
 	UpdatedAt time.Time
-
-	Active bool
-	Type   int8
-	Token  string
-	Scope  string
+	Active    bool
+	Type      int8
+	Token     string
+	Scope     string
 
 	UserID int64
 }

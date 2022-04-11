@@ -1,6 +1,7 @@
 package user
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"fmt"
 	"time"
@@ -13,24 +14,17 @@ import (
 )
 
 type User struct {
-	ID        int64
-	CreatedAt time.Time
-	UpdatedAt time.Time
-
-	Name      string
-	Nickname  string
-	Password  []byte
-	Email     string
-	Telephone string
-	Avatar    string
-	GithubID  int64
-
+	ID              int64
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
+	Name            string
+	Nickname        string
+	Password        []byte
+	Email           string
+	Telephone       string
+	Avatar          string
+	GithubID        int64
 	BasicTodoListID int64
-	BasicTodoList   *todolist.TodoList
-
-	TodoLists []todolist.TodoList
-
-	SharedTodoLists []*todolist.TodoList
 }
 
 type NewUser struct {
@@ -69,6 +63,17 @@ func CreateUser(payload NewUser) (User, error) {
 	return user, nil
 }
 
+// Password
+func (user User) IsSamePassword(password string) bool {
+	crypto := GetCryptoPassword(password)
+	return bytes.Equal(user.Password, crypto)
+}
+
+func GetCryptoPassword(password string) []byte {
+	pwd := sha256.Sum256(append([]byte(password), config.Secret.PasswordNonce...))
+	return pwd[:]
+}
+
 /**
  * Invalid User Refresh Token
  */
@@ -102,12 +107,6 @@ func IsValidRefreshToken(userID int64, tokenID string) (bool, error) {
 	}
 
 	return valid, nil
-}
-
-// Password
-func GetCryptoPassword(password string) []byte {
-	pwd := sha256.Sum256(append([]byte(password), config.Secret.PasswordNonce...))
-	return pwd[:]
 }
 
 /**

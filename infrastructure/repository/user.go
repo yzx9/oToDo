@@ -150,24 +150,17 @@ func (r UserRepository) convertToPO(entity *user.User) User {
 
 func (r UserRepository) convertToEntity(po User) user.User {
 	return user.User{
-		ID:        po.ID,
-		CreatedAt: po.CreatedAt,
-		UpdatedAt: po.UpdatedAt,
-
-		Name:      po.Name,
-		Nickname:  po.Nickname,
-		Password:  po.Password,
-		Email:     po.Email,
-		Telephone: po.Telephone,
-		Avatar:    po.Avatar,
-		GithubID:  po.GithubID,
-
+		ID:              po.ID,
+		CreatedAt:       po.CreatedAt,
+		UpdatedAt:       po.UpdatedAt,
+		Name:            po.Name,
+		Nickname:        po.Nickname,
+		Password:        po.Password,
+		Email:           po.Email,
+		Telephone:       po.Telephone,
+		Avatar:          po.Avatar,
+		GithubID:        po.GithubID,
 		BasicTodoListID: po.BasicTodoListID,
-		BasicTodoList:   nil, // TODO
-
-		TodoLists: nil, // TODO
-
-		SharedTodoLists: nil, // TODO
 	}
 }
 

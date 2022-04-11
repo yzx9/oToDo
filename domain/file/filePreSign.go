@@ -24,8 +24,7 @@ func CreateFilePreSignID(userID, fileID int64, exp int) (string, error) {
 		return "", util.NewErrorWithPreconditionFailed("expires is too long")
 	}
 
-	_, err := OwnFile(userID, fileID)
-	if err != nil {
+	if _, err := OwnFile(userID, fileID); err != nil {
 		return "", err
 	}
 

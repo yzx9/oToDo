@@ -1,7 +1,6 @@
 package user
 
 import (
-	"bytes"
 	"fmt"
 	"regexp"
 	"time"
@@ -38,17 +37,11 @@ type SessionTokens struct {
 }
 
 func Login(payload UserCredential) (SessionTokens, error) {
-	write := func() (SessionTokens, error) {
-		return SessionTokens{}, util.NewErrorWithBadRequest("invalid credential")
-	}
-
 	user, err := UserRepository.FindByUserName(payload.UserName)
-	if err != nil || user.Password == nil {
-		return write()
-	}
-
-	if cryptoPwd := GetCryptoPassword(payload.Password); !bytes.Equal(user.Password, cryptoPwd) {
-		return write()
+	if err != nil ||
+		user.Password == nil ||
+		!user.IsSamePassword(payload.Password) {
+		return SessionTokens{}, util.NewErrorWithBadRequest("invalid credential")
 	}
 
 	if payload.RefreshTokenExpiresIn <= 0 {
