@@ -118,6 +118,10 @@ func CreateNewToken(refreshToken string) (user.Token, error) {
 	return newToken, nil
 }
 
+func CreateUser(newUser dto.NewUser) (user.User, error) {
+	return user.CreateUser(newUser.ToEntity())
+}
+
 func GetUser(userID int64) (user.User, error) {
 	u, err := UserRepository.Find(userID)
 	if err != nil {

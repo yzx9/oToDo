@@ -13,3 +13,9 @@ type SessionValidation struct {
 	NewAccessToken bool   `json:"newAccessToken"`
 	AccessToken    string `json:"token"`
 }
+
+type UserCredential struct {
+	UserName              string `json:"userName"`
+	Password              string `json:"password"`
+	RefreshTokenExpiresIn int    `json:"refreshTokenExp"`
+}

@@ -8,6 +8,35 @@ import (
 	"github.com/yzx9/otodo/domain/user"
 )
 
+func CreateTodoList(userID int64, todoList dto.NewTodoList) (dto.TodoList, error) {
+	entity := todoList.ToEntity()
+	if err := todolist.CreateTodoList(userID, &entity); err != nil {
+		return dto.TodoList{}, err
+	}
+
+	return dto.TodoList{}.FromEntity(entity), nil
+}
+
+func DeleteTodoList(userID, id int64) (todolist.TodoList, error) {
+	return todolist.DeleteTodoList(userID, id)
+}
+
+func CreateTodoListSharing(userID, todoListID int64) (todolist.Sharing, error) {
+	return todolist.CreateTodoListSharing(userID, todoListID)
+}
+
+func DeleteTodoListSharing(userID int64, token string) error {
+	return todolist.DeleteTodoListSharing(userID, token)
+}
+
+func CreateTodoListSharedUser(userID int64, token string) error {
+	return todolist.CreateTodoListSharedUser(userID, token)
+}
+
+func DeleteTodoListSharedUser(operatorID int64, userID int64, todoListID int64) error {
+	return todolist.DeleteTodoListSharedUser(operatorID, userID, todoListID)
+}
+
 func GetActiveTodoListSharings(userID, todoListID int64) ([]todolist.Sharing, error) {
 	sharings, err := SharingRepository.FindAllActive(userID, todolist.SharingTypeTodoList)
 	if err != nil {
@@ -22,6 +51,10 @@ func GetActiveTodoListSharings(userID, todoListID int64) ([]todolist.Sharing, er
 	}
 
 	return vec, nil
+}
+
+func GetTodoList(userID, todoListID int64) (todolist.TodoList, error) {
+	return todolist.GetTodoList(userID, todoListID)
 }
 
 func GetTodoLists(userID int64) ([]todolist.TodoList, error) {

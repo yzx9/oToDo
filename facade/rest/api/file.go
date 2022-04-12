@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/application/dto"
 	"github.com/yzx9/otodo/application/service"
-	"github.com/yzx9/otodo/domain/file"
 	"github.com/yzx9/otodo/facade/rest/common"
 	"github.com/yzx9/otodo/infrastructure/errors"
 	"github.com/yzx9/otodo/infrastructure/util"
@@ -14,19 +13,19 @@ import (
 
 // Upload public file, for user avatar
 func PostFileHandler(c *gin.Context) {
-	f, err := c.FormFile("file")
+	file, err := c.FormFile("file")
 	if err != nil {
 		common.AbortWithError(c, util.NewError(errors.ErrPreconditionRequired, "file required"))
 		return
 	}
 
-	record, err := file.UploadPublicFile(f)
+	dto, err := service.UploadPublicFile(file)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.FileDTO{FileID: record.ID})
+	c.JSON(http.StatusOK, dto)
 }
 
 // Upload todo file, only support single file now
@@ -38,19 +37,19 @@ func PostTodoFileHandler(c *gin.Context) {
 		return
 	}
 
-	f, err := c.FormFile("file")
+	file, err := c.FormFile("file")
 	if err != nil {
 		common.AbortWithError(c, util.NewError(errors.ErrPreconditionRequired, "file required"))
 		return
 	}
 
-	record, err := file.UploadTodoFile(userID, todoID, f)
+	dto, err := service.UploadTodoFile(userID, todoID, file)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.FileDTO{FileID: record.ID})
+	c.JSON(http.StatusOK, dto)
 }
 
 // Upload file, only support single file now

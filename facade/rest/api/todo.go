@@ -4,22 +4,22 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/yzx9/otodo/application/dto"
 	"github.com/yzx9/otodo/application/service"
-	"github.com/yzx9/otodo/domain/todo"
-	todoAggregate "github.com/yzx9/otodo/domain/todo"
 	"github.com/yzx9/otodo/facade/rest/common"
 )
 
 // Create todo
 func PostTodoHandler(c *gin.Context) {
-	todo := todo.Todo{}
-	if err := c.ShouldBind(&todo); err != nil {
+	newTodo := dto.NewTodo{}
+	if err := c.ShouldBind(&newTodo); err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
 
 	userID := common.MustGetAccessUserID(c)
-	if err := todoAggregate.CreateTodo(userID, &todo); err != nil {
+	todo, err := service.CreateTodo(userID, newTodo)
+	if err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
@@ -47,7 +47,7 @@ func GetTodoHandler(c *gin.Context) {
 
 // Update todo fully
 func PutTodoHandler(c *gin.Context) {
-	todo := todo.Todo{}
+	todo := dto.Todo{}
 	err := c.ShouldBind(&todo)
 	if err != nil {
 		common.AbortWithError(c, err)
@@ -55,12 +55,13 @@ func PutTodoHandler(c *gin.Context) {
 	}
 
 	userID := common.MustGetAccessUserID(c)
-	if err = todoAggregate.UpdateTodo(userID, &todo); err != nil {
+	newTodo, err := service.UpdateTodo(userID, todo)
+	if err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, todo)
+	c.JSON(http.StatusOK, newTodo)
 }
 
 // Update todo partial
@@ -79,7 +80,7 @@ func DeleteTodoHandler(c *gin.Context) {
 	}
 
 	userID := common.MustGetAccessUserID(c)
-	todo, err := todoAggregate.DeleteTodo(userID, todoID)
+	todo, err := service.DeleteTodo(userID, todoID)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return

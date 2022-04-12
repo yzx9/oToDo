@@ -4,21 +4,22 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/yzx9/otodo/application/dto"
 	"github.com/yzx9/otodo/application/service"
-	"github.com/yzx9/otodo/domain/todolist"
 	"github.com/yzx9/otodo/facade/rest/common"
 )
 
 // Create todo list folder
 func PostTodoListFolderHandler(c *gin.Context) {
-	folder := todolist.TodoListFolder{}
-	if err := c.ShouldBind(&folder); err != nil {
+	newFolder := dto.NewTodoListFolder{}
+	if err := c.ShouldBind(&newFolder); err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
 
 	userID := common.MustGetAccessUserID(c)
-	if err := todolist.CreateTodoListFolder(userID, &folder); err != nil {
+	folder, err := service.CreateTodoListFolder(userID, newFolder)
+	if err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
@@ -53,7 +54,7 @@ func DeleteTodoListFolderHandler(c *gin.Context) {
 	}
 
 	userID := common.MustGetAccessUserID(c)
-	todo, err := todolist.DeleteTodoListFolder(userID, id)
+	todo, err := service.DeleteTodoListFolder(userID, id)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return

@@ -3,9 +3,49 @@ package service
 import (
 	"fmt"
 
+	"github.com/yzx9/otodo/application/dto"
 	"github.com/yzx9/otodo/domain/todo"
 	"github.com/yzx9/otodo/domain/todolist"
 )
+
+func CreateTodo(userID int64, newTodo dto.NewTodo) (dto.Todo, error) {
+	entity := newTodo.ToEntity()
+	if err := todo.CreateTodo(userID, &entity); err != nil {
+		return dto.Todo{}, err
+	}
+
+	return dto.Todo{}.FromEntity(entity), nil
+}
+
+func UpdateTodo(userID int64, t dto.Todo) (dto.Todo, error) {
+	entity := t.ToEntity()
+	if err := todo.UpdateTodo(userID, &entity); err != nil {
+		return dto.Todo{}, nil
+	}
+
+	return dto.Todo{}.FromEntity(entity), nil
+}
+
+func DeleteTodo(userID int64, todoID int64) (todo.Todo, error) {
+	return todo.DeleteTodo(userID, todoID)
+}
+
+func CreateTodoStep(userID int64, dto dto.NewTodoStep) (todo.TodoStep, error) {
+	return todo.CreateTodoStep(userID, dto.TodoID, dto.Name)
+}
+
+func UpdateTodoStep(userID int64, step dto.TodoStep) (todo.TodoStep, error) {
+	entity := step.ToEntity()
+	if err := todo.UpdateTodoStep(userID, &entity); err != nil {
+		return todo.TodoStep{}, nil
+	}
+
+	return entity, nil
+}
+
+func DeleteTodoStep(userID, todoID, todoStepID int64) (todo.TodoStep, error) {
+	return todo.DeleteTodoStep(userID, todoID, todoStepID)
+}
 
 func GetTodo(userID, todoID int64) (todo.Todo, error) {
 	entity, err := todo.OwnTodo(userID, todoID)

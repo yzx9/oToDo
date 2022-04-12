@@ -1,12 +1,31 @@
 package service
 
 import (
+	"mime/multipart"
 	"strconv"
 
 	"github.com/yzx9/otodo/application/dto"
 	"github.com/yzx9/otodo/domain/file"
 	"github.com/yzx9/otodo/infrastructure/util"
 )
+
+func UploadPublicFile(f *multipart.FileHeader) (dto.FileDTO, error) {
+	record, err := file.UploadPublicFile(f)
+	if err != nil {
+		return dto.FileDTO{}, err
+	}
+
+	return dto.FileDTO{FileID: record.ID}, nil
+}
+
+func UploadTodoFile(userID, todoID int64, f *multipart.FileHeader) (dto.FileDTO, error) {
+	record, err := file.UploadTodoFile(userID, todoID, f)
+	if err != nil {
+		return dto.FileDTO{}, err
+	}
+
+	return dto.FileDTO{FileID: record.ID}, nil
+}
 
 func GetFilePath(userID int64, fileID string) (string, error) {
 	id, err := strconv.ParseInt(fileID, 10, 64)

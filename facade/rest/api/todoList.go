@@ -6,25 +6,25 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/application/dto"
 	"github.com/yzx9/otodo/application/service"
-	"github.com/yzx9/otodo/domain/todolist"
 	"github.com/yzx9/otodo/facade/rest/common"
 )
 
 // Create todo list
 func PostTodoListHandler(c *gin.Context) {
-	list := todolist.TodoList{}
-	if err := c.ShouldBind(&list); err != nil {
+	newTodoList := dto.NewTodoList{}
+	if err := c.ShouldBind(&newTodoList); err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
 
 	userID := common.MustGetAccessUserID(c)
-	if err := todolist.CreateTodoList(userID, &list); err != nil {
+	todoList, err := service.CreateTodoList(userID, newTodoList)
+	if err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, list)
+	c.JSON(http.StatusOK, todoList)
 }
 
 // Get todo list
@@ -36,7 +36,7 @@ func GetTodoListHandler(c *gin.Context) {
 	}
 
 	userID := common.MustGetAccessUserID(c)
-	todoList, err := todolist.GetTodoList(userID, todoListID)
+	todoList, err := service.GetTodoList(userID, todoListID)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -72,7 +72,7 @@ func DeleteTodoListHandler(c *gin.Context) {
 	}
 
 	userID := common.MustGetAccessUserID(c)
-	todo, err := todolist.DeleteTodoList(userID, id)
+	todo, err := service.DeleteTodoList(userID, id)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -120,7 +120,7 @@ func DeleteTodoListSharedUserHandler(c *gin.Context) {
 		return
 	}
 
-	if err := todolist.DeleteTodoListSharedUser(operatorID, userID, todoListID); err != nil {
+	if err := service.DeleteTodoListSharedUser(operatorID, userID, todoListID); err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
@@ -137,7 +137,7 @@ func PostTodoListSharingsHandler(c *gin.Context) {
 		return
 	}
 
-	sharing, err := todolist.CreateTodoListSharing(userID, todoListID)
+	sharing, err := service.CreateTodoListSharing(userID, todoListID)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -186,7 +186,7 @@ func PostTodoListSharingHandler(c *gin.Context) {
 		return
 	}
 
-	if err := todolist.CreateTodoListSharedUser(userID, token); err != nil {
+	if err := service.CreateTodoListSharedUser(userID, token); err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
@@ -203,7 +203,7 @@ func DeleteTodoListSharingHandler(c *gin.Context) {
 		return
 	}
 
-	if err := todolist.DeleteTodoListSharing(userID, token); err != nil {
+	if err := service.DeleteTodoListSharing(userID, token); err != nil {
 		common.AbortWithError(c, err)
 		return
 	}
