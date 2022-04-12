@@ -53,7 +53,7 @@ func GetCurrentUserBasicTodoListTodosHandler(c *gin.Context) {
 		return
 	}
 
-	todos, err := service.ForceGetTodos(user.BasicTodoListID)
+	todos, err := service.GetTodosByTodoList(user.BasicTodoListID)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -70,7 +70,7 @@ func GetCurrentUserDailyTodosHandler(c *gin.Context) {
 // Get planned todos for current user
 func GetCurrentUserPlannedTodosHandler(c *gin.Context) {
 	userID := common.MustGetAccessUserID(c)
-	todos, err := service.GetPlannedTodos(userID)
+	todos, err := service.GetPlannedTodosByUser(userID)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -82,7 +82,7 @@ func GetCurrentUserPlannedTodosHandler(c *gin.Context) {
 // Get important todos for current user
 func GetCurrentUserImportantTodosHandler(c *gin.Context) {
 	userID := common.MustGetAccessUserID(c)
-	todos, err := service.GetImportantTodos(userID)
+	todos, err := service.GetImportantTodosByUser(userID)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return
@@ -94,7 +94,7 @@ func GetCurrentUserImportantTodosHandler(c *gin.Context) {
 // Get not-notified todos for current user
 func GetCurrentUserNotNotifiedTodosHandler(c *gin.Context) {
 	userID := common.MustGetAccessUserID(c)
-	todos, err := service.GetNotNotifiedTodos(userID)
+	todos, err := service.GetNotNotifiedTodosByUser(userID)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return

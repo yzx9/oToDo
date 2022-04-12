@@ -54,7 +54,7 @@ func GetTodoListTodosHandler(c *gin.Context) {
 	}
 
 	userID := common.MustGetAccessUserID(c)
-	todos, err := service.GetTodos(userID, todoListID)
+	todos, err := service.GetTodosByUserAndTodoList(userID, todoListID)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return

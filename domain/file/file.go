@@ -51,7 +51,7 @@ func UploadPublicFile(file *multipart.FileHeader) (File, error) {
 }
 
 func UploadTodoFile(userID, todoID int64, file *multipart.FileHeader) (File, error) {
-	if _, err := todo.OwnTodo(userID, todoID); err != nil {
+	if _, err := todo.GetTodoByUser(userID, todoID); err != nil {
 		return File{}, err
 	}
 
@@ -110,7 +110,7 @@ func OwnFile(userID, fileID int64) (*File, error) {
 		break
 
 	case FileTypeTodo:
-		if _, err := todo.OwnTodo(userID, file.RelatedID); err != nil {
+		if _, err := todo.GetTodoByUser(userID, file.RelatedID); err != nil {
 			return nil, util.NewErrorWithForbidden("unable to get non-owned file: %w", err)
 		}
 

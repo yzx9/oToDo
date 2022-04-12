@@ -19,27 +19,18 @@ type TodoStep struct {
 	TodoID int64
 }
 
-func CreateTodoStep(userID, todoID int64, name string) (TodoStep, error) {
-	_, err := OwnTodo(userID, todoID)
-	if err != nil {
-		return TodoStep{}, util.NewErrorWithNotFound("todo not found: %v", todoID)
+func (step TodoStep) New() error {
+	if err := TodoStepRepository.Save(&step); err != nil {
+		return util.NewErrorWithUnknown("fails to create todo step")
 	}
 
-	step := TodoStep{
-		Name:   name,
-		TodoID: todoID,
-	}
-	if err = TodoStepRepository.Save(&step); err != nil {
-		return TodoStep{}, util.NewErrorWithUnknown("fails to create todo step")
-	}
-
-	return step, nil
+	return nil
 }
 
-func UpdateTodoStep(userID int64, step *TodoStep) error {
-	oldStep, err := OwnTodoStep(userID, step.ID)
+func (step *TodoStep) Save(userID int64) error {
+	oldStep, err := TodoStepRepository.Find(step.ID)
 	if err != nil {
-		return err
+		return fmt.Errorf("fails to get todo step: %w", err)
 	}
 
 	step.CreatedAt = oldStep.CreatedAt
@@ -57,29 +48,7 @@ func UpdateTodoStep(userID int64, step *TodoStep) error {
 	return nil
 }
 
-func DeleteTodoStep(userID, todoID, todoStepID int64) (TodoStep, error) {
-	step, err := OwnTodoStep(userID, todoStepID)
-	if err != nil {
-		return TodoStep{}, err
-	}
-
-	if step.TodoID != todoID {
-		return TodoStep{}, util.NewErrorWithNotFound("todo step not found in todo: %v", todoStepID)
-	}
-
-	return step, TodoStepRepository.Delete(todoStepID)
-}
-
-func OwnTodoStep(userID, todoStepID int64) (TodoStep, error) {
-	step, err := TodoStepRepository.Find(todoStepID)
-	if err != nil {
-		return TodoStep{}, fmt.Errorf("fails to get todo step: %w", err)
-	}
-
-	_, err = OwnTodo(userID, step.TodoID)
-	if err != nil {
-		return TodoStep{}, util.NewErrorWithForbidden("unable to handle non-owned todo: %v", step.ID)
-	}
-
-	return step, nil
+func (step *TodoStep) Delete() error {
+	// TODO: delte association
+	return TodoStepRepository.Delete(step.ID)
 }

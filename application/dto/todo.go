@@ -116,6 +116,11 @@ type NewTodoStep struct {
 	TodoID int64 `json:"todoID"`
 }
 
+func (step NewTodoStep) AssembleTo(entity *todo.TodoStep) {
+	entity.Name = step.Name
+	entity.Done = step.Done
+}
+
 type TodoStep struct {
 	ID int64 `json:"id"`
 
@@ -135,5 +140,17 @@ func (s TodoStep) ToEntity() todo.TodoStep {
 		DoneAt: s.DoneAt,
 
 		TodoID: s.TodoID,
+	}
+}
+
+func (TodoStep) FromEntity(entity todo.TodoStep) TodoStep {
+	return TodoStep{
+		ID: entity.ID,
+
+		Name:   entity.Name,
+		Done:   entity.Done,
+		DoneAt: entity.DoneAt,
+
+		TodoID: entity.TodoID,
 	}
 }

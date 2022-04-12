@@ -36,12 +36,23 @@ type Todo struct {
 	NextID *int64 // next todo id if repeat
 }
 
-func CreateTodo(userID int64, todo *Todo) error {
-	if _, err := todolist.OwnOrSharedTodoList(userID, todo.TodoListID); err != nil {
-		return fmt.Errorf("fails to get todo list: %w", err)
+func GetTodoByUser(userID, todoID int64) (Todo, error) {
+	todo, err := TodoRepository.Find(todoID)
+	if err != nil {
+		return Todo{}, fmt.Errorf("fails to get todo: %w", err)
 	}
 
-	todo.UserID = userID // override user
+	if _, err = todolist.OwnOrSharedTodoList(userID, todo.TodoListID); err != nil {
+		return Todo{}, util.NewErrorWithForbidden("unable to handle non-owned todo: %v", todo.ID)
+	}
+
+	return todo, nil
+}
+
+func (todo *Todo) New() error {
+	if _, err := todolist.OwnOrSharedTodoList(todo.UserID, todo.TodoListID); err != nil {
+		return fmt.Errorf("fails to get todo list: %w", err)
+	}
 
 	plan, err := CreateTodoRepeatPlan(todo.TodoRepeatPlan)
 	if err != nil {
@@ -57,9 +68,9 @@ func CreateTodo(userID int64, todo *Todo) error {
 	return nil
 }
 
-func UpdateTodo(userID int64, todo *Todo) error {
+func (todo *Todo) Save(userID int64) error {
 	// Limits
-	oldTodo, err := OwnTodo(userID, todo.ID)
+	oldTodo, err := GetTodoByUser(userID, todo.ID)
 	if err != nil {
 		return err
 	}
@@ -103,30 +114,35 @@ func UpdateTodo(userID int64, todo *Todo) error {
 	return nil
 }
 
-func DeleteTodo(userID, todoID int64) (Todo, error) {
-	todo, err := OwnTodo(userID, todoID)
-	if err != nil {
-		return Todo{}, err
+func (todo Todo) Delete(userID int64) error {
+	if _, err := GetTodoByUser(userID, todo.ID); err != nil {
+		return err
 	}
 
-	if err = TodoRepository.Delete(todoID); err != nil {
-		return Todo{}, fmt.Errorf("fails to delete todo: %w", err)
+	if err := TodoRepository.Delete(todo.ID); err != nil {
+		return fmt.Errorf("fails to delete todo: %w", err)
 	}
 
 	go UpdateTagAsync(&todo, "")
 
-	return todo, nil
+	return nil
 }
 
-func OwnTodo(userID, todoID int64) (Todo, error) {
-	todo, err := TodoRepository.Find(todoID)
+func (todo Todo) NewStep() TodoStep {
+	return TodoStep{
+		TodoID: todo.ID,
+	}
+}
+
+func (todo Todo) GetStep(id int64) (TodoStep, error) {
+	step, err := TodoStepRepository.Find(id)
 	if err != nil {
-		return Todo{}, fmt.Errorf("fails to get todo: %w", err)
+		return TodoStep{}, fmt.Errorf("fails to get todo step: %w", err)
 	}
 
-	if _, err = todolist.OwnOrSharedTodoList(userID, todo.TodoListID); err != nil {
-		return Todo{}, util.NewErrorWithForbidden("unable to handle non-owned todo: %v", todo.ID)
+	if step.TodoID != todo.ID {
+		return TodoStep{}, fmt.Errorf("todo step not found")
 	}
 
-	return todo, nil
+	return step, err
 }
