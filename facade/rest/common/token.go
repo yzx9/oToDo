@@ -14,7 +14,7 @@ const authorizationRegexString = `^[Bb]earer (?P<token>[\w-]+.[\w-]+.[\w-]+)$`
 var authorizationRegex = regexp.MustCompile(authorizationRegexString)
 
 func GetAccessToken(c *gin.Context) (string, error) {
-	token, ok := c.Keys[middleware.ContextKeyAccessToken]
+	token, ok := c.Get(middleware.ContextKeyAccessToken)
 	if !ok {
 		return "", fmt.Errorf("unauthorized")
 	}
@@ -23,7 +23,7 @@ func GetAccessToken(c *gin.Context) (string, error) {
 }
 
 func GetAccessUserID(c *gin.Context) (int64, error) {
-	userID, ok := c.Keys[middleware.ContextKeyUserID]
+	userID, ok := c.Get(middleware.ContextKeyUserID)
 	if !ok {
 		return 0, fmt.Errorf("unauthorized")
 	}
@@ -32,9 +32,19 @@ func GetAccessUserID(c *gin.Context) (int64, error) {
 }
 
 func MustGetAccessToken(c *gin.Context) string {
-	return c.Keys[middleware.ContextKeyAccessToken].(string)
+	token, ok := c.Get(middleware.ContextKeyAccessToken)
+	if !ok {
+		return ""
+	}
+
+	return token.(string)
 }
 
 func MustGetAccessUserID(c *gin.Context) int64 {
-	return c.Keys[middleware.ContextKeyUserID].(int64)
+	userID, ok := c.Get(middleware.ContextKeyUserID)
+	if !ok {
+		return 0
+	}
+
+	return userID.(int64)
 }

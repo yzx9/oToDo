@@ -33,8 +33,8 @@ func JwtAuthMiddleware() func(*gin.Context) {
 			return
 		}
 
-		c.Keys[ContextKeyAccessToken] = token
-		c.Keys[ContextKeyUserID] = validation.UserID
+		c.Set(ContextKeyAccessToken, token)
+		c.Set(ContextKeyUserID, validation.UserID)
 		if validation.NewAccessToken {
 			c.Header(headerKey, "bearer "+validation.AccessToken)
 		}
