@@ -72,12 +72,7 @@ func (r SharingRepository) FindByUser(userID int64, sharingType todolist.Sharing
 		return nil, util.WrapGormErr(err, "sharing")
 	}
 
-	entities := make([]todolist.Sharing, len(POs))
-	for i := range POs {
-		entities = append(entities, r.convertToEntity(POs[i]))
-	}
-
-	return entities, nil
+	return r.convertToEntities(POs), nil
 }
 
 func (r SharingRepository) FindAllActive(userID int64, sharingType todolist.SharingType) ([]todolist.Sharing, error) {
@@ -95,12 +90,7 @@ func (r SharingRepository) FindAllActive(userID int64, sharingType todolist.Shar
 		return nil, util.WrapGormErr(err, "sharing")
 	}
 
-	entities := make([]todolist.Sharing, len(POs))
-	for i := range POs {
-		entities = append(entities, r.convertToEntity(POs[i]))
-	}
-
-	return entities, nil
+	return r.convertToEntities(POs), nil
 }
 
 func (r SharingRepository) ExistActiveOne(userID int64, sharingType todolist.SharingType) (bool, error) {
@@ -147,4 +137,8 @@ func (r SharingRepository) convertToEntity(po Sharing) todolist.Sharing {
 
 		UserID: po.UserID,
 	}
+}
+
+func (r SharingRepository) convertToEntities(POs []Sharing) []todolist.Sharing {
+	return util.Map(r.convertToEntity, POs)
 }

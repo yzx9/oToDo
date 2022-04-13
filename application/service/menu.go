@@ -13,7 +13,7 @@ func GetMenu(userID int64) ([]dto.MenuItem, error) {
 		return nil, err
 	}
 
-	items := make([]dto.MenuItem, len(menu))
+	items := make([]dto.MenuItem, 0, len(menu))
 
 	var assembler func(a todolist.MenuItem) dto.MenuItem
 	assembler = func(a todolist.MenuItem) dto.MenuItem {

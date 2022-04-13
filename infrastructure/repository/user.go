@@ -165,14 +165,5 @@ func (r UserRepository) convertToEntity(po User) user.User {
 }
 
 func (r UserRepository) convertToEntities(POs []User) []user.User {
-	if POs == nil {
-		return nil
-	}
-
-	entities := make([]user.User, len(POs))
-	for i := range entities {
-		entities = append(entities, r.convertToEntity(POs[i]))
-	}
-
-	return entities
+	return util.Map(r.convertToEntity, POs)
 }

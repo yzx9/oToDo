@@ -71,12 +71,7 @@ func (r TodoListFolderRepository) FindAllByUser(userId int64) ([]todolist.TodoLi
 		return nil, util.WrapGormErr(err, "todo list folder")
 	}
 
-	entities := make([]todolist.TodoListFolder, len(POs))
-	for i := range POs {
-		entities = append(entities, r.convertToEntity(POs[i]))
-	}
-
-	return entities, nil
+	return r.convertToEntities(POs), nil
 }
 
 func (r TodoListFolderRepository) Exist(id int64) (bool, error) {
@@ -116,4 +111,8 @@ func (r TodoListFolderRepository) convertToEntity(po TodoListFolder) todolist.To
 		UserID:    po.UserID,
 		TodoLists: nil, // TODO
 	}
+}
+
+func (r TodoListFolderRepository) convertToEntities(POs []TodoListFolder) []todolist.TodoListFolder {
+	return util.Map(r.convertToEntity, POs)
 }
