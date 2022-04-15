@@ -5,6 +5,7 @@ var TodoStepRepository todoStepRepository
 var TodoRepeatPlanRepository todoRepeatPlanRepository
 var TagRepository tagRepository
 var TagTodoRepository tagTodoRepository
+var TodoFileRepository todoFileRepository // TODO move to todo domain
 
 type todoRepository interface {
 	Save(todo *Todo) error
@@ -40,4 +41,8 @@ type tagTodoRepository interface {
 	Save(userID, todoID int64, tagName string) error
 
 	Delete(userID, todoID int64, tagName string) error
+}
+
+type todoFileRepository interface {
+	Save(todoID, fileID int64) error
 }

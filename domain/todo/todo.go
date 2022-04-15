@@ -146,3 +146,11 @@ func (todo Todo) GetStep(id int64) (TodoStep, error) {
 
 	return step, err
 }
+
+func (todo Todo) AddFile(fileID int64) error {
+	if err := TodoFileRepository.Save(todo.ID, fileID); err != nil {
+		return fmt.Errorf("fails to upload todo file: %w", err)
+	}
+
+	return nil
+}

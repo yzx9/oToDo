@@ -31,9 +31,26 @@ type File struct {
 	RelatedID    int64  `json:"-"` // Depend on access type
 }
 
-func GetFile(fileID int64) (*File, error) {
+func GetFileByUser(userID, fileID int64) (*File, error) {
 	file, err := FileRepository.Find(fileID)
-	return file, fmt.Errorf("fails to get file: %w", err)
+	if err != nil {
+		return nil, fmt.Errorf("fails to get file: %w", err)
+	}
+
+	switch FileAccessType(file.AccessType) {
+	case FileTypePublic:
+		break
+
+	case FileTypeTodo:
+		if _, err := todo.GetTodoByUser(userID, file.RelatedID); err != nil {
+			return nil, util.NewErrorWithForbidden("unable to get non-owned file: %w", err)
+		}
+
+	default:
+		return nil, fmt.Errorf("invalid file access type: %v", file.AccessType)
+	}
+
+	return file, nil
 }
 
 func UploadPublicFile(file *multipart.FileHeader) (File, error) {
@@ -50,8 +67,10 @@ func UploadPublicFile(file *multipart.FileHeader) (File, error) {
 	return record, err
 }
 
+// TODO move to todo
 func UploadTodoFile(userID, todoID int64, file *multipart.FileHeader) (File, error) {
-	if _, err := todo.GetTodoByUser(userID, todoID); err != nil {
+	todo, err := todo.GetTodoByUser(userID, todoID)
+	if err != nil {
 		return File{}, err
 	}
 
@@ -64,8 +83,9 @@ func UploadTodoFile(userID, todoID int64, file *multipart.FileHeader) (File, err
 		return File{}, err
 	}
 
-	if err := TodoFileRepository.Save(todoID, record.ID); err != nil {
-		return File{}, fmt.Errorf("fails to upload todo file: %w", err)
+	if err := todo.AddFile(record.ID); err != nil {
+		// TODO rollback
+		return File{}, err
 	}
 
 	return record, nil
@@ -98,27 +118,9 @@ func (record *File) upload(file *multipart.FileHeader) error {
 	return nil
 }
 
-// Get file path, auto
-func OwnFile(userID, fileID int64) (*File, error) {
-	file, err := GetFile(fileID)
-	if err != nil {
-		return nil, err
-	}
-
-	switch FileAccessType(file.AccessType) {
-	case FileTypePublic:
-		break
-
-	case FileTypeTodo:
-		if _, err := todo.GetTodoByUser(userID, file.RelatedID); err != nil {
-			return nil, util.NewErrorWithForbidden("unable to get non-owned file: %w", err)
-		}
-
-	default:
-		return nil, fmt.Errorf("invalid file access type: %v", file.AccessType)
-	}
-
-	return file, nil
+func (file *File) GetFilePath() string {
+	// TODO[feat]: If exist multi servers, how to get file? maybe we need redirect
+	return file.FilePath
 }
 
 func (file *File) newFilePath() string {
@@ -129,9 +131,4 @@ func (file *File) newFilePath() string {
 	template = strings.ReplaceAll(template, ":path", file.FilePath)
 	template = strings.ReplaceAll(template, ":date", file.CreatedAt.Format("20060102"))
 	return template
-}
-
-func (file *File) GetFilePath() string {
-	// TODO[feat]: If exist multi servers, how to get file? maybe we need redirect
-	return file.FilePath
 }

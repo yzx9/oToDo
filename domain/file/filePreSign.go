@@ -9,7 +9,7 @@ import (
 )
 
 // Configurable
-const fileSignedMaxExpiresIn = 6 * time.Hour
+const preSignMaxExpiresIn = 6 * time.Hour
 
 type FilePreSignClaims struct {
 	session.JWTClaims
@@ -17,26 +17,9 @@ type FilePreSignClaims struct {
 	FileID int64 `json:"fileID"`
 }
 
-func CreateFilePreSignID(userID, fileID int64, exp int) (string, error) {
-	expiresIn := time.Duration(exp * int(time.Second))
-	if expiresIn > fileSignedMaxExpiresIn {
-		return "", util.NewErrorWithPreconditionFailed("expires is too long")
-	}
-
-	if _, err := OwnFile(userID, fileID); err != nil {
-		return "", err
-	}
-
-	token := session.NewToken(FilePreSignClaims{
-		JWTClaims: session.NewClaims(userID, expiresIn),
-		FileID:    fileID,
-	})
-	return base64.StdEncoding.EncodeToString([]byte(token)), nil
-}
-
-func ParseFilePreSignID(filePresignedID string) (int64, error) {
-	write := func() (int64, error) {
-		return 0, util.NewErrorWithPreconditionFailed("invalid presigned file id")
+func ParseFilePreSignID(filePresignedID string) (*File, error) {
+	write := func() (*File, error) {
+		return nil, util.NewErrorWithPreconditionFailed("invalid file")
 	}
 
 	payload, err := base64.StdEncoding.DecodeString(filePresignedID)
@@ -54,5 +37,27 @@ func ParseFilePreSignID(filePresignedID string) (int64, error) {
 		return write()
 	}
 
-	return claims.FileID, nil
+	file, err := FileRepository.Find(claims.FileID)
+	if err != nil {
+		return write()
+	}
+
+	return file, nil
+}
+
+func (file File) CreateFilePreSignID(userID int64, exp int) (string, error) {
+	expiresIn := time.Duration(exp * int(time.Second))
+	if expiresIn > preSignMaxExpiresIn {
+		return "", util.NewErrorWithPreconditionFailed("expires is too long")
+	}
+
+	if _, err := GetFileByUser(userID, file.ID); err != nil {
+		return "", err
+	}
+
+	token := session.NewToken(FilePreSignClaims{
+		JWTClaims: session.NewClaims(userID, expiresIn),
+		FileID:    file.ID,
+	})
+	return base64.StdEncoding.EncodeToString([]byte(token)), nil
 }

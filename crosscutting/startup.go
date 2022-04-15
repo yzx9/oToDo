@@ -32,7 +32,6 @@ func StartUp() error {
 
 func startUpDomain(db *gorm.DB) error {
 	file.FileRepository = repository.NewFileRepository(db)
-	file.TodoFileRepository = repository.NewTodoFileRepository(db)
 
 	session.UserRepository = repository.NewUserRepository(db)
 	session.UserInvalidRefreshTokenRepository = repository.NewUserInvalidRefreshTokenRepository(db)
@@ -42,6 +41,7 @@ func startUpDomain(db *gorm.DB) error {
 	todo.TodoRepeatPlanRepository = repository.NewTodoRepeatPlanRepository(db)
 	todo.TagRepository = repository.NewTagRepository(db)
 	todo.TagTodoRepository = repository.NewTagTodoRepository(db)
+	todo.TodoFileRepository = repository.NewTodoFileRepository(db)
 
 	todolist.TodoRepository = repository.NewTodoRepository(db)
 	todolist.TodoListRepository = repository.NewTodoListRepository(db)
