@@ -21,7 +21,10 @@ func Login(credential dto.UserCredential) (dto.SessionTokens, error) {
 		return dto.SessionTokens{}, err
 	}
 
-	refreshToken := tokens.NewRefreshToken(credential.RefreshTokenExpiresIn)
+	refreshToken, err := tokens.NewRefreshToken(credential.RefreshTokenExpiresIn)
+	if err != nil {
+		return dto.SessionTokens{}, err
+	}
 
 	return dto.SessionTokens{
 		AccessToken:  accessToken.Token,
@@ -42,13 +45,35 @@ func LoginByGithubOAuth(code string, state string) (dto.SessionTokens, error) {
 		return dto.SessionTokens{}, err
 	}
 
-	refreshToken := session.NewRefreshToken(config.Session.RefreshTokenExpiresInOAuth)
+	refreshToken, err := session.NewRefreshToken(config.Session.RefreshTokenExpiresInOAuth)
+	if err != nil {
+		return dto.SessionTokens{}, err
+	}
 
 	return dto.SessionTokens{
 		AccessToken:  accessToken.Token,
 		TokenType:    TokenType,
 		ExpiresIn:    accessToken.ExpiresIn,
 		RefreshToken: refreshToken.Token,
+	}, nil
+}
+
+func LoginByRefreshToken(token string) (dto.SessionTokens, error) {
+	session, err := user.LoginByRefreshToken(token)
+	if err != nil {
+		return dto.SessionTokens{}, err
+	}
+
+	accessToken, err := session.NewAccessToken()
+	if err != nil {
+		return dto.SessionTokens{}, err
+	}
+
+	return dto.SessionTokens{
+		AccessToken:  accessToken.Token,
+		TokenType:    TokenType,
+		ExpiresIn:    accessToken.ExpiresIn,
+		RefreshToken: token,
 	}, nil
 }
 
@@ -94,7 +119,12 @@ func Logout(accessToken string) {
 }
 
 func CreateGithubOAuthURI() (dto.OAuthRedirector, error) {
-	uri, err := user.CreateGithubOAuthURI()
+	oauth, err := user.NewOAuthEntry()
+	if err != nil {
+		return dto.OAuthRedirector{}, nil
+	}
+
+	uri, err := oauth.GetGithubOAuthURI()
 	if err != nil {
 		return dto.OAuthRedirector{}, nil
 	}
@@ -102,20 +132,6 @@ func CreateGithubOAuthURI() (dto.OAuthRedirector, error) {
 	return dto.OAuthRedirector{
 		RedirectURI: uri,
 	}, nil
-}
-
-func CreateNewToken(refreshToken string) (user.Token, error) {
-	session, err := user.LoginByRefreshToken(refreshToken)
-	if err != nil {
-		return user.Token{}, err
-	}
-
-	newToken, err := session.NewAccessToken()
-	if err != nil {
-		return user.Token{}, fmt.Errorf("fails to refresh token: %w", err)
-	}
-
-	return newToken, nil
 }
 
 func CreateUser(newUser dto.NewUser) (user.User, error) {

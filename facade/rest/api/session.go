@@ -50,7 +50,7 @@ func PostSessionTokenHandler(c *gin.Context) {
 		common.AbortWithError(c, fmt.Errorf("refreshToken required"))
 	}
 
-	token, err := service.CreateNewToken(payload.RefreshToken)
+	token, err := service.LoginByRefreshToken(payload.RefreshToken)
 	if err != nil {
 		common.AbortWithError(c, err)
 		return

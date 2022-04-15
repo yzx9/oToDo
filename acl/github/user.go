@@ -48,7 +48,7 @@ type UserPublicProfile struct {
 	UpdatedAt         time.Time `json:"updated_at"`
 }
 
-func FetchGithubUserPublicProfile(token string) (UserPublicProfile, error) {
+func FetchUserPublicProfile(token string) (UserPublicProfile, error) {
 	write := func(err error) (UserPublicProfile, error) {
 		return UserPublicProfile{}, err
 	}
