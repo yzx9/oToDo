@@ -5,6 +5,7 @@ import (
 
 	"github.com/yzx9/otodo/application/service"
 	"github.com/yzx9/otodo/domain/file"
+	"github.com/yzx9/otodo/domain/session"
 	"github.com/yzx9/otodo/domain/todo"
 	"github.com/yzx9/otodo/domain/todolist"
 	"github.com/yzx9/otodo/domain/user"
@@ -33,6 +34,9 @@ func startUpDomain(db *gorm.DB) error {
 	file.FileRepository = repository.NewFileRepository(db)
 	file.TodoFileRepository = repository.NewTodoFileRepository(db)
 
+	session.UserRepository = repository.NewUserRepository(db)
+	session.UserInvalidRefreshTokenRepository = repository.NewUserInvalidRefreshTokenRepository(db)
+
 	todo.TodoRepository = repository.NewTodoRepository(db)
 	todo.TodoStepRepository = repository.NewTodoStepRepository(db)
 	todo.TodoRepeatPlanRepository = repository.NewTodoRepeatPlanRepository(db)
@@ -46,7 +50,6 @@ func startUpDomain(db *gorm.DB) error {
 	todolist.TodoListSharingRepository = repository.NewTodoListSharingRepository(db)
 
 	user.UserRepository = repository.NewUserRepository(db)
-	user.UserInvalidRefreshTokenRepository = repository.NewUserInvalidRefreshTokenRepository(db)
 	user.ThirdPartyOAuthTokenRepository = repository.NewThirdPartyOAuthTokenRepository(db)
 	user.TodoListRepo = repository.NewTodoListRepository(db)
 

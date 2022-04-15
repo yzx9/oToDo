@@ -3,7 +3,6 @@ package user
 import "github.com/yzx9/otodo/domain/todolist"
 
 var UserRepository userRepository
-var UserInvalidRefreshTokenRepository userInvalidRefreshTokenRepository
 var ThirdPartyOAuthTokenRepository thirdPartyOAuthTokenRepository
 var TodoListRepo todoListRepository
 
@@ -21,12 +20,6 @@ type userRepository interface {
 	ExistByUserName(username string) (bool, error)
 
 	ExistByGithubID(githubID int64) (bool, error)
-}
-
-type userInvalidRefreshTokenRepository interface {
-	Save(entity *UserInvalidRefreshToken) error
-
-	Exist(userID int64, tokenID string) (bool, error)
 }
 
 type thirdPartyOAuthTokenRepository interface {

@@ -75,34 +75,10 @@ func GetCryptoPassword(password string) []byte {
 }
 
 /**
- * Invalid User Refresh Token
- */
-type UserInvalidRefreshToken struct {
-	ID        int64
-	CreatedAt time.Time
-	UpdatedAt time.Time
-
-	UserID  int64
-	TokenID string
-}
-
-func CreateUserInvalidRefreshToken(userID int64, tokenID string) (UserInvalidRefreshToken, error) {
-	model := UserInvalidRefreshToken{
-		UserID:  userID,
-		TokenID: tokenID,
-	}
-	if err := UserInvalidRefreshTokenRepository.Save(&model); err != nil {
-		return UserInvalidRefreshToken{}, fmt.Errorf("fails to make user refresh token invalid: %w", err)
-	}
-
-	return model, nil
-}
-
-/**
  * OAuth
  */
 
-func getOrRegisterUserByGithub(profile github.UserPublicProfile) (User, error) {
+func GetOrRegisterUserByGithub(profile github.UserPublicProfile) (User, error) {
 	exist, err := UserRepository.ExistByGithubID(profile.ID)
 	if err != nil {
 		return User{}, util.NewErrorWithUnknown("fails to register user: %w", err)

@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"time"
 
-	"github.com/yzx9/otodo/domain/user"
+	"github.com/yzx9/otodo/domain/session"
 	"github.com/yzx9/otodo/infrastructure/util"
 )
 
@@ -12,9 +12,8 @@ import (
 const fileSignedMaxExpiresIn = 6 * time.Hour
 
 type FilePreSignClaims struct {
-	user.JWTClaims
+	session.JWTClaims
 
-	UserID int64 `json:"uid"`
 	FileID int64 `json:"fileID"`
 }
 
@@ -28,9 +27,8 @@ func CreateFilePreSignID(userID, fileID int64, exp int) (string, error) {
 		return "", err
 	}
 
-	token := user.NewToken(FilePreSignClaims{
-		JWTClaims: user.NewClaims(userID, expiresIn),
-		UserID:    userID,
+	token := session.NewToken(FilePreSignClaims{
+		JWTClaims: session.NewClaims(userID, expiresIn),
 		FileID:    fileID,
 	})
 	return base64.StdEncoding.EncodeToString([]byte(token)), nil
@@ -46,7 +44,7 @@ func ParseFilePreSignID(filePresignedID string) (int64, error) {
 		return write()
 	}
 
-	token, err := user.ParseToken(string(payload), &FilePreSignClaims{})
+	token, err := session.ParseToken(string(payload), &FilePreSignClaims{})
 	if err != nil || !token.Valid {
 		return write()
 	}
