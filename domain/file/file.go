@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"mime/multipart"
 	"path/filepath"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/yzx9/otodo/domain/todo"
 	"github.com/yzx9/otodo/infrastructure/config"
 	"github.com/yzx9/otodo/infrastructure/errors"
 	"github.com/yzx9/otodo/infrastructure/util"
@@ -17,74 +15,42 @@ import (
 
 const maxFileSize = 8 << 20 // 8MiB
 
-var supportedFileTypeRegex = regexp.MustCompile(`.(jpg|jpeg|JPG|png|PNG|gif|GIF|ico|ICO)$`)
-
 type File struct {
-	ID        int64     `json:"id"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	ID        int64
+	CreatedAt time.Time
+	UpdatedAt time.Time
 
-	FileName     string `json:"fileName"`
-	FileServerID string `json:"-"`
-	FilePath     string `json:"-"`
-	AccessType   int8   `json:"-"` // FileAccessType
-	RelatedID    int64  `json:"-"` // Depend on access type
+	FileName     string
+	FileServerID string
+	FilePath     string
+	AccessType   FileAccessType // FileAccessType
+	RelatedID    int64          // Depend on access type
 }
 
-func GetFileByUser(userID, fileID int64) (*File, error) {
-	file, err := FileRepository.Find(fileID)
+var Notfound = fmt.Errorf("file not found")
+
+func GetFile(fileID int64) (*File, error) {
+	f, err := FileRepository.Find(fileID)
+
 	if err != nil {
-		return nil, fmt.Errorf("fails to get file: %w", err)
+		return nil, Notfound
 	}
 
-	switch FileAccessType(file.AccessType) {
-	case FileTypePublic:
-		break
-
-	case FileTypeTodo:
-		if _, err := todo.GetTodoByUser(userID, file.RelatedID); err != nil {
-			return nil, util.NewErrorWithForbidden("unable to get non-owned file: %w", err)
-		}
-
-	default:
-		return nil, fmt.Errorf("invalid file access type: %v", file.AccessType)
-	}
-
-	return file, nil
+	return f, nil
 }
 
-func UploadPublicFile(file *multipart.FileHeader) (File, error) {
-	// only support img now
-	if !supportedFileTypeRegex.MatchString(file.Filename) {
-		return File{}, util.NewErrorWithForbidden("unsupported file type")
-	}
-
+func UploadFile(
+	accessType FileAccessType,
+	relatedID int64,
+	file *multipart.FileHeader,
+) (File, error) {
 	record := File{
 		FileName:   file.Filename,
-		AccessType: int8(FileTypePublic),
-	}
-	err := record.upload(file)
-	return record, err
-}
-
-// TODO move to todo
-func UploadTodoFile(userID, todoID int64, file *multipart.FileHeader) (File, error) {
-	todo, err := todo.GetTodoByUser(userID, todoID)
-	if err != nil {
-		return File{}, err
+		AccessType: accessType,
+		RelatedID:  relatedID,
 	}
 
-	record := File{
-		FileName:   file.Filename,
-		AccessType: int8(FileTypeTodo),
-		RelatedID:  todoID,
-	}
 	if err := record.upload(file); err != nil {
-		return File{}, err
-	}
-
-	if err := todo.AddFile(record.ID); err != nil {
-		// TODO rollback
 		return File{}, err
 	}
 

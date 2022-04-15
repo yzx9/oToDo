@@ -2,8 +2,10 @@ package service
 
 import (
 	"fmt"
+	"mime/multipart"
 
 	"github.com/yzx9/otodo/application/dto"
+	"github.com/yzx9/otodo/domain/file"
 	"github.com/yzx9/otodo/domain/todo"
 	"github.com/yzx9/otodo/domain/todolist"
 )
@@ -81,6 +83,25 @@ func DeleteTodoStep(userID, todoID, todoStepID int64) (todo.TodoStep, error) {
 	}
 
 	return step, err
+}
+
+func UploadTodoFile(userID, todoID int64, file *multipart.FileHeader) (dto.FileDTO, error) {
+	todo, err := todo.GetTodoByUser(userID, todoID)
+	if err != nil {
+		return dto.FileDTO{}, err
+	}
+
+	record, err := todo.AddFile(file)
+	if err != nil {
+		return dto.FileDTO{}, err
+	}
+
+	return dto.FileDTO{FileID: record.ID}, nil
+}
+
+func CanAccessTodoFile(request file.PermissionRequest) bool {
+	_, err := todo.GetTodoByUser(request.VisitorID, request.RelatedID)
+	return err == nil
 }
 
 func GetTodo(userID, todoID int64) (todo.Todo, error) {

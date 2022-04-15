@@ -57,7 +57,7 @@ func (r FileRepository) convertToPO(f *file.File) File {
 		FileName:     f.FileName,
 		FileServerID: f.FileServerID,
 		FilePath:     f.FilePath,
-		AccessType:   f.AccessType,
+		AccessType:   int8(f.AccessType),
 		RelatedID:    f.RelatedID,
 	}
 }
@@ -71,7 +71,7 @@ func (r FileRepository) convertToEntity(f File) file.File {
 		FileName:     f.FileName,
 		FileServerID: f.FileServerID,
 		FilePath:     f.FilePath,
-		AccessType:   f.AccessType,
+		AccessType:   file.FileAccessType(f.AccessType),
 		RelatedID:    f.RelatedID,
 	}
 }

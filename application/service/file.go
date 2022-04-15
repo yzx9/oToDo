@@ -2,6 +2,7 @@ package service
 
 import (
 	"mime/multipart"
+	"regexp"
 	"strconv"
 
 	"github.com/yzx9/otodo/application/dto"
@@ -9,17 +10,15 @@ import (
 	"github.com/yzx9/otodo/infrastructure/util"
 )
 
+var supportedFileTypeRegex = regexp.MustCompile(`.(jpg|jpeg|JPG|png|PNG|gif|GIF|ico|ICO)$`)
+
 func UploadPublicFile(f *multipart.FileHeader) (dto.FileDTO, error) {
-	record, err := file.UploadPublicFile(f)
-	if err != nil {
-		return dto.FileDTO{}, err
+	// only support img now
+	if !supportedFileTypeRegex.MatchString(f.Filename) {
+		return dto.FileDTO{}, util.NewErrorWithForbidden("unsupported file type")
 	}
 
-	return dto.FileDTO{FileID: record.ID}, nil
-}
-
-func UploadTodoFile(userID, todoID int64, f *multipart.FileHeader) (dto.FileDTO, error) {
-	record, err := file.UploadTodoFile(userID, todoID, f)
+	record, err := file.UploadFile(file.FileTypePublic, 0, f)
 	if err != nil {
 		return dto.FileDTO{}, err
 	}
@@ -32,22 +31,20 @@ func GetFilePath(userID int64, fileID string) (string, error) {
 
 	var f *file.File
 	if err == nil {
-		f, err = file.GetFileByUser(userID, id)
-		if err != nil {
-			return "", err
-		}
+		f, err = file.GetFile(id)
 	} else {
-		f, err = file.ParseFilePreSignID(fileID)
-		if err != nil {
-			return "", util.NewErrorWithNotFound("file not found")
-		}
+		f, err = file.GetFileByPreSignID(fileID)
+	}
+
+	if err != nil || !f.CanAccessByUser(userID) {
+		return "", file.Notfound
 	}
 
 	return f.GetFilePath(), nil
 }
 
 func PreSignFile(payload dto.FilePreSign) (dto.FilePreSignResult, error) {
-	file, err := file.GetFileByUser(payload.UserID, payload.FileID)
+	file, err := file.GetFile(payload.FileID)
 	if err != nil {
 		return dto.FilePreSignResult{}, err
 	}

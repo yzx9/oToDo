@@ -31,11 +31,15 @@ func StartUp() error {
 }
 
 func startUpDomain(db *gorm.DB) error {
+	// File
 	file.FileRepository = repository.NewFileRepository(db)
+	file.PermissionCheckerFactory.Register(file.FileTypeTodo, service.CanAccessTodoFile)
 
+	// Session
 	session.UserRepository = repository.NewUserRepository(db)
 	session.UserInvalidRefreshTokenRepository = repository.NewUserInvalidRefreshTokenRepository(db)
 
+	// Todo
 	todo.TodoRepository = repository.NewTodoRepository(db)
 	todo.TodoStepRepository = repository.NewTodoStepRepository(db)
 	todo.TodoRepeatPlanRepository = repository.NewTodoRepeatPlanRepository(db)
@@ -43,12 +47,14 @@ func startUpDomain(db *gorm.DB) error {
 	todo.TagTodoRepository = repository.NewTagTodoRepository(db)
 	todo.TodoFileRepository = repository.NewTodoFileRepository(db)
 
+	// Todo List
 	todolist.TodoRepository = repository.NewTodoRepository(db)
 	todolist.TodoListRepository = repository.NewTodoListRepository(db)
 	todolist.TodoListFolderRepository = repository.NewTodoListFolderRepository(db)
 	todolist.SharingRepository = repository.NewSharingRepository(db)
 	todolist.TodoListSharingRepository = repository.NewTodoListSharingRepository(db)
 
+	// User
 	user.UserRepository = repository.NewUserRepository(db)
 	user.ThirdPartyOAuthTokenRepository = repository.NewThirdPartyOAuthTokenRepository(db)
 	user.TodoListRepo = repository.NewTodoListRepository(db)
