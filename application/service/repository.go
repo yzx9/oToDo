@@ -18,6 +18,8 @@ type userRepository interface {
 }
 
 type todoRepository interface {
+	Find(id int64) (todo.Todo, error)
+
 	FindAllByTodoList(todoListID int64) ([]todo.Todo, error)
 
 	FindAllImportantOnesByUser(userID int64) ([]todo.Todo, error)

@@ -12,18 +12,18 @@ import (
 
 var supportedFileTypeRegex = regexp.MustCompile(`.(jpg|jpeg|JPG|png|PNG|gif|GIF|ico|ICO)$`)
 
-func UploadPublicFile(f *multipart.FileHeader) (dto.FileDTO, error) {
+func UploadPublicFile(f *multipart.FileHeader) (dto.File, error) {
 	// only support img now
 	if !supportedFileTypeRegex.MatchString(f.Filename) {
-		return dto.FileDTO{}, util.NewErrorWithForbidden("unsupported file type")
+		return dto.File{}, util.NewErrorWithForbidden("unsupported file type")
 	}
 
 	record, err := file.UploadFile(file.FileTypePublic, 0, f)
 	if err != nil {
-		return dto.FileDTO{}, err
+		return dto.File{}, err
 	}
 
-	return dto.FileDTO{FileID: record.ID}, nil
+	return dto.File{FileID: record.ID}, nil
 }
 
 func GetFilePath(userID int64, fileID string) (string, error) {

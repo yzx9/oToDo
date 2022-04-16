@@ -7,8 +7,9 @@ import (
 
 	"github.com/yzx9/otodo/domain/file"
 	"github.com/yzx9/otodo/domain/todolist"
-	"github.com/yzx9/otodo/infrastructure/util"
 )
+
+var PermissionDenied = fmt.Errorf("permission denied")
 
 type Todo struct {
 	ID        int64
@@ -38,19 +39,6 @@ type Todo struct {
 	NextID *int64 // next todo id if repeat
 }
 
-func GetTodoByUser(userID, todoID int64) (Todo, error) {
-	todo, err := TodoRepository.Find(todoID)
-	if err != nil {
-		return Todo{}, fmt.Errorf("fails to get todo: %w", err)
-	}
-
-	if _, err = todolist.OwnOrSharedTodoList(userID, todo.TodoListID); err != nil {
-		return Todo{}, util.NewErrorWithForbidden("unable to handle non-owned todo: %v", todo.ID)
-	}
-
-	return todo, nil
-}
-
 func (todo *Todo) New() error {
 	if _, err := todolist.OwnOrSharedTodoList(todo.UserID, todo.TodoListID); err != nil {
 		return fmt.Errorf("fails to get todo list: %w", err)
@@ -72,9 +60,13 @@ func (todo *Todo) New() error {
 
 func (todo *Todo) Save(userID int64) error {
 	// Limits
-	oldTodo, err := GetTodoByUser(userID, todo.ID)
+	if !todo.CanAccessByUser(userID) {
+		return PermissionDenied
+	}
+
+	oldTodo, err := TodoRepository.Find(todo.ID)
 	if err != nil {
-		return err
+		return fmt.Errorf("fails to get todo: %w", err)
 	}
 
 	todo.CreatedAt = oldTodo.CreatedAt
@@ -117,8 +109,8 @@ func (todo *Todo) Save(userID int64) error {
 }
 
 func (todo Todo) Delete(userID int64) error {
-	if _, err := GetTodoByUser(userID, todo.ID); err != nil {
-		return err
+	if !todo.CanAccessByUser(userID) {
+		return PermissionDenied
 	}
 
 	if err := TodoRepository.Delete(todo.ID); err != nil {
@@ -128,6 +120,11 @@ func (todo Todo) Delete(userID int64) error {
 	go UpdateTagAsync(&todo, "")
 
 	return nil
+}
+
+func (todo Todo) CanAccessByUser(userID int64) bool {
+	_, err := todolist.OwnOrSharedTodoList(userID, todo.TodoListID)
+	return err == nil
 }
 
 func (todo Todo) NewStep() TodoStep {

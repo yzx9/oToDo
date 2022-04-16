@@ -1,6 +1,6 @@
 package dto
 
-type FileDTO struct {
+type File struct {
 	FileID int64 `json:"fileID"`
 }
 

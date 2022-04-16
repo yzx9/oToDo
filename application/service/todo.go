@@ -31,25 +31,33 @@ func UpdateTodo(userID int64, todo dto.Todo) (dto.Todo, error) {
 }
 
 func DeleteTodo(userID int64, todoID int64) (dto.Todo, error) {
-	todo, err := todo.GetTodoByUser(userID, todoID)
+	t, err := TodoRepository.Find(todoID)
 	if err != nil {
+		return dto.Todo{}, fmt.Errorf("fails to get todo: %w", err)
+	}
+
+	if !t.CanAccessByUser(userID) {
+		return dto.Todo{}, todo.PermissionDenied
+	}
+
+	if err := t.Delete(userID); err != nil {
 		return dto.Todo{}, err
 	}
 
-	if err := todo.Delete(userID); err != nil {
-		return dto.Todo{}, err
-	}
-
-	return dto.Todo{}.FromEntity(todo), nil
+	return dto.Todo{}.FromEntity(t), nil
 }
 
 func CreateTodoStep(userID int64, step dto.NewTodoStep) (dto.TodoStep, error) {
-	todo, err := todo.GetTodoByUser(userID, step.TodoID)
+	t, err := TodoRepository.Find(step.TodoID)
 	if err != nil {
-		return dto.TodoStep{}, nil
+		return dto.TodoStep{}, fmt.Errorf("fails to get todo: %w", err)
 	}
 
-	entity := todo.NewStep()
+	if !t.CanAccessByUser(userID) {
+		return dto.TodoStep{}, todo.PermissionDenied
+	}
+
+	entity := t.NewStep()
 	step.AssembleTo(&entity)
 	if err := entity.New(); err != nil {
 		return dto.TodoStep{}, err
@@ -68,12 +76,16 @@ func UpdateTodoStep(userID int64, step dto.TodoStep) (todo.TodoStep, error) {
 }
 
 func DeleteTodoStep(userID, todoID, todoStepID int64) (todo.TodoStep, error) {
-	entity, err := todo.GetTodoByUser(userID, todoID)
+	t, err := TodoRepository.Find(todoID)
 	if err != nil {
-		return todo.TodoStep{}, err
+		return todo.TodoStep{}, fmt.Errorf("fails to get todo: %w", err)
 	}
 
-	step, err := entity.GetStep(todoStepID)
+	if !t.CanAccessByUser(userID) {
+		return todo.TodoStep{}, todo.PermissionDenied
+	}
+
+	step, err := t.GetStep(todoStepID)
 	if err != nil {
 		return todo.TodoStep{}, err
 	}
@@ -85,32 +97,44 @@ func DeleteTodoStep(userID, todoID, todoStepID int64) (todo.TodoStep, error) {
 	return step, err
 }
 
-func UploadTodoFile(userID, todoID int64, file *multipart.FileHeader) (dto.FileDTO, error) {
-	todo, err := todo.GetTodoByUser(userID, todoID)
+func UploadTodoFile(userID, todoID int64, file *multipart.FileHeader) (dto.File, error) {
+	t, err := TodoRepository.Find(todoID)
 	if err != nil {
-		return dto.FileDTO{}, err
+		return dto.File{}, fmt.Errorf("fails to get todo: %w", err)
 	}
 
-	record, err := todo.AddFile(file)
-	if err != nil {
-		return dto.FileDTO{}, err
+	if !t.CanAccessByUser(userID) {
+		return dto.File{}, todo.PermissionDenied
 	}
 
-	return dto.FileDTO{FileID: record.ID}, nil
+	record, err := t.AddFile(file)
+	if err != nil {
+		return dto.File{}, err
+	}
+
+	return dto.File{FileID: record.ID}, nil
 }
 
 func CanAccessTodoFile(request file.PermissionRequest) bool {
-	_, err := todo.GetTodoByUser(request.VisitorID, request.RelatedID)
-	return err == nil
+	t, err := TodoRepository.Find(request.RelatedID)
+	if err != nil {
+		return false
+	}
+
+	return t.CanAccessByUser(request.VisitorID)
 }
 
 func GetTodo(userID, todoID int64) (todo.Todo, error) {
-	entity, err := todo.GetTodoByUser(userID, todoID)
+	t, err := TodoRepository.Find(todoID)
 	if err != nil {
 		return todo.Todo{}, fmt.Errorf("fails to get todo: %w", err)
 	}
 
-	return entity, nil
+	if !t.CanAccessByUser(userID) {
+		return todo.Todo{}, todo.PermissionDenied
+	}
+
+	return t, nil
 }
 
 func GetTodosByTodoList(todoListID int64) ([]todo.Todo, error) {
