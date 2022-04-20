@@ -1,10 +1,8 @@
-package user
+package identity
 
 import (
 	"fmt"
 	"time"
-
-	"github.com/yzx9/otodo/acl/github"
 )
 
 type ThirdPartyOAuthToken struct {
@@ -19,7 +17,7 @@ type ThirdPartyOAuthToken struct {
 	UserID int64
 }
 
-func NewGithubOAuthToken(payload github.OAuthToken) ThirdPartyOAuthToken {
+func NewGithubOAuthToken(payload OAuthToken) ThirdPartyOAuthToken {
 	token := ThirdPartyOAuthToken{
 		Active: true,
 		Type:   int8(ThirdPartyTokenTypeGithubAccessToken),

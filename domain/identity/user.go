@@ -1,4 +1,4 @@
-package user
+package identity
 
 import (
 	"bytes"
@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/yzx9/otodo/acl/github"
 	"github.com/yzx9/otodo/config"
 	"github.com/yzx9/otodo/domain/todolist"
 	"github.com/yzx9/otodo/infrastructure/errors"
@@ -28,9 +27,9 @@ type User struct {
 }
 
 type NewUser struct {
-	UserName string `json:"userName"`
-	Password string `json:"password"`
-	Nickname string `json:"nickname"`
+	UserName string
+	Password string
+	Nickname string
 }
 
 func CreateUser(payload NewUser) (User, error) {
@@ -56,7 +55,7 @@ func CreateUser(payload NewUser) (User, error) {
 		Nickname: payload.Nickname,
 		Password: GetCryptoPassword(payload.Password),
 	}
-	if err := createUser(&user); err != nil {
+	if err := user.new(); err != nil {
 		return User{}, fmt.Errorf("fails to create user: %w", err)
 	}
 
@@ -78,7 +77,7 @@ func GetCryptoPassword(password string) []byte {
  * OAuth
  */
 
-func GetOrRegisterUserByGithub(profile github.UserPublicProfile) (User, error) {
+func GetOrRegisterUserByGithub(profile GithubUserPublicProfile) (User, error) {
 	exist, err := UserRepository.ExistByGithubID(profile.ID)
 	if err != nil {
 		return User{}, util.NewErrorWithUnknown("fails to register user: %w", err)
@@ -101,7 +100,7 @@ func GetOrRegisterUserByGithub(profile github.UserPublicProfile) (User, error) {
 		Email:    profile.Email,
 		GithubID: profile.ID,
 	}
-	if err := createUser(&user); err != nil {
+	if err := user.new(); err != nil {
 		return User{}, fmt.Errorf("fails to create user: %w", err)
 	}
 
@@ -112,13 +111,13 @@ func GetOrRegisterUserByGithub(profile github.UserPublicProfile) (User, error) {
  * Helpers
  */
 
-func createUser(user *User) error {
+func (user *User) new() error {
 	if err := UserRepository.Save(user); err != nil {
 		return fmt.Errorf("fails to create user: %w", err)
 	}
 
 	// create base todo list
-	if _, err := createBasicTodoList(user); err != nil {
+	if _, err := user.createBasicTodoList(); err != nil {
 		return fmt.Errorf("fails to create user basic todo list: %w", err)
 	}
 
@@ -126,7 +125,7 @@ func createUser(user *User) error {
 }
 
 // TODO move to todo list domain
-func createBasicTodoList(user *User) (todolist.TodoList, error) {
+func (user *User) createBasicTodoList() (todolist.TodoList, error) {
 	basicTodoList := todolist.TodoList{
 		Name:    "Todos", // TODO i18n
 		IsBasic: true,

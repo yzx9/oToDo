@@ -1,6 +1,6 @@
 package dto
 
-import "github.com/yzx9/otodo/domain/user"
+import "github.com/yzx9/otodo/domain/identity"
 
 type NewUser struct {
 	UserName string `json:"userName"`
@@ -8,8 +8,8 @@ type NewUser struct {
 	Nickname string `json:"nickname"`
 }
 
-func (u NewUser) ToEntity() user.NewUser {
-	return user.NewUser{
+func (u NewUser) ToEntity() identity.NewUser {
+	return identity.NewUser{
 		UserName: u.UserName,
 		Password: u.Password,
 		Nickname: u.Nickname,

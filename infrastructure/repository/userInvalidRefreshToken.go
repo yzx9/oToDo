@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/yzx9/otodo/domain/session"
+	"github.com/yzx9/otodo/domain/identity"
 	"github.com/yzx9/otodo/util"
 	"gorm.io/gorm"
 )
@@ -23,7 +23,7 @@ func NewUserInvalidRefreshTokenRepository(db *gorm.DB) UserInvalidRefreshTokenRe
 	return UserInvalidRefreshTokenRepository{db: db}
 }
 
-func (r UserInvalidRefreshTokenRepository) Save(entity *session.UserInvalidRefreshToken) error {
+func (r UserInvalidRefreshTokenRepository) Save(entity *identity.UserInvalidRefreshToken) error {
 	po := r.convertToPO(*entity)
 	err := r.db.Save(&po).Error
 	entity.ID = po.ID
@@ -48,7 +48,7 @@ func (r UserInvalidRefreshTokenRepository) Exist(userID int64, tokenID string) (
 	return count != 0, nil
 }
 
-func (r UserInvalidRefreshTokenRepository) convertToPO(entity session.UserInvalidRefreshToken) UserInvalidRefreshToken {
+func (r UserInvalidRefreshTokenRepository) convertToPO(entity identity.UserInvalidRefreshToken) UserInvalidRefreshToken {
 	return UserInvalidRefreshToken{
 		Entity: Entity{
 			ID:        entity.ID,
@@ -60,8 +60,8 @@ func (r UserInvalidRefreshTokenRepository) convertToPO(entity session.UserInvali
 	}
 }
 
-func (r UserInvalidRefreshTokenRepository) convertToEntity(po UserInvalidRefreshToken) session.UserInvalidRefreshToken {
-	return session.UserInvalidRefreshToken{
+func (r UserInvalidRefreshTokenRepository) convertToEntity(po UserInvalidRefreshToken) identity.UserInvalidRefreshToken {
+	return identity.UserInvalidRefreshToken{
 		ID:        po.ID,
 		CreatedAt: po.CreatedAt,
 		UpdatedAt: po.UpdatedAt,

@@ -4,11 +4,12 @@ import (
 	"fmt"
 
 	"github.com/yzx9/otodo/application/service"
+	"github.com/yzx9/otodo/config"
 	"github.com/yzx9/otodo/domain/file"
-	"github.com/yzx9/otodo/domain/session"
+	"github.com/yzx9/otodo/domain/identity"
 	"github.com/yzx9/otodo/domain/todo"
 	"github.com/yzx9/otodo/domain/todolist"
-	"github.com/yzx9/otodo/domain/user"
+	"github.com/yzx9/otodo/driven/github"
 	"github.com/yzx9/otodo/infrastructure/repository"
 	"gorm.io/gorm"
 )
@@ -35,9 +36,9 @@ func startUpDomain(db *gorm.DB) error {
 	file.FileRepository = repository.NewFileRepository(db)
 	file.PermissionCheckerFactory.Register(file.FileTypeTodo, service.CanAccessTodoFile)
 
-	// Session
-	session.UserRepository = repository.NewUserRepository(db)
-	session.UserInvalidRefreshTokenRepository = repository.NewUserInvalidRefreshTokenRepository(db)
+	if err := startUpIdentityDomain(db); err != nil {
+		return nil
+	}
 
 	// Todo
 	todo.TodoRepository = repository.NewTodoRepository(db)
@@ -54,10 +55,22 @@ func startUpDomain(db *gorm.DB) error {
 	todolist.SharingRepository = repository.NewSharingRepository(db)
 	todolist.TodoListSharingRepository = repository.NewTodoListSharingRepository(db)
 
-	// User
-	user.UserRepository = repository.NewUserRepository(db)
-	user.ThirdPartyOAuthTokenRepository = repository.NewThirdPartyOAuthTokenRepository(db)
-	user.TodoListRepo = repository.NewTodoListRepository(db)
+	return nil
+}
+
+func startUpIdentityDomain(db *gorm.DB) error {
+	identity.UserRepository = repository.NewUserRepository(db)
+	identity.ThirdPartyOAuthTokenRepository = repository.NewThirdPartyOAuthTokenRepository(db)
+	identity.UserInvalidRefreshTokenRepository = repository.NewUserInvalidRefreshTokenRepository(db)
+	identity.TodoListRepo = repository.NewTodoListRepository(db)
+
+	// TODO: auto map
+	identity.GithubAdapter = github.New(github.Config{
+		ClientID:            config.GitHub.ClientID,
+		ClientSecret:        config.GitHub.ClientSecret,
+		OAuthRedirectURI:    config.GitHub.OAuthRedirectURI,
+		OAuthStateExpiresIn: config.GitHub.OAuthStateExpiresIn,
+	})
 
 	return nil
 }

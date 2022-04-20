@@ -1,13 +1,11 @@
-package session
+package identity
 
 import (
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/yzx9/otodo/acl/github"
 	"github.com/yzx9/otodo/config"
-	"github.com/yzx9/otodo/domain/user"
 	"github.com/yzx9/otodo/util"
 )
 
@@ -53,7 +51,7 @@ func GetOAuthEntryByState(state string) (OAuth, error) {
 }
 
 func (a OAuth) GetGithubOAuthURI() (string, error) {
-	uri, err := github.CreateOAuthURI(a.state)
+	uri, err := GithubAdapter.CreateOAuthURI(a.state)
 	if err != nil {
 		return "", util.NewErrorWithUnknown("fails to create github oauth uri: %w", err)
 	}
@@ -61,21 +59,21 @@ func (a OAuth) GetGithubOAuthURI() (string, error) {
 	return uri, nil
 }
 
-func (a OAuth) GetUserByGithub(code string) (user.User, error) {
-	payload, err := github.FetchOAuthToken(code)
+func (a OAuth) GetUserByGithub(code string) (User, error) {
+	payload, err := GithubAdapter.FetchOAuthToken(code)
 	if err != nil {
-		return user.User{}, util.NewErrorWithUnknown("fails to fetch github oauth token")
+		return User{}, util.NewErrorWithUnknown("fails to fetch github oauth token")
 	}
 
-	token := user.NewGithubOAuthToken(payload)
-	profile, err := github.FetchUserPublicProfile(token.Token)
+	token := NewGithubOAuthToken(payload)
+	profile, err := GithubAdapter.FetchUserPublicProfile(token.Token)
 	if err != nil {
-		return user.User{}, fmt.Errorf("fails to fetch github user: %w", err)
+		return User{}, fmt.Errorf("fails to fetch github user: %w", err)
 	}
 
-	u, err := user.GetOrRegisterUserByGithub(profile)
+	u, err := GetOrRegisterUserByGithub(profile)
 	if err != nil {
-		return user.User{}, fmt.Errorf("fails to get user: %w", err)
+		return User{}, fmt.Errorf("fails to get user: %w", err)
 	}
 
 	return u, nil

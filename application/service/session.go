@@ -5,13 +5,13 @@ import (
 
 	"github.com/yzx9/otodo/application/dto"
 	"github.com/yzx9/otodo/config"
-	"github.com/yzx9/otodo/domain/session"
+	"github.com/yzx9/otodo/domain/identity"
 )
 
 const TokenType = `bearer`
 
 func Login(credential dto.UserCredential) (dto.SessionTokens, error) {
-	tokens, err := session.LoginByCredential(credential.UserName, credential.Password)
+	tokens, err := identity.LoginByCredential(credential.UserName, credential.Password)
 	if err != nil {
 		return dto.SessionTokens{}, err
 	}
@@ -35,7 +35,7 @@ func Login(credential dto.UserCredential) (dto.SessionTokens, error) {
 }
 
 func LoginByGithubOAuth(code string, state string) (dto.SessionTokens, error) {
-	session, err := session.LoginByGithubOAuth(code, state)
+	session, err := identity.LoginByGithubOAuth(code, state)
 	if err != nil {
 		return dto.SessionTokens{}, err
 	}
@@ -59,7 +59,7 @@ func LoginByGithubOAuth(code string, state string) (dto.SessionTokens, error) {
 }
 
 func LoginByRefreshToken(token string) (dto.SessionTokens, error) {
-	session, err := session.LoginByRefreshToken(token)
+	session, err := identity.LoginByRefreshToken(token)
 	if err != nil {
 		return dto.SessionTokens{}, err
 	}
@@ -78,7 +78,7 @@ func LoginByRefreshToken(token string) (dto.SessionTokens, error) {
 }
 
 func LoginByAccessToken(token string) dto.SessionValidation {
-	session, err := session.LoginByAccessToken(token)
+	session, err := identity.LoginByAccessToken(token)
 	if err != nil {
 		return dto.SessionValidation{Valid: false}
 	}
@@ -104,7 +104,7 @@ func LoginByAccessToken(token string) dto.SessionValidation {
 }
 
 func Logout(accessToken string) {
-	session, err := session.LoginByAccessToken(accessToken)
+	session, err := identity.LoginByAccessToken(accessToken)
 	if err != nil {
 		// TODO log
 		fmt.Println(err.Error())
@@ -119,7 +119,7 @@ func Logout(accessToken string) {
 }
 
 func CreateGithubOAuthURI() (dto.OAuthRedirector, error) {
-	oauth, err := session.NewOAuthEntry()
+	oauth, err := identity.NewOAuthEntry()
 	if err != nil {
 		return dto.OAuthRedirector{}, nil
 	}

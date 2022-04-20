@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/yzx9/otodo/application/dto"
+	"github.com/yzx9/otodo/domain/identity"
 	"github.com/yzx9/otodo/domain/todolist"
-	"github.com/yzx9/otodo/domain/user"
 )
 
 func CreateTodoList(userID int64, todoList dto.NewTodoList) (dto.TodoList, error) {
@@ -85,7 +85,7 @@ func GetTodoListFolders(userID int64) ([]todolist.TodoListFolder, error) {
 	return vec, nil
 }
 
-func GetTodoListSharedUsers(userID, todoListID int64) ([]user.User, error) {
+func GetTodoListSharedUsers(userID, todoListID int64) ([]identity.User, error) {
 	if _, err := todolist.OwnOrSharedTodoList(userID, todoListID); err != nil {
 		return nil, err
 	}

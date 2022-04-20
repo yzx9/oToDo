@@ -1,8 +1,8 @@
 package repository
 
 import (
+	"github.com/yzx9/otodo/domain/identity"
 	"github.com/yzx9/otodo/domain/todolist"
-	"github.com/yzx9/otodo/domain/user"
 	"github.com/yzx9/otodo/util"
 	"gorm.io/gorm"
 )
@@ -200,7 +200,7 @@ func (r TodoListSharingRepository) SaveSharedUser(userID, todoListID int64) erro
 	return util.WrapGormErr(err, "todo list shared user")
 }
 
-func (r TodoListSharingRepository) FindAllSharedUsers(todoListID int64) ([]user.User, error) {
+func (r TodoListSharingRepository) FindAllSharedUsers(todoListID int64) ([]identity.User, error) {
 	var POs []User
 	err := r.db.
 		Model(&TodoList{

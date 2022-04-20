@@ -1,9 +1,9 @@
 package service
 
 import (
+	"github.com/yzx9/otodo/domain/identity"
 	"github.com/yzx9/otodo/domain/todo"
 	"github.com/yzx9/otodo/domain/todolist"
-	"github.com/yzx9/otodo/domain/user"
 )
 
 var UserRepository userRepository
@@ -14,7 +14,7 @@ var TodoListSharingRepository todoListSharingRepository
 var SharingRepository sharingRepository
 
 type userRepository interface {
-	Find(id int64) (user.User, error)
+	Find(id int64) (identity.User, error)
 }
 
 type todoRepository interface {
@@ -46,5 +46,5 @@ type sharingRepository interface {
 }
 
 type todoListSharingRepository interface {
-	FindAllSharedUsers(todoListID int64) ([]user.User, error)
+	FindAllSharedUsers(todoListID int64) ([]identity.User, error)
 }

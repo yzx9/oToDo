@@ -96,7 +96,7 @@ func setConfig(config *viper.Viper) {
 
 	{
 		c := config.Sub("github")
-		GitHub = github{
+		GitHub = Config{
 			ClientID:            c.GetString("client_id"),
 			ClientSecret:        c.GetString("client_secret"),
 			OAuthRedirectURI:    c.GetString("oauth_redirect_uri"),
