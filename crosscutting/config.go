@@ -38,7 +38,6 @@ func LoadAndWatchConfig(dir string) (<-chan time.Time, error) {
 
 	changed := make(chan time.Time, 1)
 	configManager.OnConfigChange(func(e fsnotify.Event) {
-		fmt.Println("Config file changed: ", e.Name)
 		config.SetConfig(configManager)
 
 		select {

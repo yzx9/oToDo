@@ -1,38 +1,75 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
+	"time"
 
 	"github.com/yzx9/otodo/crosscutting"
 	"github.com/yzx9/otodo/facade/rest"
 )
 
 func main() {
-	if _, err := crosscutting.LoadAndWatchConfig("."); err != nil {
-		err = fmt.Errorf("fails to load and watch config: %w", err)
-		log.Fatal(err)
+	// init
+	log.Println("load and watch config...")
+	onConfigChange, err := crosscutting.LoadAndWatchConfig(".")
+	if err != nil {
+		log.Fatalf("fails to load and watch config: %s", err.Error())
 	}
 
+	log.Println("start up application...")
 	if err := crosscutting.StartUp(); err != nil {
-		err = fmt.Errorf("fails to start up: %w", err)
-		log.Fatal(err)
+		log.Fatalf("fails to start up application: %s", err.Error())
 	}
+
+	// run server
+	log.Println("run rest server...")
+	shutdownRestServer, restServerErrorStream := rest.Run()
+	log.Println("serving...")
+
+	// listen events
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+
+			case <-onConfigChange:
+				fmt.Println("config file changed.")
+
+			case <-restServerErrorStream:
+				fmt.Println("[REST] ", err.Error())
+			}
+		}
+	}()
+
+	// wait quit
+	quit := make(chan os.Signal)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	signal := <-quit
+	log.Println("receive signal: ", signal.String())
+
+	log.Println("shutdown server...")
+	ctxShutdown, cancelShutdown := context.WithTimeout(ctx, 10*time.Second)
+	defer cancelShutdown()
 
 	var wg sync.WaitGroup
-	runRestServer := func() {
-		defer wg.Done()
-
-		if err := rest.Run(); err != nil {
-			err = fmt.Errorf("fails to run rest server: %w", err)
-			fmt.Println(err)
-		}
-	}
 
 	wg.Add(1)
-	go runRestServer()
+	go func() {
+		defer wg.Done()
+		if err := shutdownRestServer(ctxShutdown); err != nil {
+			log.Println("fails to shutdown rest server: %w", err)
+		}
+	}()
 
 	wg.Wait()
-	log.Fatal("all server down.")
+	log.Println("server shutdown.")
 }

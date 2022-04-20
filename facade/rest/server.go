@@ -1,14 +1,16 @@
 package rest
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/yzx9/otodo/facade/rest/middleware"
 	"github.com/yzx9/otodo/infrastructure/config"
 )
 
-func Run() error {
+func Run() (shutdown func(ctx context.Context) error, errStream <-chan error) {
 	r := gin.New()
 	r.Use(
 		gin.Logger(),
@@ -25,6 +27,26 @@ func Run() error {
 	host := config.Server.Host
 	addr := fmt.Sprintf("%v:%v", host, port)
 
-	r.Run(addr)
-	return nil
+	server := &http.Server{
+		Addr:    addr,
+		Handler: r,
+	}
+
+	stream := make(chan error)
+	errStream = stream
+	shutdown = func(ctx context.Context) error {
+		if err := server.Shutdown(ctx); err != nil {
+			return fmt.Errorf("server shutdown: %w", err)
+		}
+
+		return nil
+	}
+
+	go func() {
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			stream <- fmt.Errorf("rest server: %w", err)
+		}
+	}()
+
+	return
 }
