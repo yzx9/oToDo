@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yzx9/otodo/facade/rest/api"
-	"github.com/yzx9/otodo/facade/rest/middleware"
+	"github.com/yzx9/otodo/driver/rest/api"
+	"github.com/yzx9/otodo/driver/rest/middleware"
 )
 
 func setupRouter(engine *gin.Engine) {

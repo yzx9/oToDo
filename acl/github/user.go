@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/yzx9/otodo/infrastructure/errors"
-	"github.com/yzx9/otodo/infrastructure/util"
+	"github.com/yzx9/otodo/util"
 )
 
 const UriUser = "https://api.github.com/user"

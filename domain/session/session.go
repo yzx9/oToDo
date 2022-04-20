@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/yzx9/otodo/infrastructure/config"
+	"github.com/yzx9/otodo/config"
 	"github.com/yzx9/otodo/infrastructure/errors"
-	"github.com/yzx9/otodo/infrastructure/util"
+	"github.com/yzx9/otodo/util"
 )
 
 type Session struct {

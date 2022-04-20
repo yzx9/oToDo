@@ -6,9 +6,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/yzx9/otodo/acl/github"
+	"github.com/yzx9/otodo/config"
 	"github.com/yzx9/otodo/domain/user"
-	"github.com/yzx9/otodo/infrastructure/config"
-	"github.com/yzx9/otodo/infrastructure/util"
+	"github.com/yzx9/otodo/util"
 )
 
 const OAuthStateLen = 10

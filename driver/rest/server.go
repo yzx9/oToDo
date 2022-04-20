@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yzx9/otodo/facade/rest/middleware"
-	"github.com/yzx9/otodo/infrastructure/config"
+	"github.com/yzx9/otodo/config"
+	"github.com/yzx9/otodo/driver/rest/middleware"
 )
 
 func Run() (shutdown func(ctx context.Context) error, errStream <-chan error) {

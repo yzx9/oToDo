@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
-	"github.com/yzx9/otodo/infrastructure/config"
+	"github.com/yzx9/otodo/config"
 )
 
 type JWTClaims struct {

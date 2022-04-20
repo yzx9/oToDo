@@ -10,20 +10,20 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/yzx9/otodo/crosscutting"
-	"github.com/yzx9/otodo/facade/rest"
+	"github.com/yzx9/otodo/config"
+	"github.com/yzx9/otodo/driver/rest"
 )
 
 func main() {
 	// init
 	log.Println("load and watch config...")
-	onConfigChange, err := crosscutting.LoadAndWatchConfig(".")
+	onConfigChange, err := config.LoadAndWatch(".")
 	if err != nil {
 		log.Fatalf("fails to load and watch config: %s", err.Error())
 	}
 
 	log.Println("start up application...")
-	if err := crosscutting.StartUp(); err != nil {
+	if err := startUp(); err != nil {
 		log.Fatalf("fails to start up application: %s", err.Error())
 	}
 

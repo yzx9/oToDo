@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/yzx9/otodo/infrastructure/util"
+	"github.com/yzx9/otodo/util"
 )
 
 type Sharing struct {

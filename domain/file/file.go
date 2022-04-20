@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yzx9/otodo/infrastructure/config"
+	"github.com/yzx9/otodo/config"
 	"github.com/yzx9/otodo/infrastructure/errors"
-	"github.com/yzx9/otodo/infrastructure/util"
+	"github.com/yzx9/otodo/util"
 )
 
 const maxFileSize = 8 << 20 // 8MiB

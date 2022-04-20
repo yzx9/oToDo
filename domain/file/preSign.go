@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
-	"github.com/yzx9/otodo/infrastructure/config"
-	"github.com/yzx9/otodo/infrastructure/util"
+	"github.com/yzx9/otodo/config"
+	"github.com/yzx9/otodo/util"
 )
 
 // Configurable

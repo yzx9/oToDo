@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/bwmarrin/snowflake"
-	"github.com/yzx9/otodo/infrastructure/config"
+	"github.com/yzx9/otodo/config"
 	"github.com/yzx9/otodo/infrastructure/errors"
-	"github.com/yzx9/otodo/infrastructure/util"
+	"github.com/yzx9/otodo/util"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )

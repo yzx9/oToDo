@@ -5,7 +5,7 @@ import (
 	"regexp"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yzx9/otodo/facade/rest/middleware"
+	"github.com/yzx9/otodo/driver/rest/middleware"
 )
 
 const AuthorizationHeaderKey = "Authorization"

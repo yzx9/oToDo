@@ -1,10 +1,56 @@
 package config
 
 import (
+	"fmt"
+	"time"
+
+	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 )
 
-func SetConfig(config *viper.Viper) {
+var configManager *viper.Viper
+
+func Load(dir string) error {
+	configManager = viper.New()
+	configManager.SetConfigType("yaml")
+	configManager.AddConfigPath(dir)
+
+	configManager.SetConfigName("config.yaml")
+	if err := configManager.ReadInConfig(); err != nil {
+		return fmt.Errorf("fails to load config.yaml: %w", err)
+	}
+
+	configManager.SetConfigName("secret.yaml")
+	if err := configManager.MergeInConfig(); err != nil {
+		return fmt.Errorf("fails to load secret.yaml: %w", err)
+	}
+
+	setConfig(configManager)
+
+	return nil
+}
+
+func LoadAndWatch(dir string) (<-chan time.Time, error) {
+	if err := Load(dir); err != nil {
+		return nil, err
+	}
+
+	changed := make(chan time.Time, 1)
+	configManager.OnConfigChange(func(e fsnotify.Event) {
+		setConfig(configManager)
+
+		select {
+		case changed <- time.Now():
+		default:
+		}
+	})
+
+	configManager.WatchConfig()
+
+	return changed, nil
+}
+
+func setConfig(config *viper.Viper) {
 	{
 		c := config.Sub("server")
 		Server = server{

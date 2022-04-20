@@ -3,7 +3,7 @@ package util_test
 import (
 	"testing"
 
-	"github.com/yzx9/otodo/infrastructure/util"
+	"github.com/yzx9/otodo/util"
 )
 
 func TestMap(t *testing.T) {

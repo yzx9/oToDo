@@ -3,7 +3,7 @@ package service
 import (
 	"github.com/yzx9/otodo/application/dto"
 	"github.com/yzx9/otodo/domain/todolist"
-	"github.com/yzx9/otodo/infrastructure/util"
+	"github.com/yzx9/otodo/util"
 )
 
 // Get Menu, folder+list tree

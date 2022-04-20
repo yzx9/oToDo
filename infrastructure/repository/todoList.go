@@ -3,7 +3,7 @@ package repository
 import (
 	"github.com/yzx9/otodo/domain/todolist"
 	"github.com/yzx9/otodo/domain/user"
-	"github.com/yzx9/otodo/infrastructure/util"
+	"github.com/yzx9/otodo/util"
 	"gorm.io/gorm"
 )
 

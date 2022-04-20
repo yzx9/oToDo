@@ -3,7 +3,7 @@ package todolist
 import (
 	"fmt"
 
-	"github.com/yzx9/otodo/infrastructure/util"
+	"github.com/yzx9/otodo/util"
 )
 
 /**

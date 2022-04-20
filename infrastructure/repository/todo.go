@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/yzx9/otodo/domain/todo"
-	"github.com/yzx9/otodo/infrastructure/util"
+	"github.com/yzx9/otodo/util"
 	"gorm.io/gorm"
 )
 

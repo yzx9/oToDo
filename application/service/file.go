@@ -7,7 +7,7 @@ import (
 
 	"github.com/yzx9/otodo/application/dto"
 	"github.com/yzx9/otodo/domain/file"
-	"github.com/yzx9/otodo/infrastructure/util"
+	"github.com/yzx9/otodo/util"
 )
 
 var supportedFileTypeRegex = regexp.MustCompile(`.(jpg|jpeg|JPG|png|PNG|gif|GIF|ico|ICO)$`)

@@ -7,10 +7,10 @@ import (
 	"time"
 
 	"github.com/yzx9/otodo/acl/github"
+	"github.com/yzx9/otodo/config"
 	"github.com/yzx9/otodo/domain/todolist"
-	"github.com/yzx9/otodo/infrastructure/config"
 	"github.com/yzx9/otodo/infrastructure/errors"
-	"github.com/yzx9/otodo/infrastructure/util"
+	"github.com/yzx9/otodo/util"
 )
 
 type User struct {

@@ -7,8 +7,8 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/yzx9/otodo/infrastructure/config"
-	"github.com/yzx9/otodo/infrastructure/util"
+	"github.com/yzx9/otodo/config"
+	"github.com/yzx9/otodo/util"
 )
 
 const UriOAuthAuthorize = "https://github.com/login/oauth/authorize"

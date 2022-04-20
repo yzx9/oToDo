@@ -1,4 +1,4 @@
-package crosscutting
+package main
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func StartUp() error {
+func startUp() error {
 	db, err := repository.StartUp()
 	if err != nil {
 		return fmt.Errorf("fails to start-up infrastructure: %w", err)

@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/yzx9/otodo/application/dto"
+	"github.com/yzx9/otodo/config"
 	"github.com/yzx9/otodo/domain/session"
-	"github.com/yzx9/otodo/infrastructure/config"
 )
 
 const TokenType = `bearer`
