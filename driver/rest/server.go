@@ -10,7 +10,13 @@ import (
 	"github.com/yzx9/otodo/driver/rest/middleware"
 )
 
-func Run() (shutdown func(ctx context.Context) error, errStream <-chan error) {
+type Server struct {
+	server      *http.Server
+	shutdown    bool
+	errorStream chan error
+}
+
+func Run() (s *Server) {
 	r := gin.New()
 	r.Use(
 		gin.Logger(),
@@ -27,26 +33,38 @@ func Run() (shutdown func(ctx context.Context) error, errStream <-chan error) {
 	host := config.Server.Host
 	addr := fmt.Sprintf("%v:%v", host, port)
 
-	server := &http.Server{
+	s = new(Server)
+	s.server = &http.Server{
 		Addr:    addr,
 		Handler: r,
 	}
 
-	stream := make(chan error)
-	errStream = stream
-	shutdown = func(ctx context.Context) error {
-		if err := server.Shutdown(ctx); err != nil {
-			return fmt.Errorf("server shutdown: %w", err)
-		}
-
-		return nil
-	}
-
+	s.errorStream = make(chan error)
 	go func() {
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			stream <- fmt.Errorf("rest server: %w", err)
+		if err := s.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			s.errorStream <- fmt.Errorf("rest server: %w", err)
+			s.Shutdown(context.Background())
 		}
 	}()
 
-	return
+	return s
+}
+
+func (s *Server) Shutdown(ctx context.Context) error {
+	if s.shutdown {
+		return nil
+	}
+
+	close(s.errorStream)
+	s.shutdown = true
+
+	if err := s.server.Shutdown(ctx); err != nil {
+		return fmt.Errorf("server shutdown: %w", err)
+	}
+
+	return nil
+}
+
+func (s *Server) ErrorStream() <-chan error {
+	return s.errorStream
 }

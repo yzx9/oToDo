@@ -29,7 +29,7 @@ func main() {
 
 	// run server
 	log.Println("run rest server...")
-	shutdownRestServer, restServerErrorStream := rest.Run()
+	restServer := rest.Run()
 	log.Println("serving...")
 
 	// listen events
@@ -44,7 +44,7 @@ func main() {
 			case <-onConfigChange:
 				fmt.Println("config file changed.")
 
-			case <-restServerErrorStream:
+			case <-restServer.ErrorStream():
 				fmt.Println("[REST] ", err.Error())
 			}
 		}
@@ -65,7 +65,7 @@ func main() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		if err := shutdownRestServer(ctxShutdown); err != nil {
+		if err := restServer.Shutdown(ctxShutdown); err != nil {
 			log.Println("fails to shutdown rest server: %w", err)
 		}
 	}()
