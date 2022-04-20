@@ -54,9 +54,8 @@ func (s *Server) Shutdown(ctx context.Context) error {
 	if s.shutdown {
 		return nil
 	}
-
-	close(s.errorStream)
 	s.shutdown = true
+	defer close(s.errorStream)
 
 	if err := s.server.Shutdown(ctx); err != nil {
 		return fmt.Errorf("server shutdown: %w", err)

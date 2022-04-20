@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/yzx9/otodo/application/dto"
-	"github.com/yzx9/otodo/config"
 	"github.com/yzx9/otodo/domain/identity"
 )
 
@@ -45,7 +44,7 @@ func LoginByGithubOAuth(code string, state string) (dto.SessionTokens, error) {
 		return dto.SessionTokens{}, err
 	}
 
-	refreshToken, err := session.NewRefreshToken(config.Session.RefreshTokenExpiresInOAuth)
+	refreshToken, err := session.NewRefreshToken(identity.Conf.RefreshTokenExpiresInOAuth)
 	if err != nil {
 		return dto.SessionTokens{}, err
 	}
@@ -85,7 +84,7 @@ func LoginByAccessToken(token string) dto.SessionValidation {
 
 	dto := dto.SessionValidation{
 		Valid:          true,
-		UserID:         session.UserID,
+		UserID:         session.UserID(),
 		NewAccessToken: false,
 	}
 
@@ -111,7 +110,7 @@ func Logout(accessToken string) {
 		return
 	}
 
-	if err := session.Logout(); err != nil {
+	if err := session.Inactive(); err != nil {
 		// TODO log
 		fmt.Println(err.Error())
 		return

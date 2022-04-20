@@ -5,10 +5,9 @@ type Adapter struct {
 }
 
 type Config struct {
-	ClientID            string
-	ClientSecret        string
-	OAuthRedirectURI    string
-	OAuthStateExpiresIn int
+	ClientID         string
+	ClientSecret     string
+	OAuthRedirectURI string
 }
 
 func New(config Config) Adapter {

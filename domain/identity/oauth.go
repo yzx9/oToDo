@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/yzx9/otodo/config"
 	"github.com/yzx9/otodo/util"
 )
 
@@ -14,6 +13,7 @@ const OAuthStateLen = 10
 // TODO[perf]: redis
 var oauthEntries = make(map[string]OAuth)
 
+// entity
 type OAuth struct {
 	sessionID string
 	state     string
@@ -23,7 +23,6 @@ type OAuth struct {
 }
 
 func NewOAuthEntry() (OAuth, error) {
-	c := config.GitHub
 	now := time.Now()
 
 	entry := OAuth{
@@ -31,7 +30,7 @@ func NewOAuthEntry() (OAuth, error) {
 		state:     util.RandomString(OAuthStateLen),
 		valid:     true,
 		createdAt: now,
-		expiresAt: now.Add(time.Duration(c.OAuthStateExpiresIn * int(time.Second))),
+		expiresAt: now.Add(time.Duration(Conf.OAuthStateExpiresIn * int(time.Second))),
 	}
 
 	oauthEntries[entry.state] = entry
@@ -43,7 +42,7 @@ func GetOAuthEntryByState(state string) (OAuth, error) {
 	entry, ok := oauthEntries[state]
 	if !ok || entry.expiresAt.Before(time.Now()) {
 		// TODO: log
-		return OAuth{}, util.NewErrorWithForbidden("invalid state")
+		return OAuth{}, InvalidCredential
 	}
 
 	delete(oauthEntries, entry.state)
@@ -53,27 +52,26 @@ func GetOAuthEntryByState(state string) (OAuth, error) {
 func (a OAuth) GetGithubOAuthURI() (string, error) {
 	uri, err := GithubAdapter.CreateOAuthURI(a.state)
 	if err != nil {
-		return "", util.NewErrorWithUnknown("fails to create github oauth uri: %w", err)
+		return "", newErr(fmt.Errorf("fails to create github oauth uri: %w", err))
 	}
 
 	return uri, nil
 }
 
 func (a OAuth) GetUserByGithub(code string) (User, error) {
-	payload, err := GithubAdapter.FetchOAuthToken(code)
+	token, err := GithubAdapter.FetchOAuthToken(code)
 	if err != nil {
-		return User{}, util.NewErrorWithUnknown("fails to fetch github oauth token")
+		return User{}, newErr(fmt.Errorf("fails to fetch github oauth token: %w", err))
 	}
 
-	token := NewGithubOAuthToken(payload)
 	profile, err := GithubAdapter.FetchUserPublicProfile(token.Token)
 	if err != nil {
-		return User{}, fmt.Errorf("fails to fetch github user: %w", err)
+		return User{}, newErr(fmt.Errorf("fails to fetch github user: %w", err))
 	}
 
 	u, err := GetOrRegisterUserByGithub(profile)
 	if err != nil {
-		return User{}, fmt.Errorf("fails to get user: %w", err)
+		return User{}, newErr(fmt.Errorf("fails to get user: %w", err))
 	}
 
 	return u, nil

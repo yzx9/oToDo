@@ -6,99 +6,121 @@ import (
 
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
-	"github.com/yzx9/otodo/config"
-	"github.com/yzx9/otodo/infrastructure/errors"
-	"github.com/yzx9/otodo/util"
 )
 
+// aggregate
 type Session struct {
-	SessionID string
-	UserID    int64
+	sessionID string
+	userID    int64
+}
+
+func (s Session) UserID() int64 {
+	return s.userID
 }
 
 func LoginByCredential(userName, password string) (Session, error) {
 	user, err := UserRepository.FindByUserName(userName)
 	if err != nil ||
 		user.Password == nil ||
-		!user.IsSamePassword(password) {
-		return Session{}, util.NewErrorWithBadRequest("invalid credential")
+		!user.ValidatePassword(password) {
+		return Session{}, InvalidCredential
 	}
 
 	return Session{
-		SessionID: uuid.NewString(),
-		UserID:    user.ID,
+		userID:    user.ID,
+		sessionID: uuid.NewString(),
 	}, nil
 }
 
 func LoginByGithubOAuth(code, state string) (Session, error) {
 	oauth, err := GetOAuthEntryByState(state)
 	if err != nil {
-		return Session{}, fmt.Errorf("invalid state")
+		return Session{}, InvalidCredential
 	}
 
 	user, err := oauth.GetUserByGithub(code)
 	if err != nil {
-		return Session{}, fmt.Errorf("fails to get user: %w", err)
+		return Session{}, newErr(fmt.Errorf("fails to get user: %w", err))
 	}
 
 	return Session{
-		SessionID: uuid.NewString(),
-		UserID:    user.ID,
+		userID:    user.ID,
+		sessionID: uuid.NewString(),
 	}, nil
 }
 
 func LoginByAccessToken(token string) (Session, error) {
 	claims, err := parseSessionToken(token)
 	if err != nil {
-		return Session{}, util.NewError(errors.ErrUnauthorized, "invalid token")
+		return Session{}, InvalidCredential
 	}
 
 	return Session{
-		SessionID: claims.RefreshTokenID,
-		UserID:    claims.UserID,
+		userID:    claims.UserID,
+		sessionID: claims.SessionID,
 	}, nil
 }
 
 func LoginByRefreshToken(token string) (Session, error) {
 	claims, err := parseSessionToken(token)
 	if err != nil {
-		return Session{}, util.NewError(errors.ErrUnauthorized, "invalid token")
+		return Session{}, InvalidCredential
 	}
 
 	valid, err := UserInvalidRefreshTokenRepository.Exist(claims.UserID, claims.Id)
 	if err != nil || valid {
-		return Session{}, fmt.Errorf("invalid refresh token")
+		return Session{}, InvalidCredential
 	}
 
 	return Session{
-		SessionID: claims.Id,
-		UserID:    claims.UserID,
+		userID:    claims.UserID,
+		sessionID: claims.Id,
 	}, nil
 }
 
-func (s Session) Logout() error {
-	_, err := CreateUserInvalidRefreshToken(s.UserID, s.SessionID)
-	return err
+// entity
+type UserInvalidRefreshToken struct {
+	ID        int64
+	CreatedAt time.Time
+	UpdatedAt time.Time
+
+	UserID  int64
+	TokenID string
 }
 
+func (s Session) Inactive() error {
+	model := UserInvalidRefreshToken{
+		UserID:  s.userID,
+		TokenID: s.sessionID,
+	}
+	if err := UserInvalidRefreshTokenRepository.Save(&model); err != nil {
+		return newErr(fmt.Errorf("fails to save user invalid refresh token: %w", err))
+	}
+
+	return nil
+}
+
+// value object
 type Token struct {
 	Token     string
 	Type      TokenType
 	ExpiresIn int64
 }
 
+type TokenType int
+
+const (
+	AccessToken TokenType = iota
+	RefreshToken
+)
+
 // generate access token
 func (s Session) NewAccessToken() (Token, error) {
-	user, err := UserRepository.Find(s.UserID)
-	if err != nil {
-		return Token{}, fmt.Errorf("fails to get user, %w", err)
-	}
-
-	exp := config.Session.AccessTokenExpiresIn
+	exp := Conf.AccessTokenExpiresIn
 	dur := time.Duration(exp * int(time.Second))
 
 	return Token{
-		Token:     newClaims(user.ID, s.SessionID, dur).toToken(),
+		Token:     s.newToken(dur),
 		Type:      AccessToken,
 		ExpiresIn: int64(exp),
 	}, nil
@@ -107,16 +129,14 @@ func (s Session) NewAccessToken() (Token, error) {
 // generate refresh token
 func (s Session) NewRefreshToken(exp int) (Token, error) {
 	if exp <= 0 {
-		exp = config.Session.RefreshTokenExpiresInDefault
-	} else if exp > config.Session.RefreshTokenExpiresInMax {
-		exp = config.Session.RefreshTokenExpiresInMax
+		exp = Conf.RefreshTokenExpiresInDefault
+	} else if exp > Conf.RefreshTokenExpiresInMax {
+		exp = Conf.RefreshTokenExpiresInMax
 	}
 	dur := time.Duration(exp * int(time.Second))
 
-	claims := newClaims(s.UserID, uuid.NewString(), dur)
-	claims.Id = claims.RefreshTokenID
 	return Token{
-		Token:     claims.toToken(),
+		Token:     s.newToken(dur),
 		Type:      RefreshToken,
 		ExpiresIn: int64(exp),
 	}, nil
@@ -128,16 +148,37 @@ func (s Session) ShouldRefreshAccessToken(accessToken string) bool {
 		return false
 	}
 
-	thd := config.Session.AccessTokenRefreshThreshold
+	thd := Conf.AccessTokenRefreshThreshold
 	dur := time.Duration(thd * int(time.Second))
 	return time.Now().Add(dur).Unix() > claims.ExpiresAt
+}
+
+func (s Session) newToken(exp time.Duration) string {
+	now := time.Now().UTC()
+	claims := sessionTokenClaims{
+		StandardClaims: jwt.StandardClaims{
+			Issuer:    Conf.TokenIssuer,
+			IssuedAt:  now.Unix(),
+			ExpiresAt: now.Add(exp).Unix(),
+		},
+		UserID:    s.userID,
+		SessionID: s.sessionID,
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(Conf.TokenHmacSecret)
+	if err != nil {
+		return ""
+	}
+
+	return tokenString
 }
 
 type sessionTokenClaims struct {
 	jwt.StandardClaims
 
-	UserID         int64  `json:"uid"`
-	RefreshTokenID string `json:"rti,omitempty"`
+	UserID    int64  `json:"uid"`
+	SessionID string `json:"sid"`
 }
 
 func parseSessionToken(tokenString string) (*sessionTokenClaims, error) {
@@ -148,36 +189,12 @@ func parseSessionToken(tokenString string) (*sessionTokenClaims, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 			}
-			return config.Secret.TokenHmacSecret, nil
+			return Conf.TokenHmacSecret, nil
 		})
 	if err != nil || !token.Valid {
-		return nil, fmt.Errorf("invalid token")
+		return nil, InvalidCredential
 	}
 
 	claims := token.Claims.(*sessionTokenClaims)
 	return claims, nil
-}
-
-func newClaims(userID int64, sessionID string, exp time.Duration) sessionTokenClaims {
-	now := time.Now().UTC()
-	return sessionTokenClaims{
-		StandardClaims: jwt.StandardClaims{
-			Issuer:    config.Secret.TokenIssuer,
-			IssuedAt:  now.Unix(),
-			NotBefore: now.Unix(),
-			ExpiresAt: now.Add(exp).Unix(),
-		},
-		UserID:         userID,
-		RefreshTokenID: sessionID,
-	}
-}
-
-func (claims sessionTokenClaims) toToken() string {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(config.Secret.TokenHmacSecret)
-	if err != nil {
-		return ""
-	}
-
-	return tokenString
 }

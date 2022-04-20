@@ -32,46 +32,65 @@ func startUp() error {
 }
 
 func startUpDomain(db *gorm.DB) error {
-	// File
-	file.FileRepository = repository.NewFileRepository(db)
-	file.PermissionCheckerFactory.Register(file.FileTypeTodo, service.CanAccessTodoFile)
-
-	if err := startUpIdentityDomain(db); err != nil {
-		return nil
+	if err := startUpFileDomain(db); err != nil {
+		return err
 	}
 
-	// Todo
+	if err := startUpIdentityDomain(db); err != nil {
+		return err
+	}
+
+	if err := startUpTodoDomain(db); err != nil {
+		return err
+	}
+
+	if err := startUpTodoListDomain(db); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func startUpFileDomain(db *gorm.DB) error {
+	file.FileRepository = repository.NewFileRepository(db)
+
+	file.PermissionCheckerFactory.Register(file.FileTypeTodo, service.CanAccessTodoFile)
+
+	return nil
+}
+
+func startUpIdentityDomain(db *gorm.DB) error {
+	// config
+	identity.Conf = config.IdentityDomain
+
+	// repository
+	identity.UserRepository = repository.NewUserRepository(db)
+	identity.ThirdPartyOAuthTokenRepository = repository.NewThirdPartyOAuthTokenRepository(db)
+	identity.UserInvalidRefreshTokenRepository = repository.NewUserInvalidRefreshTokenRepository(db)
+	identity.TodoListRepo = repository.NewTodoListRepository(db)
+
+	// driven
+	identity.GithubAdapter = github.New(config.GitHubAdapter)
+
+	return nil
+}
+
+func startUpTodoDomain(db *gorm.DB) error {
 	todo.TodoRepository = repository.NewTodoRepository(db)
 	todo.TodoStepRepository = repository.NewTodoStepRepository(db)
 	todo.TodoRepeatPlanRepository = repository.NewTodoRepeatPlanRepository(db)
 	todo.TagRepository = repository.NewTagRepository(db)
 	todo.TagTodoRepository = repository.NewTagTodoRepository(db)
 	todo.TodoFileRepository = repository.NewTodoFileRepository(db)
+	return nil
+}
 
-	// Todo List
+func startUpTodoListDomain(db *gorm.DB) error {
 	todolist.TodoRepository = repository.NewTodoRepository(db)
 	todolist.TodoListRepository = repository.NewTodoListRepository(db)
 	todolist.TodoListFolderRepository = repository.NewTodoListFolderRepository(db)
 	todolist.SharingRepository = repository.NewSharingRepository(db)
 	todolist.TodoListSharingRepository = repository.NewTodoListSharingRepository(db)
-
-	return nil
-}
-
-func startUpIdentityDomain(db *gorm.DB) error {
-	identity.UserRepository = repository.NewUserRepository(db)
-	identity.ThirdPartyOAuthTokenRepository = repository.NewThirdPartyOAuthTokenRepository(db)
-	identity.UserInvalidRefreshTokenRepository = repository.NewUserInvalidRefreshTokenRepository(db)
-	identity.TodoListRepo = repository.NewTodoListRepository(db)
-
-	// TODO: auto map
-	identity.GithubAdapter = github.New(github.Config{
-		ClientID:            config.GitHub.ClientID,
-		ClientSecret:        config.GitHub.ClientSecret,
-		OAuthRedirectURI:    config.GitHub.OAuthRedirectURI,
-		OAuthStateExpiresIn: config.GitHub.OAuthStateExpiresIn,
-	})
-
 	return nil
 }
 

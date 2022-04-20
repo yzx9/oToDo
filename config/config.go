@@ -6,7 +6,12 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
+	"github.com/yzx9/otodo/domain/identity"
+	"github.com/yzx9/otodo/driven/github"
 )
+
+var IdentityDomain = identity.Config{}
+var GitHubAdapter = github.Config{}
 
 var configManager *viper.Viper
 
@@ -30,6 +35,7 @@ func Load(dir string) error {
 	return nil
 }
 
+// TODO[bug]: how to notify config change? eg: github adapter
 func LoadAndWatch(dir string) (<-chan time.Time, error) {
 	if err := Load(dir); err != nil {
 		return nil, err
@@ -75,18 +81,24 @@ func setConfig(config *viper.Viper) {
 	}
 
 	{
-		c := config.Sub("session")
-		Session = session{
+		c := config.Sub("identity")
+		IdentityDomain = identity.Config{
 			AccessTokenExpiresIn:         c.GetInt("access_token_exp"),
+			AccessTokenRefreshThreshold:  c.GetInt("access_token_refresh_threshold"),
 			RefreshTokenExpiresInDefault: c.GetInt("refresh_token_exp_default"),
 			RefreshTokenExpiresInMax:     c.GetInt("refresh_token_exp_max"),
 			RefreshTokenExpiresInOAuth:   c.GetInt("refresh_token_exp_oauth"),
-			AccessTokenRefreshThreshold:  c.GetInt("access_token_refresh_threshold"),
+			OAuthStateExpiresIn:          c.GetInt("oauth_state_exp"),
+			TokenIssuer:                  c.GetString("token_issuer"),
+
+			TokenHmacSecret: []byte(c.GetString("token_hmac_secret")),
+			PasswordNonce:   []byte(c.GetString("password_nonce")),
 		}
 	}
 
 	{
-		c := config.Sub("secret")
+		// TODO: remove, used in file domain
+		c := config.Sub("identity")
 		Secret = secret{
 			TokenIssuer:     c.GetString("token_issuer"),
 			TokenHmacSecret: []byte(c.GetString("token_hmac_secret")),
@@ -96,11 +108,10 @@ func setConfig(config *viper.Viper) {
 
 	{
 		c := config.Sub("github")
-		GitHub = Config{
-			ClientID:            c.GetString("client_id"),
-			ClientSecret:        c.GetString("client_secret"),
-			OAuthRedirectURI:    c.GetString("oauth_redirect_uri"),
-			OAuthStateExpiresIn: c.GetInt("oauth_state_exp"),
+		GitHubAdapter = github.Config{
+			ClientID:         c.GetString("client_id"),
+			ClientSecret:     c.GetString("client_secret"),
+			OAuthRedirectURI: c.GetString("oauth_redirect_uri"),
 		}
 	}
 }

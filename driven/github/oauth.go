@@ -2,17 +2,20 @@ package github
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
 
 	"github.com/yzx9/otodo/domain/identity"
-	"github.com/yzx9/otodo/util"
 )
 
 const uriOAuthAuthorize = "https://github.com/login/oauth/authorize"
 const uriOAuthAccessToken = "https://github.com/login/oauth/access_token"
+
+var ServiceNotAvailable = fmt.Errorf("fails to fetch github access token")
+var ServiceChanged = fmt.Errorf("github api seems to have changed")
 
 func (g Adapter) CreateOAuthURI(state string) (string, error) {
 	uri := uriOAuthAuthorize +
@@ -22,9 +25,9 @@ func (g Adapter) CreateOAuthURI(state string) (string, error) {
 	return uri, nil
 }
 
-func (g Adapter) FetchOAuthToken(code string) (identity.OAuthToken, error) {
-	write := func(err error) (identity.OAuthToken, error) {
-		return identity.OAuthToken{}, err
+func (g Adapter) FetchOAuthToken(code string) (identity.ThirdPartyOAuthToken, error) {
+	write := func(err error) (identity.ThirdPartyOAuthToken, error) {
+		return identity.ThirdPartyOAuthToken{}, err
 	}
 
 	// Fetch access token
@@ -36,25 +39,25 @@ func (g Adapter) FetchOAuthToken(code string) (identity.OAuthToken, error) {
 
 	req, err := http.NewRequest(http.MethodPost, uriOAuthAccessToken, strings.NewReader(vals.Encode()))
 	if err != nil {
-		return write(util.NewErrorWithUnknown("fails to new request"))
+		return write(ServiceNotAvailable)
 	}
 
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Accept", "application/json")
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return write(util.NewErrorWithUnknown("fails to fetch github access token"))
+		return write(ServiceNotAvailable)
 	}
 
 	if res.StatusCode != http.StatusOK {
-		return write(util.NewErrorWithForbidden("invalid code"))
+		return write(ServiceNotAvailable)
 	}
 
 	// Parse access token
 	defer res.Body.Close()
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		return write(util.NewErrorWithUnknown("fails to fetch github access token"))
+		return write(ServiceNotAvailable)
 	}
 
 	token := struct {
@@ -63,14 +66,14 @@ func (g Adapter) FetchOAuthToken(code string) (identity.OAuthToken, error) {
 		TokenType   string `json:"token_type"`
 	}{}
 	if err := json.Unmarshal(body, &token); err != nil || token.TokenType != "bearer" {
-		// TODO[feat]: this is a fatal error as it usually means GitHub API changes
-		return write(util.NewErrorWithUnknown("fails to parse github access token"))
+		return write(ServiceChanged)
 	}
 
 	// TODO: auto map
-	return identity.OAuthToken{
+	t := identity.NewThirdPartyOAuthToken(identity.ThirdPartyTokenTypeGithubAccessToken, identity.OAuthToken{
 		AccessToken: token.AccessToken,
 		Scope:       token.Scope,
 		TokenType:   token.TokenType,
-	}, nil
+	})
+	return t, nil
 }

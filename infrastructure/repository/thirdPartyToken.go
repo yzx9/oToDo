@@ -43,7 +43,7 @@ func (r ThirdPartyOAuthTokenRepository) SaveByUserIDAndType(entity *identity.Thi
 	err := r.db.
 		Where(&ThirdPartyOAuthToken{
 			UserID: entity.UserID,
-			Type:   entity.Type,
+			Type:   int8(entity.Type),
 		}).
 		Save(&po).
 		Error
@@ -80,7 +80,7 @@ func (r ThirdPartyOAuthTokenRepository) convertToPO(entity identity.ThirdPartyOA
 		},
 
 		Active: entity.Active,
-		Type:   entity.Type,
+		Type:   int8(entity.Type),
 		Token:  entity.Token,
 		Scope:  entity.Scope,
 
@@ -95,7 +95,7 @@ func (r ThirdPartyOAuthTokenRepository) convertToEntity(po ThirdPartyOAuthToken)
 		UpdatedAt: po.UpdatedAt,
 
 		Active: po.Active,
-		Type:   po.Type,
+		Type:   identity.ThirdPartyTokenType(po.Type),
 		Token:  po.Token,
 		Scope:  po.Scope,
 

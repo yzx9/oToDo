@@ -5,6 +5,25 @@ import (
 )
 
 /**
+ * config
+ */
+var Conf Config
+
+type Config struct {
+	AccessTokenExpiresIn         int // second
+	AccessTokenRefreshThreshold  int // second
+	RefreshTokenExpiresInDefault int // second
+	RefreshTokenExpiresInMax     int // second
+	RefreshTokenExpiresInOAuth   int // second
+	OAuthStateExpiresIn          int // second
+	TokenIssuer                  string
+
+	// secret
+	PasswordNonce   []byte
+	TokenHmacSecret []byte
+}
+
+/**
  * repository
  */
 
@@ -46,14 +65,8 @@ var GithubAdapter githubAdapter
 
 type githubAdapter interface {
 	CreateOAuthURI(state string) (string, error)
-	FetchOAuthToken(code string) (OAuthToken, error)
+	FetchOAuthToken(code string) (ThirdPartyOAuthToken, error)
 	FetchUserPublicProfile(token string) (GithubUserPublicProfile, error)
-}
-
-type OAuthToken struct {
-	AccessToken string
-	Scope       string
-	TokenType   string
 }
 
 type GithubUserPublicProfile struct {

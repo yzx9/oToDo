@@ -6,10 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/yzx9/otodo/config"
 	"github.com/yzx9/otodo/domain/todolist"
-	"github.com/yzx9/otodo/infrastructure/errors"
-	"github.com/yzx9/otodo/util"
 )
 
 type User struct {
@@ -34,42 +31,42 @@ type NewUser struct {
 
 func CreateUser(payload NewUser) (User, error) {
 	if len(payload.UserName) < 5 {
-		return User{}, fmt.Errorf("user name too short: %v", payload.UserName)
+		return User{}, UserNameTooShort
 	}
 
 	if len(payload.Password) < 6 {
-		return User{}, fmt.Errorf("password too short")
+		return User{}, PasswordTooShort
 	}
 
 	exist, err := UserRepository.ExistByUserName(payload.UserName)
 	if err != nil {
-		return User{}, fmt.Errorf("fails to valid user name: %w", err)
+		return User{}, newErr(fmt.Errorf("fails to valid user name: %w", err))
 	}
 
 	if exist {
-		return User{}, util.NewError(errors.ErrDuplicateID, "user name has been used: %v", payload.UserName)
+		return User{}, UserNameDuplicate
 	}
 
 	user := User{
 		Name:     payload.UserName,
 		Nickname: payload.Nickname,
-		Password: GetCryptoPassword(payload.Password),
 	}
+	user.Password = user.cryptoPassword(payload.Password)
 	if err := user.new(); err != nil {
-		return User{}, fmt.Errorf("fails to create user: %w", err)
+		return User{}, newErr(fmt.Errorf("fails to create user: %w", err))
 	}
 
 	return user, nil
 }
 
 // Password
-func (user User) IsSamePassword(password string) bool {
-	crypto := GetCryptoPassword(password)
+func (user User) ValidatePassword(password string) bool {
+	crypto := user.cryptoPassword(password)
 	return bytes.Equal(user.Password, crypto)
 }
 
-func GetCryptoPassword(password string) []byte {
-	pwd := sha256.Sum256(append([]byte(password), config.Secret.PasswordNonce...))
+func (User) cryptoPassword(password string) []byte {
+	pwd := sha256.Sum256(append([]byte(password), Conf.PasswordNonce...))
 	return pwd[:]
 }
 
@@ -80,13 +77,13 @@ func GetCryptoPassword(password string) []byte {
 func GetOrRegisterUserByGithub(profile GithubUserPublicProfile) (User, error) {
 	exist, err := UserRepository.ExistByGithubID(profile.ID)
 	if err != nil {
-		return User{}, util.NewErrorWithUnknown("fails to register user: %w", err)
+		return User{}, newErr(fmt.Errorf("fails to register user: %w", err))
 	}
 
 	if exist {
 		user, err := UserRepository.FindByGithubID(profile.ID)
 		if err != nil {
-			return User{}, util.NewErrorWithUnknown("fails to get user: %w", err)
+			return User{}, newErr(fmt.Errorf("fails to get user: %w", err))
 		}
 
 		return user, nil
@@ -101,7 +98,7 @@ func GetOrRegisterUserByGithub(profile GithubUserPublicProfile) (User, error) {
 		GithubID: profile.ID,
 	}
 	if err := user.new(); err != nil {
-		return User{}, fmt.Errorf("fails to create user: %w", err)
+		return User{}, newErr(fmt.Errorf("fails to get user: %w", err))
 	}
 
 	return user, nil
@@ -111,14 +108,20 @@ func GetOrRegisterUserByGithub(profile GithubUserPublicProfile) (User, error) {
  * Helpers
  */
 
-func (user *User) new() error {
-	if err := UserRepository.Save(user); err != nil {
-		return fmt.Errorf("fails to create user: %w", err)
+func (user *User) new() (err error) {
+	defer func() {
+		if err != nil {
+			err = newErr(fmt.Errorf("fails to create user: %w", err))
+		}
+	}()
+
+	if err = UserRepository.Save(user); err != nil {
+		return
 	}
 
 	// create base todo list
-	if _, err := user.createBasicTodoList(); err != nil {
-		return fmt.Errorf("fails to create user basic todo list: %w", err)
+	if _, err = user.createBasicTodoList(); err != nil {
+		return
 	}
 
 	return nil
@@ -132,12 +135,12 @@ func (user *User) createBasicTodoList() (todolist.TodoList, error) {
 		UserID:  user.ID,
 	}
 	if err := TodoListRepo.Save(&basicTodoList); err != nil {
-		return todolist.TodoList{}, fmt.Errorf("fails to create user basic todo list: %w", err)
+		return todolist.TodoList{}, newErr(fmt.Errorf("fails to create user basic todo list: %w", err))
 	}
 
 	user.BasicTodoListID = basicTodoList.ID
 	if err := UserRepository.Save(user); err != nil {
-		return todolist.TodoList{}, fmt.Errorf("fails to create user basic todo list: %w", err)
+		return todolist.TodoList{}, newErr(fmt.Errorf("fails to create user basic todo list: %w", err))
 	}
 
 	return basicTodoList, nil
