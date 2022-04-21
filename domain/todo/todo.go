@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/yzx9/otodo/domain/file"
-	"github.com/yzx9/otodo/domain/todolist"
 )
 
 var PermissionDenied = fmt.Errorf("permission denied")
@@ -40,7 +39,7 @@ type Todo struct {
 }
 
 func (todo *Todo) New() error {
-	if _, err := todolist.OwnOrSharedTodoList(todo.UserID, todo.TodoListID); err != nil {
+	if _, err := OwnOrSharedTodoList(todo.UserID, todo.TodoListID); err != nil {
 		return fmt.Errorf("fails to get todo list: %w", err)
 	}
 
@@ -123,7 +122,7 @@ func (todo Todo) Delete(userID int64) error {
 }
 
 func (todo Todo) CanAccessByUser(userID int64) bool {
-	_, err := todolist.OwnOrSharedTodoList(userID, todo.TodoListID)
+	_, err := OwnOrSharedTodoList(userID, todo.TodoListID)
 	return err == nil
 }
 

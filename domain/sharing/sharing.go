@@ -1,4 +1,4 @@
-package todolist
+package sharing
 
 import (
 	"encoding/base64"
@@ -16,32 +16,29 @@ type Sharing struct {
 
 	Token     string
 	Active    bool
-	Type      int8  // SharingType
+	Type      SharingType
 	RelatedID int64 // Depends on Type
 
 	UserID int64
 }
 
-func CreateTodoListSharing(userID, todoListID int64) (Sharing, error) {
-	todoList, err := OwnTodoList(userID, todoListID)
-	if err != nil {
-		return Sharing{}, err
-	}
+type SharingType = int8
 
-	if todoList.IsBasic {
-		return Sharing{}, fmt.Errorf("unable to share basic todo list: %v", todoListID)
-	}
+const (
+	SharingTypeTodoList SharingType = 10*iota + 1 // Set RelatedID to todo list id
+)
 
+func CreateSharing(userID, relatedID int64, sharingType SharingType) (Sharing, error) {
 	// Only allow one sharing active
-	if _, err = SharingRepository.DeleteAllByUserAndType(userID, SharingTypeTodoList); err != nil {
+	if _, err := SharingRepository.DeleteAllByUserAndType(userID, SharingTypeTodoList); err != nil {
 		return Sharing{}, fmt.Errorf("fails to delete old sharing tokens: %w", err)
 	}
 
 	sharing := Sharing{
 		Token:     newSharingToken(),
 		Active:    true,
-		Type:      SharingTypeTodoList,
-		RelatedID: todoListID,
+		Type:      sharingType,
+		RelatedID: relatedID,
 		UserID:    userID,
 	}
 	if err := SharingRepository.Save(&sharing); err != nil {
@@ -51,20 +48,7 @@ func CreateTodoListSharing(userID, todoListID int64) (Sharing, error) {
 	return sharing, nil
 }
 
-func DeleteTodoListSharing(userID int64, token string) error {
-	sharing, err := GetSharing(token)
-	if err != nil {
-		return err
-	}
-
-	if sharing.Type != SharingTypeTodoList {
-		return util.NewErrorWithForbidden("invalid sharing token: %v")
-	}
-
-	if sharing.UserID != userID {
-		return util.NewErrorWithForbidden("unable to delete non-own sharing token")
-	}
-
+func (sharing Sharing) Delete() error {
 	sharing.Active = false
 	if err := SharingRepository.Save(&sharing); err != nil {
 		return fmt.Errorf("fails to delete sharing: %w", err)

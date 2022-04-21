@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/yzx9/otodo/domain/todolist"
+	"github.com/yzx9/otodo/domain/todo"
 	"github.com/yzx9/otodo/util"
 	"gorm.io/gorm"
 )
@@ -25,7 +25,7 @@ func NewTodoListFolderRepository(db *gorm.DB) TodoListFolderRepository {
 	return TodoListFolderRepository{db: db}
 }
 
-func (r TodoListFolderRepository) Save(entity *todolist.TodoListFolder) error {
+func (r TodoListFolderRepository) Save(entity *todo.TodoListFolder) error {
 	po := r.convertToPO(entity)
 	re := r.db.Create(po).Error
 	entity.ID = po.ID
@@ -44,7 +44,7 @@ func (r TodoListFolderRepository) Delete(id int64) error {
 	return util.WrapGormErr(err, "todo list folder")
 }
 
-func (r TodoListFolderRepository) Find(id int64) (todolist.TodoListFolder, error) {
+func (r TodoListFolderRepository) Find(id int64) (todo.TodoListFolder, error) {
 	var folder TodoListFolder
 	err := r.db.
 		Where(&TodoListFolder{
@@ -58,7 +58,7 @@ func (r TodoListFolderRepository) Find(id int64) (todolist.TodoListFolder, error
 	return r.convertToEntity(folder), util.WrapGormErr(err, "todo list folder")
 }
 
-func (r TodoListFolderRepository) FindAllByUser(userId int64) ([]todolist.TodoListFolder, error) {
+func (r TodoListFolderRepository) FindAllByUser(userId int64) ([]todo.TodoListFolder, error) {
 	var POs []TodoListFolder
 	err := r.db.
 		Where(TodoListFolder{
@@ -89,7 +89,7 @@ func (r TodoListFolderRepository) Exist(id int64) (bool, error) {
 	return count != 0, util.WrapGormErr(err, "tag")
 }
 
-func (r TodoListFolderRepository) convertToPO(entity *todolist.TodoListFolder) TodoListFolder {
+func (r TodoListFolderRepository) convertToPO(entity *todo.TodoListFolder) TodoListFolder {
 	return TodoListFolder{
 		Entity: Entity{
 			ID:        entity.ID,
@@ -102,8 +102,8 @@ func (r TodoListFolderRepository) convertToPO(entity *todolist.TodoListFolder) T
 	}
 }
 
-func (r TodoListFolderRepository) convertToEntity(po TodoListFolder) todolist.TodoListFolder {
-	return todolist.TodoListFolder{
+func (r TodoListFolderRepository) convertToEntity(po TodoListFolder) todo.TodoListFolder {
+	return todo.TodoListFolder{
 		ID:        po.ID,
 		CreatedAt: po.CreatedAt,
 		UpdatedAt: po.UpdatedAt,
@@ -113,6 +113,6 @@ func (r TodoListFolderRepository) convertToEntity(po TodoListFolder) todolist.To
 	}
 }
 
-func (r TodoListFolderRepository) convertToEntities(POs []TodoListFolder) []todolist.TodoListFolder {
+func (r TodoListFolderRepository) convertToEntities(POs []TodoListFolder) []todo.TodoListFolder {
 	return util.Map(r.convertToEntity, POs)
 }

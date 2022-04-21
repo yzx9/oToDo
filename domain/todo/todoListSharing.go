@@ -1,16 +1,56 @@
-package todolist
+package todo
 
 import (
 	"fmt"
 
+	"github.com/yzx9/otodo/domain/sharing"
 	"github.com/yzx9/otodo/util"
 )
+
+func CreateTodoListSharing(userID, todoListID int64) (sharing.Sharing, error) {
+	todoList, err := OwnTodoList(userID, todoListID)
+	if err != nil {
+		return sharing.Sharing{}, err
+	}
+
+	if todoList.IsBasic {
+		return sharing.Sharing{}, fmt.Errorf("unable to share basic todo list: %v", todoListID)
+	}
+
+	record, err := sharing.CreateSharing(userID, todoListID, sharing.SharingTypeTodoList)
+	if err != nil {
+		return sharing.Sharing{}, fmt.Errorf("fails to create sharing token: %w", err)
+	}
+
+	return record, nil
+}
+
+func DeleteTodoListSharing(userID int64, token string) error {
+	record, err := sharing.GetSharing(token)
+	if err != nil {
+		return err
+	}
+
+	if record.Type != sharing.SharingTypeTodoList {
+		return util.NewErrorWithForbidden("invalid sharing token: %v")
+	}
+
+	if record.UserID != userID {
+		return util.NewErrorWithForbidden("unable to delete non-own sharing token")
+	}
+
+	if err := record.Delete(); err != nil {
+		return fmt.Errorf("fails to delete sharing: %w", err)
+	}
+
+	return nil
+}
 
 /**
  * oTodo List Shared Users
  */
 func CreateTodoListSharedUser(userID int64, token string) error {
-	sharing, err := GetSharing(token)
+	sharing, err := sharing.GetSharing(token)
 	if err != nil {
 		return err
 	}

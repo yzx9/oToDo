@@ -7,8 +7,8 @@ import (
 	"github.com/yzx9/otodo/config"
 	"github.com/yzx9/otodo/domain/file"
 	"github.com/yzx9/otodo/domain/identity"
+	"github.com/yzx9/otodo/domain/sharing"
 	"github.com/yzx9/otodo/domain/todo"
-	"github.com/yzx9/otodo/domain/todolist"
 	"github.com/yzx9/otodo/driven/github"
 	"github.com/yzx9/otodo/infrastructure/event_publisher"
 	"github.com/yzx9/otodo/infrastructure/repository"
@@ -43,11 +43,11 @@ func startUpDomain(db *gorm.DB, ep *event_publisher.EventPublisher) error {
 		return err
 	}
 
-	if err := startUpTodoDomain(db); err != nil {
+	if err := startUpTodoDomain(db, ep); err != nil {
 		return err
 	}
 
-	if err := startUpTodoListDomain(db, ep); err != nil {
+	if err := startUpSharingDomain(db); err != nil {
 		return err
 	}
 
@@ -80,28 +80,29 @@ func startUpIdentityDomain(db *gorm.DB, ep *event_publisher.EventPublisher) erro
 	return nil
 }
 
-func startUpTodoDomain(db *gorm.DB) error {
+func startUpTodoDomain(db *gorm.DB, ep *event_publisher.EventPublisher) error {
+	// event
+	todo.EventPublisher = ep
+	ep.Subscribe(identity.EventUserCreated, todo.HandleUserCreatedEvent)
+
 	todo.TodoRepository = repository.NewTodoRepository(db)
 	todo.TodoStepRepository = repository.NewTodoStepRepository(db)
 	todo.TodoRepeatPlanRepository = repository.NewTodoRepeatPlanRepository(db)
 	todo.TagRepository = repository.NewTagRepository(db)
 	todo.TagTodoRepository = repository.NewTagTodoRepository(db)
 	todo.TodoFileRepository = repository.NewTodoFileRepository(db)
+
+	// repository
+	todo.TodoRepository = repository.NewTodoRepository(db)
+	todo.TodoListRepository = repository.NewTodoListRepository(db)
+	todo.TodoListFolderRepository = repository.NewTodoListFolderRepository(db)
+	todo.TodoListSharingRepository = repository.NewTodoListSharingRepository(db)
+
 	return nil
 }
 
-func startUpTodoListDomain(db *gorm.DB, ep *event_publisher.EventPublisher) error {
-	// event
-	todolist.EventPublisher = ep
-	ep.Subscribe(identity.EventUserCreated, todolist.HandleUserCreatedEvent)
-
-	// repository
-	todolist.TodoRepository = repository.NewTodoRepository(db)
-	todolist.TodoListRepository = repository.NewTodoListRepository(db)
-	todolist.TodoListFolderRepository = repository.NewTodoListFolderRepository(db)
-	todolist.SharingRepository = repository.NewSharingRepository(db)
-	todolist.TodoListSharingRepository = repository.NewTodoListSharingRepository(db)
-
+func startUpSharingDomain(db *gorm.DB) error {
+	sharing.SharingRepository = repository.NewSharingRepository(db)
 	return nil
 }
 

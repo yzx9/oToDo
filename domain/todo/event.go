@@ -1,4 +1,4 @@
-package todolist
+package todo
 
 import (
 	"encoding/json"

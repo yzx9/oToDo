@@ -7,7 +7,6 @@ import (
 	"github.com/yzx9/otodo/application/dto"
 	"github.com/yzx9/otodo/domain/file"
 	"github.com/yzx9/otodo/domain/todo"
-	"github.com/yzx9/otodo/domain/todolist"
 )
 
 func CreateTodo(userID int64, newTodo dto.NewTodo) (dto.Todo, error) {
@@ -138,7 +137,7 @@ func GetTodo(userID, todoID int64) (todo.Todo, error) {
 }
 
 func GetTodosByUserAndTodoList(userID, todoListID int64) ([]todo.Todo, error) {
-	if _, err := todolist.OwnOrSharedTodoList(userID, todoListID); err != nil {
+	if _, err := todo.OwnOrSharedTodoList(userID, todoListID); err != nil {
 		return nil, err
 	}
 

@@ -2,7 +2,7 @@ package repository
 
 import (
 	"github.com/yzx9/otodo/domain/identity"
-	"github.com/yzx9/otodo/domain/todolist"
+	"github.com/yzx9/otodo/domain/todo"
 	"github.com/yzx9/otodo/util"
 	"gorm.io/gorm"
 )
@@ -31,7 +31,7 @@ func NewTodoListRepository(db *gorm.DB) TodoListRepository {
 	return TodoListRepository{db: db}
 }
 
-func (r TodoListRepository) Save(entity *todolist.TodoList) error {
+func (r TodoListRepository) Save(entity *todo.TodoList) error {
 	po := r.convertToPO(entity)
 	re := r.db.Save(&po)
 	entity.ID = po.ID
@@ -60,7 +60,7 @@ func (r TodoListRepository) DeleteAllByFolder(todoListFolderID int64) (int64, er
 	return re.RowsAffected, util.WrapGormErr(re.Error, "todo list")
 }
 
-func (r TodoListRepository) Find(id int64) (todolist.TodoList, error) {
+func (r TodoListRepository) Find(id int64) (todo.TodoList, error) {
 	var PO TodoList
 	err := r.db.
 		Where(&TodoList{
@@ -74,7 +74,7 @@ func (r TodoListRepository) Find(id int64) (todolist.TodoList, error) {
 	return r.convertToEntity(PO), util.WrapGormErr(err, "todo list")
 }
 
-func (r TodoListRepository) FindAllByUser(userID int64) ([]todolist.TodoList, error) {
+func (r TodoListRepository) FindAllByUser(userID int64) ([]todo.TodoList, error) {
 	var POs []TodoList
 	err := r.db.
 		Where(TodoList{
@@ -90,7 +90,7 @@ func (r TodoListRepository) FindAllByUser(userID int64) ([]todolist.TodoList, er
 	return r.convertToEntities(POs), nil
 }
 
-func (r TodoListRepository) FindAllSharedByUser(userID int64) ([]todolist.TodoList, error) {
+func (r TodoListRepository) FindAllSharedByUser(userID int64) ([]todo.TodoList, error) {
 	var POs []TodoList
 	err := r.db.
 		Model(&User{
@@ -104,8 +104,8 @@ func (r TodoListRepository) FindAllSharedByUser(userID int64) ([]todolist.TodoLi
 	return r.convertToEntities(POs), util.WrapGormErr(err, "user shared todo list")
 }
 
-func (r TodoListRepository) FindByUserOnMenuFormat(userID int64) ([]todolist.MenuItem, error) {
-	var items []todolist.MenuItem
+func (r TodoListRepository) FindByUserOnMenuFormat(userID int64) ([]todo.MenuItem, error) {
+	var items []todo.MenuItem
 	err := r.db.
 		Model(TodoList{}).
 		Where(TodoList{
@@ -136,7 +136,7 @@ func (r TodoListRepository) Exist(id int64) (bool, error) {
 	return count != 0, util.WrapGormErr(err, "todo list")
 }
 
-func (r TodoListRepository) convertToPO(entity *todolist.TodoList) TodoList {
+func (r TodoListRepository) convertToPO(entity *todo.TodoList) TodoList {
 	return TodoList{
 		Entity: Entity{
 			ID:        entity.ID,
@@ -153,8 +153,8 @@ func (r TodoListRepository) convertToPO(entity *todolist.TodoList) TodoList {
 	}
 }
 
-func (r TodoListRepository) convertToEntity(po TodoList) todolist.TodoList {
-	return todolist.TodoList{
+func (r TodoListRepository) convertToEntity(po TodoList) todo.TodoList {
+	return todo.TodoList{
 		ID:        po.ID,
 		CreatedAt: po.CreatedAt,
 		UpdatedAt: po.UpdatedAt,
@@ -167,7 +167,7 @@ func (r TodoListRepository) convertToEntity(po TodoList) todolist.TodoList {
 	}
 }
 
-func (r TodoListRepository) convertToEntities(POs []TodoList) []todolist.TodoList {
+func (r TodoListRepository) convertToEntities(POs []TodoList) []todo.TodoList {
 	return util.Map(r.convertToEntity, POs)
 }
 
@@ -256,7 +256,7 @@ func (r TodoListSharingRepository) ExistSharing(userID, todoListID int64) (bool,
 	return len(lists) != 0, nil
 }
 
-func (r TodoListSharingRepository) convertToPO(entity *todolist.TodoList) TodoList {
+func (r TodoListSharingRepository) convertToPO(entity *todo.TodoList) TodoList {
 	return TodoList{
 		Entity: Entity{
 			ID:        entity.ID,
@@ -273,8 +273,8 @@ func (r TodoListSharingRepository) convertToPO(entity *todolist.TodoList) TodoLi
 	}
 }
 
-func (r TodoListSharingRepository) convertToEntity(po TodoList) todolist.TodoList {
-	return todolist.TodoList{
+func (r TodoListSharingRepository) convertToEntity(po TodoList) todo.TodoList {
+	return todo.TodoList{
 		ID:        po.ID,
 		CreatedAt: po.CreatedAt,
 		UpdatedAt: po.UpdatedAt,

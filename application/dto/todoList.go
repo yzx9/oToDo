@@ -3,7 +3,7 @@ package dto
 import (
 	"time"
 
-	"github.com/yzx9/otodo/domain/todolist"
+	"github.com/yzx9/otodo/domain/todo"
 )
 
 type NewTodoList struct {
@@ -15,8 +15,8 @@ type NewTodoList struct {
 	TodoListFolderID int64 `json:"todoListFolderID"`
 }
 
-func (dto NewTodoList) ToEntity() todolist.TodoList {
-	return todolist.TodoList{
+func (dto NewTodoList) ToEntity() todo.TodoList {
+	return todo.TodoList{
 		Name:      dto.Name,
 		IsBasic:   dto.IsBasic,
 		IsSharing: dto.IsSharing,
@@ -39,7 +39,7 @@ type TodoList struct {
 	TodoListFolderID int64 `json:"todoListFolderID"`
 }
 
-func (TodoList) FromEntity(entity todolist.TodoList) TodoList {
+func (TodoList) FromEntity(entity todo.TodoList) TodoList {
 	return TodoList{
 		ID:        entity.ID,
 		CreatedAt: entity.CreatedAt,

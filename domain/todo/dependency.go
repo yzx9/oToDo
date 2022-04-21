@@ -1,4 +1,4 @@
-package todolist
+package todo
 
 /**
  * Event publisher
@@ -14,7 +14,36 @@ var EventPublisher interface {
  */
 
 var TodoRepository interface {
+	Save(todo *Todo) error
+	Delete(id int64) error
+	Find(id int64) (Todo, error)
 	DeleteAllByTodoList(todoListID int64) (int64, error)
+}
+
+var TodoStepRepository interface {
+	Save(entity *TodoStep) error
+	Delete(id int64) error
+	Find(id int64) (TodoStep, error)
+}
+
+var TodoRepeatPlanRepository interface {
+	Save(entity *TodoRepeatPlan) error
+	Delete(id int64) error
+	Find(id int64) (TodoRepeatPlan, error)
+}
+
+var TagRepository interface {
+	Save(tag *Tag) error
+	Exist(userID int64, tagName string) (bool, error)
+}
+
+var TagTodoRepository interface {
+	Save(userID, todoID int64, tagName string) error
+	Delete(userID, todoID int64, tagName string) error
+}
+
+var TodoFileRepository interface {
+	Save(todoID, fileID int64) error
 }
 
 var TodoListRepository interface {
@@ -30,12 +59,6 @@ var TodoListFolderRepository interface {
 	Delete(id int64) error
 	Find(id int64) (TodoListFolder, error)
 	FindAllByUser(userId int64) ([]TodoListFolder, error)
-}
-
-var SharingRepository interface {
-	Save(entity *Sharing) error
-	DeleteAllByUserAndType(userID int64, sharingType SharingType) (int64, error)
-	Find(token string) (Sharing, error)
 }
 
 var TodoListSharingRepository interface {
