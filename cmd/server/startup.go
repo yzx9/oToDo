@@ -10,6 +10,7 @@ import (
 	"github.com/yzx9/otodo/domain/todo"
 	"github.com/yzx9/otodo/domain/todolist"
 	"github.com/yzx9/otodo/driven/github"
+	"github.com/yzx9/otodo/infrastructure/event_publisher"
 	"github.com/yzx9/otodo/infrastructure/repository"
 	"gorm.io/gorm"
 )
@@ -20,7 +21,9 @@ func startUp() error {
 		return fmt.Errorf("fails to start-up infrastructure: %w", err)
 	}
 
-	if err := startUpDomain(db); err != nil {
+	eventPublisher := event_publisher.New()
+
+	if err := startUpDomain(db, eventPublisher); err != nil {
 		return fmt.Errorf("fails to start-up domain: %w", err)
 	}
 
@@ -31,12 +34,12 @@ func startUp() error {
 	return nil
 }
 
-func startUpDomain(db *gorm.DB) error {
+func startUpDomain(db *gorm.DB, ep *event_publisher.EventPublisher) error {
 	if err := startUpFileDomain(db); err != nil {
 		return err
 	}
 
-	if err := startUpIdentityDomain(db); err != nil {
+	if err := startUpIdentityDomain(db, ep); err != nil {
 		return err
 	}
 
@@ -44,7 +47,7 @@ func startUpDomain(db *gorm.DB) error {
 		return err
 	}
 
-	if err := startUpTodoListDomain(db); err != nil {
+	if err := startUpTodoListDomain(db, ep); err != nil {
 		return err
 	}
 
@@ -59,15 +62,17 @@ func startUpFileDomain(db *gorm.DB) error {
 	return nil
 }
 
-func startUpIdentityDomain(db *gorm.DB) error {
+func startUpIdentityDomain(db *gorm.DB, ep *event_publisher.EventPublisher) error {
 	// config
 	identity.Conf = config.IdentityDomain
+
+	// event
+	identity.EventPublisher = ep
 
 	// repository
 	identity.UserRepository = repository.NewUserRepository(db)
 	identity.ThirdPartyOAuthTokenRepository = repository.NewThirdPartyOAuthTokenRepository(db)
 	identity.UserInvalidRefreshTokenRepository = repository.NewUserInvalidRefreshTokenRepository(db)
-	identity.TodoListRepo = repository.NewTodoListRepository(db)
 
 	// driven
 	identity.GithubAdapter = github.New(config.GitHubAdapter)
@@ -85,12 +90,18 @@ func startUpTodoDomain(db *gorm.DB) error {
 	return nil
 }
 
-func startUpTodoListDomain(db *gorm.DB) error {
+func startUpTodoListDomain(db *gorm.DB, ep *event_publisher.EventPublisher) error {
+	// event
+	todolist.EventPublisher = ep
+	ep.Subscribe(identity.EventUserCreated, todolist.HandleUserCreatedEvent)
+
+	// repository
 	todolist.TodoRepository = repository.NewTodoRepository(db)
 	todolist.TodoListRepository = repository.NewTodoListRepository(db)
 	todolist.TodoListFolderRepository = repository.NewTodoListFolderRepository(db)
 	todolist.SharingRepository = repository.NewSharingRepository(db)
 	todolist.TodoListSharingRepository = repository.NewTodoListSharingRepository(db)
+
 	return nil
 }
 

@@ -5,22 +5,19 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"time"
-
-	"github.com/yzx9/otodo/domain/todolist"
 )
 
 type User struct {
-	ID              int64
-	CreatedAt       time.Time
-	UpdatedAt       time.Time
-	Name            string
-	Nickname        string
-	Password        []byte
-	Email           string
-	Telephone       string
-	Avatar          string
-	GithubID        int64
-	BasicTodoListID int64
+	ID        int64
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Name      string
+	Nickname  string
+	Password  []byte
+	Email     string
+	Telephone string
+	Avatar    string
+	GithubID  int64
 }
 
 type NewUser struct {
@@ -119,29 +116,7 @@ func (user *User) new() (err error) {
 		return
 	}
 
-	// create base todo list
-	if _, err = user.createBasicTodoList(); err != nil {
-		return
-	}
+	PublishUserCreatedEvent(user.ID)
 
 	return nil
-}
-
-// TODO move to todo list domain
-func (user *User) createBasicTodoList() (todolist.TodoList, error) {
-	basicTodoList := todolist.TodoList{
-		Name:    "Todos", // TODO i18n
-		IsBasic: true,
-		UserID:  user.ID,
-	}
-	if err := TodoListRepo.Save(&basicTodoList); err != nil {
-		return todolist.TodoList{}, newErr(fmt.Errorf("fails to create user basic todo list: %w", err))
-	}
-
-	user.BasicTodoListID = basicTodoList.ID
-	if err := UserRepository.Save(user); err != nil {
-		return todolist.TodoList{}, newErr(fmt.Errorf("fails to create user basic todo list: %w", err))
-	}
-
-	return basicTodoList, nil
 }

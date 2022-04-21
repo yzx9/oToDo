@@ -137,7 +137,11 @@ func GetTodo(userID, todoID int64) (todo.Todo, error) {
 	return t, nil
 }
 
-func GetTodosByTodoList(todoListID int64) ([]todo.Todo, error) {
+func GetTodosByUserAndTodoList(userID, todoListID int64) ([]todo.Todo, error) {
+	if _, err := todolist.OwnOrSharedTodoList(userID, todoListID); err != nil {
+		return nil, err
+	}
+
 	todos, err := TodoRepository.FindAllByTodoList(todoListID)
 	if err != nil {
 		return nil, fmt.Errorf("fails to get todos: %w", err)
@@ -146,12 +150,13 @@ func GetTodosByTodoList(todoListID int64) ([]todo.Todo, error) {
 	return todos, nil
 }
 
-func GetTodosByUserAndTodoList(userID, todoListID int64) ([]todo.Todo, error) {
-	if _, err := todolist.OwnOrSharedTodoList(userID, todoListID); err != nil {
-		return nil, err
+func GetTodosInBasicTodoList(userID int64) ([]todo.Todo, error) {
+	todos, err := TodoRepository.FindAllInBasicTodoList(userID)
+	if err != nil {
+		return nil, fmt.Errorf("fails to get todos: %w", err)
 	}
 
-	return GetTodosByTodoList(todoListID)
+	return todos, nil
 }
 
 func GetImportantTodosByUser(userID int64) ([]todo.Todo, error) {

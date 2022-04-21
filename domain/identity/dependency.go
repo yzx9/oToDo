@@ -1,11 +1,7 @@
 package identity
 
-import (
-	"github.com/yzx9/otodo/domain/todolist"
-)
-
 /**
- * config
+ * Config
  */
 var Conf Config
 
@@ -24,15 +20,19 @@ type Config struct {
 }
 
 /**
- * repository
+ * Event publisher
  */
 
-var UserRepository userRepository
-var ThirdPartyOAuthTokenRepository thirdPartyOAuthTokenRepository
-var UserInvalidRefreshTokenRepository userInvalidRefreshTokenRepository
-var TodoListRepo todoListRepository
+var EventPublisher interface {
+	Publish(event string, payload []byte)
+	Subscribe(event string, cb func([]byte)) func()
+}
 
-type userRepository interface {
+/**
+ * Repository
+ */
+
+var UserRepository interface {
 	Save(entity *User) error
 	Find(id int64) (User, error)
 	FindByUserName(username string) (User, error)
@@ -42,28 +42,22 @@ type userRepository interface {
 	ExistByGithubID(githubID int64) (bool, error)
 }
 
-type thirdPartyOAuthTokenRepository interface {
+var ThirdPartyOAuthTokenRepository interface {
 	Save(entity *ThirdPartyOAuthToken) error
 	SaveByUserIDAndType(entity *ThirdPartyOAuthToken) error
 	ExistActiveOne(userID int64, tokenType ThirdPartyTokenType) (bool, error)
 }
 
-type userInvalidRefreshTokenRepository interface {
+var UserInvalidRefreshTokenRepository interface {
 	Save(entity *UserInvalidRefreshToken) error
 	Exist(userID int64, tokenID string) (bool, error)
-}
-
-type todoListRepository interface {
-	Save(entity *todolist.TodoList) error
 }
 
 /**
  * GitHub
  */
 
-var GithubAdapter githubAdapter
-
-type githubAdapter interface {
+var GithubAdapter interface {
 	CreateOAuthURI(state string) (string, error)
 	FetchOAuthToken(code string) (ThirdPartyOAuthToken, error)
 	FetchUserPublicProfile(token string) (GithubUserPublicProfile, error)

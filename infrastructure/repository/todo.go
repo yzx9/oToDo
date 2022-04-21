@@ -114,6 +114,26 @@ func (r TodoRepository) FindAllByUser(userID int64) ([]todo.Todo, error) {
 	return r.convertToEntities(POs), util.WrapGormErr(err, "all todos")
 }
 
+func (r TodoRepository) FindAllInBasicTodoList(userID int64) ([]todo.Todo, error) {
+	var basicTodoList TodoList
+	err := r.db.
+		Model(&TodoList{}).
+		Where(TodoList{UserID: userID, IsBasic: true}).
+		Find(&basicTodoList).
+		Error
+	if err != nil {
+		return nil, util.WrapGormErr(err, "basic todolist")
+	}
+
+	var POs []Todo
+	err = r.db.
+		Scopes(filterTodoUser(userID)).
+		Find(&POs).
+		Error
+
+	return r.convertToEntities(POs), util.WrapGormErr(err, "basic todolist")
+}
+
 func (r TodoRepository) FindAllImportantOnesByUser(userID int64) ([]todo.Todo, error) {
 	var POs []Todo
 	err := r.db.

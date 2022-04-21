@@ -6,45 +6,33 @@ import (
 	"github.com/yzx9/otodo/domain/todolist"
 )
 
-var UserRepository userRepository
-var TodoRepository todoRepository
-var TodoListRepository todoListRepository
-var TodoListFolderRepository todoListFolderRepository
-var TodoListSharingRepository todoListSharingRepository
-var SharingRepository sharingRepository
-
-type userRepository interface {
+var UserRepository interface {
 	Find(id int64) (identity.User, error)
 }
 
-type todoRepository interface {
+var TodoRepository interface {
 	Find(id int64) (todo.Todo, error)
-
 	FindAllByTodoList(todoListID int64) ([]todo.Todo, error)
-
+	FindAllInBasicTodoList(userID int64) ([]todo.Todo, error)
 	FindAllImportantOnesByUser(userID int64) ([]todo.Todo, error)
-
 	FindAllPlanedOnesByUser(userID int64) ([]todo.Todo, error)
-
 	FindAllNotNotifiedOnesByUser(userID int64) ([]todo.Todo, error)
 }
 
-type todoListRepository interface {
+var TodoListRepository interface {
 	Find(id int64) (todolist.TodoList, error)
-
 	FindAllByUser(userID int64) ([]todolist.TodoList, error)
-
 	FindAllSharedByUser(userID int64) ([]todolist.TodoList, error)
 }
 
-type todoListFolderRepository interface {
+var TodoListFolderRepository interface {
 	FindAllByUser(userId int64) ([]todolist.TodoListFolder, error)
 }
 
-type sharingRepository interface {
+var SharingRepository interface {
 	FindAllActive(userID int64, sharingType todolist.SharingType) ([]todolist.Sharing, error)
 }
 
-type todoListSharingRepository interface {
+var TodoListSharingRepository interface {
 	FindAllSharedUsers(todoListID int64) ([]identity.User, error)
 }

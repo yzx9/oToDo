@@ -17,9 +17,6 @@ type User struct {
 	Avatar    string `json:"avatar"`
 	GithubID  int64  `json:"githubID" gorm:"index:,unique,priority:12"`
 
-	BasicTodoListID int64     `json:"basicTodoListID"`
-	BasicTodoList   *TodoList `json:"-"`
-
 	TodoLists []TodoList `json:"-"`
 
 	SharedTodoLists []*TodoList `json:"-" gorm:"many2many:todo_list_shared_users"`
@@ -139,9 +136,6 @@ func (r UserRepository) convertToPO(entity *identity.User) User {
 		Avatar:    entity.Avatar,
 		GithubID:  entity.GithubID,
 
-		BasicTodoListID: entity.BasicTodoListID,
-		BasicTodoList:   nil, // TODO
-
 		TodoLists: nil, // TODO
 
 		SharedTodoLists: nil, // TODO
@@ -150,17 +144,16 @@ func (r UserRepository) convertToPO(entity *identity.User) User {
 
 func (r UserRepository) convertToEntity(po User) identity.User {
 	return identity.User{
-		ID:              po.ID,
-		CreatedAt:       po.CreatedAt,
-		UpdatedAt:       po.UpdatedAt,
-		Name:            po.Name,
-		Nickname:        po.Nickname,
-		Password:        po.Password,
-		Email:           po.Email,
-		Telephone:       po.Telephone,
-		Avatar:          po.Avatar,
-		GithubID:        po.GithubID,
-		BasicTodoListID: po.BasicTodoListID,
+		ID:        po.ID,
+		CreatedAt: po.CreatedAt,
+		UpdatedAt: po.UpdatedAt,
+		Name:      po.Name,
+		Nickname:  po.Nickname,
+		Password:  po.Password,
+		Email:     po.Email,
+		Telephone: po.Telephone,
+		Avatar:    po.Avatar,
+		GithubID:  po.GithubID,
 	}
 }
 
