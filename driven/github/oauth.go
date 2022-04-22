@@ -25,9 +25,9 @@ func (g Adapter) CreateOAuthURI(state string) (string, error) {
 	return uri, nil
 }
 
-func (g Adapter) FetchOAuthToken(code string) (identity.ThirdPartyOAuthToken, error) {
-	write := func(err error) (identity.ThirdPartyOAuthToken, error) {
-		return identity.ThirdPartyOAuthToken{}, err
+func (g Adapter) FetchOAuthToken(code string) (identity.GithubOAuthToken, error) {
+	write := func(err error) (identity.GithubOAuthToken, error) {
+		return identity.GithubOAuthToken{}, err
 	}
 
 	// Fetch access token
@@ -70,10 +70,9 @@ func (g Adapter) FetchOAuthToken(code string) (identity.ThirdPartyOAuthToken, er
 	}
 
 	// TODO: auto map
-	t := identity.NewThirdPartyOAuthToken(identity.ThirdPartyTokenTypeGithubAccessToken, identity.OAuthToken{
+	return identity.GithubOAuthToken{
 		AccessToken: token.AccessToken,
 		Scope:       token.Scope,
 		TokenType:   token.TokenType,
-	})
-	return t, nil
+	}, nil
 }

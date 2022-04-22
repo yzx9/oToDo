@@ -59,8 +59,14 @@ var UserInvalidRefreshTokenRepository interface {
 
 var GithubAdapter interface {
 	CreateOAuthURI(state string) (string, error)
-	FetchOAuthToken(code string) (ThirdPartyOAuthToken, error)
+	FetchOAuthToken(code string) (GithubOAuthToken, error)
 	FetchUserPublicProfile(token string) (GithubUserPublicProfile, error)
+}
+
+type GithubOAuthToken struct {
+	AccessToken string
+	Scope       string
+	TokenType   string
 }
 
 type GithubUserPublicProfile struct {

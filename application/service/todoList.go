@@ -129,7 +129,7 @@ func GetSharingTodoListInfo(token string) (dto.SharingTodoList, error) {
 	}
 
 	return dto.SharingTodoList{
-		UserNickname: user.Nickname,
+		UserNickname: user.Nickname(),
 		TodoListName: list.Name,
 	}, nil
 }

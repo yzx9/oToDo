@@ -16,10 +16,6 @@ type User struct {
 	Telephone string `json:"telephone" gorm:"size:16;"`
 	Avatar    string `json:"avatar"`
 	GithubID  int64  `json:"githubID" gorm:"index:,unique,priority:12"`
-
-	TodoLists []TodoList `json:"-"`
-
-	SharedTodoLists []*TodoList `json:"-" gorm:"many2many:todo_list_shared_users"`
 }
 
 type UserRepository struct {
@@ -33,7 +29,7 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 func (r UserRepository) Save(entity *identity.User) error {
 	po := r.convertToPO(entity)
 	err := r.db.Save(&po).Error
-	entity.ID = po.ID
+	entity.SetID(po.ID)
 	return util.WrapGormErr(err, "user")
 }
 
@@ -123,38 +119,34 @@ func (r UserRepository) ExistByGithubID(githubID int64) (bool, error) {
 func (r UserRepository) convertToPO(entity *identity.User) User {
 	return User{
 		Entity: Entity{
-			ID:        entity.ID,
-			CreatedAt: entity.CreatedAt,
-			UpdatedAt: entity.UpdatedAt,
+			ID:        entity.Id(),
+			CreatedAt: entity.CreatedAt(),
+			UpdatedAt: entity.UpdatedAt(),
 		},
 
-		Name:      entity.Name,
-		Nickname:  entity.Nickname,
-		Password:  entity.Password,
-		Email:     entity.Email,
-		Telephone: entity.Telephone,
-		Avatar:    entity.Avatar,
-		GithubID:  entity.GithubID,
-
-		TodoLists: nil, // TODO
-
-		SharedTodoLists: nil, // TODO
+		Name:      entity.Name(),
+		Nickname:  entity.Nickname(),
+		Password:  entity.Password().Bytes(),
+		Email:     entity.Email(),
+		Telephone: entity.Telephone(),
+		Avatar:    entity.Avatar(),
+		GithubID:  entity.GithubId(),
 	}
 }
 
 func (r UserRepository) convertToEntity(po User) identity.User {
-	return identity.User{
-		ID:        po.ID,
-		CreatedAt: po.CreatedAt,
-		UpdatedAt: po.UpdatedAt,
-		Name:      po.Name,
-		Nickname:  po.Nickname,
-		Password:  po.Password,
-		Email:     po.Email,
-		Telephone: po.Telephone,
-		Avatar:    po.Avatar,
-		GithubID:  po.GithubID,
-	}
+	return identity.NewUser(
+		po.ID,
+		po.CreatedAt,
+		po.UpdatedAt,
+		po.Name,
+		po.Nickname,
+		identity.NewPasswordByBytes(po.Password),
+		po.Email,
+		po.Telephone,
+		po.Avatar,
+		po.GithubID,
+	)
 }
 
 func (r UserRepository) convertToEntities(POs []User) []identity.User {

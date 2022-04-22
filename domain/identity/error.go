@@ -5,22 +5,13 @@ import (
 )
 
 var InvalidCredential = fmt.Errorf("invalid credential.")
-var UserNameDuplicate = fmt.Errorf("duplicate.")
+var UserNameDuplicate = fmt.Errorf("user name has been used.")
 var UserNameTooShort = fmt.Errorf("user name too short.")
-var PasswordTooShort = fmt.Errorf("password too short.")
+var InvalidPassword = fmt.Errorf("invalid password.")
 
-type InnerError struct {
+type Error struct {
 	err error
 }
 
-func (InnerError) Error() string {
-	return "identity domain error."
-}
-
-func (e InnerError) Unwrap() error {
-	return e.err
-}
-
-func newErr(err error) InnerError {
-	return InnerError{err: err}
-}
+func (e Error) Error() string { return "unknown error." }
+func (e Error) Unwrap() error { return e.err }

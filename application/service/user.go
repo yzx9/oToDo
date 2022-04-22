@@ -8,7 +8,7 @@ import (
 )
 
 func CreateUser(newUser dto.NewUser) (identity.User, error) {
-	return identity.CreateUser(newUser.ToEntity())
+	return identity.RegisterUser(newUser.UserName, newUser.Nickname, newUser.Password)
 }
 
 func GetUser(userID int64) (identity.User, error) {

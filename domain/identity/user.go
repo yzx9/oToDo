@@ -1,114 +1,74 @@
 package identity
 
 import (
-	"bytes"
-	"crypto/sha256"
 	"fmt"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type User struct {
-	ID        int64
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Name      string
-	Nickname  string
-	Password  []byte
-	Email     string
-	Telephone string
-	Avatar    string
-	GithubID  int64
+	id        int64
+	createdAt time.Time
+	updatedAt time.Time
+	name      string
+	nickname  string
+	password  password
+	email     string
+	telephone string
+	avatar    string
+	githubId  int64
+
+	fromSession string // login by session, fill with session id
 }
 
-type NewUser struct {
-	UserName string
-	Password string
-	Nickname string
+func NewUser(
+	id int64,
+	createdAt time.Time,
+	updatedAt time.Time,
+	name string,
+	nickname string,
+	pwd password,
+	email string,
+	telephone string,
+	avatar string,
+	githubId int64,
+) User {
+	return User{
+		id:        id,
+		createdAt: createdAt,
+		updatedAt: updatedAt,
+		name:      name,
+		nickname:  nickname,
+		password:  pwd,
+		email:     email,
+		telephone: telephone,
+		avatar:    avatar,
+		githubId:  githubId,
+	}
 }
 
-func CreateUser(payload NewUser) (User, error) {
-	if len(payload.UserName) < 5 {
-		return User{}, UserNameTooShort
-	}
+func (user User) Id() int64            { return user.id }
+func (user User) CreatedAt() time.Time { return user.createdAt }
+func (user User) UpdatedAt() time.Time { return user.updatedAt }
+func (user User) Name() string         { return user.name }
+func (user User) Nickname() string     { return user.nickname }
+func (user User) Password() password   { return user.password }
+func (user User) Email() string        { return user.email }
+func (user User) Telephone() string    { return user.telephone }
+func (user User) Avatar() string       { return user.avatar }
+func (user User) GithubId() int64      { return user.githubId }
 
-	if len(payload.Password) < 6 {
-		return User{}, PasswordTooShort
+func (user *User) SetID(id int64) {
+	if user.id == 0 {
+		user.id = id
 	}
-
-	exist, err := UserRepository.ExistByUserName(payload.UserName)
-	if err != nil {
-		return User{}, newErr(fmt.Errorf("fails to valid user name: %w", err))
-	}
-
-	if exist {
-		return User{}, UserNameDuplicate
-	}
-
-	user := User{
-		Name:     payload.UserName,
-		Nickname: payload.Nickname,
-	}
-	user.Password = user.cryptoPassword(payload.Password)
-	if err := user.new(); err != nil {
-		return User{}, newErr(fmt.Errorf("fails to create user: %w", err))
-	}
-
-	return user, nil
 }
-
-// Password
-func (user User) ValidatePassword(password string) bool {
-	crypto := user.cryptoPassword(password)
-	return bytes.Equal(user.Password, crypto)
-}
-
-func (User) cryptoPassword(password string) []byte {
-	pwd := sha256.Sum256(append([]byte(password), Conf.PasswordNonce...))
-	return pwd[:]
-}
-
-/**
- * OAuth
- */
-
-func GetOrRegisterUserByGithub(profile GithubUserPublicProfile) (User, error) {
-	exist, err := UserRepository.ExistByGithubID(profile.ID)
-	if err != nil {
-		return User{}, newErr(fmt.Errorf("fails to register user: %w", err))
-	}
-
-	if exist {
-		user, err := UserRepository.FindByGithubID(profile.ID)
-		if err != nil {
-			return User{}, newErr(fmt.Errorf("fails to get user: %w", err))
-		}
-
-		return user, nil
-	}
-
-	// Register new user
-	// TODO[feat]: download user avatar
-	user := User{
-		Name:     profile.Email,
-		Nickname: profile.Name,
-		Email:    profile.Email,
-		GithubID: profile.ID,
-	}
-	if err := user.new(); err != nil {
-		return User{}, newErr(fmt.Errorf("fails to get user: %w", err))
-	}
-
-	return user, nil
-}
-
-/**
- * Helpers
- */
 
 func (user *User) new() (err error) {
 	defer func() {
 		if err != nil {
-			err = newErr(fmt.Errorf("fails to create user: %w", err))
+			err = Error{fmt.Errorf("fails to create user: %w", err)}
 		}
 	}()
 
@@ -116,7 +76,19 @@ func (user *User) new() (err error) {
 		return
 	}
 
-	PublishUserCreatedEvent(user.ID)
+	PublishUserCreatedEvent(user.Id())
 
 	return nil
+}
+
+func (user *User) Session() session {
+	if user.fromSession == "" {
+		// new session
+		user.fromSession = uuid.NewString()
+	}
+
+	return session{
+		userID:    user.Id(),
+		sessionID: user.fromSession,
+	}
 }

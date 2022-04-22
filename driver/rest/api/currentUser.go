@@ -53,7 +53,7 @@ func GetCurrentUserBasicTodoListTodosHandler(c *gin.Context) {
 		return
 	}
 
-	todos, err := service.GetTodosInBasicTodoList(user.ID)
+	todos, err := service.GetTodosInBasicTodoList(user.Id())
 	if err != nil {
 		common.AbortWithError(c, err)
 		return

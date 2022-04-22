@@ -10,17 +10,22 @@ import (
 const TokenType = `bearer`
 
 func Login(credential dto.UserCredential) (dto.SessionTokens, error) {
-	tokens, err := identity.LoginByCredential(credential.UserName, credential.Password)
+	user, err := identity.GetUserByUserName(credential.UserName)
 	if err != nil {
 		return dto.SessionTokens{}, err
 	}
 
-	accessToken, err := tokens.NewAccessToken()
+	if !user.Password().Equals(credential.Password) {
+		return dto.SessionTokens{}, identity.InvalidCredential
+	}
+
+	session := user.Session()
+	accessToken, err := session.NewAccessToken()
 	if err != nil {
 		return dto.SessionTokens{}, err
 	}
 
-	refreshToken, err := tokens.NewRefreshToken(credential.RefreshTokenExpiresIn)
+	refreshToken, err := session.NewRefreshToken(credential.RefreshTokenExpiresIn)
 	if err != nil {
 		return dto.SessionTokens{}, err
 	}
@@ -34,11 +39,12 @@ func Login(credential dto.UserCredential) (dto.SessionTokens, error) {
 }
 
 func LoginByGithubOAuth(code string, state string) (dto.SessionTokens, error) {
-	session, err := identity.LoginByGithubOAuth(code, state)
+	user, err := identity.GetUserByGithubOAuth(code, state)
 	if err != nil {
 		return dto.SessionTokens{}, err
 	}
 
+	session := user.Session()
 	accessToken, err := session.NewAccessToken()
 	if err != nil {
 		return dto.SessionTokens{}, err
@@ -58,12 +64,12 @@ func LoginByGithubOAuth(code string, state string) (dto.SessionTokens, error) {
 }
 
 func LoginByRefreshToken(token string) (dto.SessionTokens, error) {
-	session, err := identity.LoginByRefreshToken(token)
+	user, err := identity.GetUserBySessionToken(identity.RefreshToken, token)
 	if err != nil {
 		return dto.SessionTokens{}, err
 	}
 
-	accessToken, err := session.NewAccessToken()
+	accessToken, err := user.Session().NewAccessToken()
 	if err != nil {
 		return dto.SessionTokens{}, err
 	}
@@ -77,11 +83,12 @@ func LoginByRefreshToken(token string) (dto.SessionTokens, error) {
 }
 
 func LoginByAccessToken(token string) dto.SessionValidation {
-	session, err := identity.LoginByAccessToken(token)
+	user, err := identity.GetUserBySessionToken(identity.AccessToken, token)
 	if err != nil {
 		return dto.SessionValidation{Valid: false}
 	}
 
+	session := user.Session()
 	dto := dto.SessionValidation{
 		Valid:          true,
 		UserID:         session.UserID(),
@@ -103,14 +110,14 @@ func LoginByAccessToken(token string) dto.SessionValidation {
 }
 
 func Logout(accessToken string) {
-	session, err := identity.LoginByAccessToken(accessToken)
+	user, err := identity.GetUserBySessionToken(identity.AccessToken, accessToken)
 	if err != nil {
 		// TODO log
 		fmt.Println(err.Error())
 		return
 	}
 
-	if err := session.Inactive(); err != nil {
+	if err := user.Session().Deactivate(); err != nil {
 		// TODO log
 		fmt.Println(err.Error())
 		return
@@ -118,12 +125,7 @@ func Logout(accessToken string) {
 }
 
 func CreateGithubOAuthURI() (dto.OAuthRedirector, error) {
-	oauth, err := identity.NewOAuthEntry()
-	if err != nil {
-		return dto.OAuthRedirector{}, nil
-	}
-
-	uri, err := oauth.GetGithubOAuthURI()
+	uri, err := identity.NewGithubOAuthURI()
 	if err != nil {
 		return dto.OAuthRedirector{}, nil
 	}
