@@ -3,8 +3,15 @@ package dto
 import (
 	"time"
 
+	"github.com/devfeel/mapper"
 	"github.com/yzx9/otodo/domain/todo"
 )
+
+func init() {
+	mapper.Register(&NewTodo{})
+	mapper.Register(&Todo{})
+	mapper.Register(&todo.Todo{})
+}
 
 type NewTodo struct {
 	Title      string     `json:"title"`
@@ -24,22 +31,11 @@ type NewTodo struct {
 }
 
 func (t NewTodo) ToEntity() todo.Todo {
-	return todo.Todo{
-		Title:      t.Title,
-		Memo:       t.Memo,
-		Importance: t.Importance,
-		Deadline:   t.Deadline,
-		Notified:   t.Notified,
-		NotifyAt:   t.NotifyAt,
-		Done:       t.Done,
-		DoneAt:     t.DoneAt,
-
-		UserID:           t.UserID,
-		TodoListID:       t.TodoListID,
-		Files:            t.Files,
-		Steps:            t.Steps,
-		TodoRepeatPlanID: t.TodoRepeatPlanID,
+	var to todo.Todo
+	if err := mapper.Mapper(t, to); err != nil {
+		panic(err)
 	}
+	return to
 }
 
 type Todo struct {
@@ -64,49 +60,19 @@ type Todo struct {
 }
 
 func (t Todo) ToEntity() todo.Todo {
-	return todo.Todo{
-		ID:        t.ID,
-		CreatedAt: t.CreatedAt,
-		UpdatedAt: t.UpdatedAt,
-
-		Title:      t.Title,
-		Memo:       t.Memo,
-		Importance: t.Importance,
-		Deadline:   t.Deadline,
-		Notified:   t.Notified,
-		NotifyAt:   t.NotifyAt,
-		Done:       t.Done,
-		DoneAt:     t.DoneAt,
-
-		UserID:           t.UserID,
-		TodoListID:       t.TodoListID,
-		Files:            t.Files,
-		Steps:            t.Steps,
-		TodoRepeatPlanID: t.TodoRepeatPlanID,
+	var to todo.Todo
+	if err := mapper.Mapper(t, to); err != nil {
+		panic(err)
 	}
+	return to
 }
 
 func (Todo) FromEntity(t todo.Todo) Todo {
-	return Todo{
-		ID:        t.ID,
-		CreatedAt: t.CreatedAt,
-		UpdatedAt: t.UpdatedAt,
-
-		Title:      t.Title,
-		Memo:       t.Memo,
-		Importance: t.Importance,
-		Deadline:   t.Deadline,
-		Notified:   t.Notified,
-		NotifyAt:   t.NotifyAt,
-		Done:       t.Done,
-		DoneAt:     t.DoneAt,
-
-		UserID:           t.UserID,
-		TodoListID:       t.TodoListID,
-		Files:            t.Files,
-		Steps:            t.Steps,
-		TodoRepeatPlanID: t.TodoRepeatPlanID,
+	var to Todo
+	if err := mapper.Mapper(t, to); err != nil {
+		panic(err)
 	}
+	return to
 }
 
 type NewTodoStep struct {

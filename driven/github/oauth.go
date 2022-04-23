@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/devfeel/mapper"
 	"github.com/yzx9/otodo/domain/identity"
 )
 
@@ -60,19 +61,26 @@ func (g Adapter) FetchOAuthToken(code string) (identity.GithubOAuthToken, error)
 		return write(ServiceNotAvailable)
 	}
 
-	token := struct {
-		AccessToken string `json:"access_token"`
-		Scope       string `json:"scope"`
-		TokenType   string `json:"token_type"`
-	}{}
+	token := GithubOAuthToken{}
 	if err := json.Unmarshal(body, &token); err != nil || token.TokenType != "bearer" {
 		return write(ServiceChanged)
 	}
 
-	// TODO: auto map
-	return identity.GithubOAuthToken{
-		AccessToken: token.AccessToken,
-		Scope:       token.Scope,
-		TokenType:   token.TokenType,
-	}, nil
+	var to identity.GithubOAuthToken
+	if err := mapper.Mapper(&token, &to); err != nil {
+		return write(ServiceChanged)
+	}
+
+	return to, nil
+}
+
+func init() {
+	mapper.Register(&identity.GithubOAuthToken{})
+	mapper.Register(&GithubOAuthToken{})
+}
+
+type GithubOAuthToken struct {
+	AccessToken string `json:"access_token"`
+	Scope       string `json:"scope"`
+	TokenType   string `json:"token_type"`
 }
