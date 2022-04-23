@@ -4,12 +4,13 @@ import (
 	"time"
 
 	"github.com/yzx9/otodo/domain/todo"
+	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/util"
 	"gorm.io/gorm"
 )
 
 type TodoRepeatPlan struct {
-	Entity
+	repository.Entity
 
 	Type     string `gorm:"size:8"`
 	Interval int
@@ -37,7 +38,7 @@ func (r TodoRepeatPlanRepository) Save(entity *todo.TodoRepeatPlan) error {
 func (r TodoRepeatPlanRepository) Delete(id int64) error {
 	err := r.db.
 		Delete(&TodoRepeatPlan{
-			Entity: Entity{
+			Entity: repository.Entity{
 				ID: id,
 			},
 		}).
@@ -50,7 +51,7 @@ func (r TodoRepeatPlanRepository) Find(id int64) (todo.TodoRepeatPlan, error) {
 	var po TodoRepeatPlan
 	err := r.db.
 		Where(&TodoRepeatPlan{
-			Entity: Entity{
+			Entity: repository.Entity{
 				ID: id,
 			},
 		}).
@@ -62,7 +63,7 @@ func (r TodoRepeatPlanRepository) Find(id int64) (todo.TodoRepeatPlan, error) {
 
 func (r TodoRepeatPlanRepository) convertToPO(entity *todo.TodoRepeatPlan) TodoRepeatPlan {
 	return TodoRepeatPlan{
-		Entity: Entity{
+		Entity: repository.Entity{
 			ID:        entity.ID,
 			CreatedAt: entity.CreatedAt,
 			UpdatedAt: entity.UpdatedAt,

@@ -6,8 +6,8 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
+	"github.com/yzx9/otodo/adapter/driven/github"
 	"github.com/yzx9/otodo/domain/identity"
-	"github.com/yzx9/otodo/driven/github"
 )
 
 var IdentityDomain = identity.Config{}

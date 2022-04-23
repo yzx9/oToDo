@@ -1,40 +1,18 @@
-package main
+package domain
 
 import (
-	"fmt"
-
-	"github.com/yzx9/otodo/application/service"
+	"github.com/yzx9/otodo/adapter/driven/github"
+	"github.com/yzx9/otodo/adapter/driven/repository"
 	"github.com/yzx9/otodo/config"
 	"github.com/yzx9/otodo/domain/file"
 	"github.com/yzx9/otodo/domain/identity"
 	"github.com/yzx9/otodo/domain/sharing"
 	"github.com/yzx9/otodo/domain/todo"
-	"github.com/yzx9/otodo/driven/github"
 	"github.com/yzx9/otodo/infrastructure/event_publisher"
-	"github.com/yzx9/otodo/infrastructure/repository"
 	"gorm.io/gorm"
 )
 
-func startUp() error {
-	db, err := repository.StartUp()
-	if err != nil {
-		return fmt.Errorf("fails to start-up infrastructure: %w", err)
-	}
-
-	eventPublisher := event_publisher.New()
-
-	if err := startUpDomain(db, eventPublisher); err != nil {
-		return fmt.Errorf("fails to start-up domain: %w", err)
-	}
-
-	if err := startUpApplication(db); err != nil {
-		return fmt.Errorf("fails to start-up application: %w", err)
-	}
-
-	return nil
-}
-
-func startUpDomain(db *gorm.DB, ep *event_publisher.EventPublisher) error {
+func StartUp(db *gorm.DB, ep *event_publisher.EventPublisher) error {
 	if err := startUpFileDomain(db); err != nil {
 		return err
 	}
@@ -56,8 +34,6 @@ func startUpDomain(db *gorm.DB, ep *event_publisher.EventPublisher) error {
 
 func startUpFileDomain(db *gorm.DB) error {
 	file.FileRepository = repository.NewFileRepository(db)
-
-	file.PermissionCheckerFactory.Register(file.FileTypeTodo, service.CanAccessTodoFile)
 
 	return nil
 }
@@ -103,15 +79,5 @@ func startUpTodoDomain(db *gorm.DB, ep *event_publisher.EventPublisher) error {
 
 func startUpSharingDomain(db *gorm.DB) error {
 	sharing.SharingRepository = repository.NewSharingRepository(db)
-	return nil
-}
-
-func startUpApplication(db *gorm.DB) error {
-	service.UserRepository = repository.NewUserRepository(db)
-	service.TodoRepository = repository.NewTodoRepository(db)
-	service.TodoListRepository = repository.NewTodoListRepository(db)
-	service.TodoListFolderRepository = repository.NewTodoListFolderRepository(db)
-	service.SharingRepository = repository.NewSharingRepository(db)
-
 	return nil
 }

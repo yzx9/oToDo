@@ -2,12 +2,13 @@ package repository
 
 import (
 	"github.com/yzx9/otodo/domain/sharing"
+	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/util"
 	"gorm.io/gorm"
 )
 
 type Sharing struct {
-	Entity
+	repository.Entity
 
 	Token     string `gorm:"size:128;uniqueIndex"`
 	Active    bool
@@ -109,7 +110,7 @@ func (r SharingRepository) ExistActiveOne(userID int64, sharingType sharing.Shar
 
 func (r SharingRepository) convertToPO(entity *sharing.Sharing) Sharing {
 	return Sharing{
-		Entity: Entity{
+		Entity: repository.Entity{
 			ID:        entity.ID,
 			CreatedAt: entity.CreatedAt,
 			UpdatedAt: entity.UpdatedAt,

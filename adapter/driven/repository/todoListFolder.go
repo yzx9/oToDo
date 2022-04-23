@@ -2,12 +2,13 @@ package repository
 
 import (
 	"github.com/yzx9/otodo/domain/todo"
+	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/util"
 	"gorm.io/gorm"
 )
 
 type TodoListFolder struct {
-	Entity
+	repository.Entity
 
 	Name string `gorm:"size:128"`
 
@@ -35,7 +36,7 @@ func (r TodoListFolderRepository) Save(entity *todo.TodoListFolder) error {
 func (r TodoListFolderRepository) Delete(id int64) error {
 	err := r.db.
 		Delete(&TodoListFolder{
-			Entity: Entity{
+			Entity: repository.Entity{
 				ID: id,
 			},
 		}).
@@ -48,7 +49,7 @@ func (r TodoListFolderRepository) Find(id int64) (todo.TodoListFolder, error) {
 	var folder TodoListFolder
 	err := r.db.
 		Where(&TodoListFolder{
-			Entity: Entity{
+			Entity: repository.Entity{
 				ID: id,
 			},
 		}).
@@ -79,7 +80,7 @@ func (r TodoListFolderRepository) Exist(id int64) (bool, error) {
 	err := r.db.
 		Model(&TodoListFolder{}).
 		Where(&TodoListFolder{
-			Entity: Entity{
+			Entity: repository.Entity{
 				ID: id,
 			},
 		}).
@@ -91,7 +92,7 @@ func (r TodoListFolderRepository) Exist(id int64) (bool, error) {
 
 func (r TodoListFolderRepository) convertToPO(entity *todo.TodoListFolder) TodoListFolder {
 	return TodoListFolder{
-		Entity: Entity{
+		Entity: repository.Entity{
 			ID:        entity.ID,
 			CreatedAt: entity.CreatedAt,
 			UpdatedAt: entity.UpdatedAt,

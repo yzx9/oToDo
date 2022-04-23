@@ -4,12 +4,13 @@ import (
 	"time"
 
 	"github.com/yzx9/otodo/domain/todo"
+	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/util"
 	"gorm.io/gorm"
 )
 
 type Todo struct {
-	Entity
+	repository.Entity
 
 	Title      string `gorm:"size:128"`
 	Memo       string
@@ -57,7 +58,7 @@ func (r TodoRepository) Save(entity *todo.Todo) error {
 func (r TodoRepository) Delete(id int64) error {
 	err := r.db.
 		Delete(&Todo{
-			Entity: Entity{
+			Entity: repository.Entity{
 				ID: id,
 			},
 		}).
@@ -81,7 +82,7 @@ func (r TodoRepository) Find(id int64) (todo.Todo, error) {
 	err := r.db.
 		Scopes(preloadTodoInfo).
 		Where(&Todo{
-			Entity: Entity{
+			Entity: repository.Entity{
 				ID: id,
 			},
 		}).
@@ -179,7 +180,7 @@ func (r TodoRepository) FindAllNotNotifiedOnesByUser(userID int64) ([]todo.Todo,
 
 func (r TodoRepository) convertToPO(entity *todo.Todo) Todo {
 	return Todo{
-		Entity: Entity{
+		Entity: repository.Entity{
 			ID:        entity.ID,
 			CreatedAt: entity.CreatedAt,
 			UpdatedAt: entity.UpdatedAt,
@@ -246,13 +247,13 @@ func NewTodoFileRepository(db *gorm.DB) TodoFileRepository {
 func (r TodoFileRepository) Save(todoID, fileID int64) error {
 	err := r.db.
 		Where(Todo{
-			Entity: Entity{
+			Entity: repository.Entity{
 				ID: todoID,
 			},
 		}).
 		Association("Files").
 		Append(&File{
-			Entity: Entity{
+			Entity: repository.Entity{
 				ID: fileID,
 			},
 		})
@@ -264,7 +265,7 @@ func (r TodoFileRepository) FindAllByTodo(todoID int64) ([]File, error) {
 	var files []File
 	err := r.db.
 		Where(Todo{
-			Entity: Entity{
+			Entity: repository.Entity{
 				ID: todoID,
 			},
 		}).

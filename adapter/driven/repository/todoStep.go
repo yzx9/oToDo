@@ -4,12 +4,13 @@ import (
 	"time"
 
 	"github.com/yzx9/otodo/domain/todo"
+	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/util"
 	"gorm.io/gorm"
 )
 
 type TodoStep struct {
-	Entity
+	repository.Entity
 
 	Name   string
 	Done   bool
@@ -37,7 +38,7 @@ func (r TodoStepRepository) Save(entity *todo.TodoStep) error {
 func (r TodoStepRepository) Delete(id int64) error {
 	err := r.db.
 		Delete(&TodoStep{
-			Entity: Entity{
+			Entity: repository.Entity{
 				ID: id,
 			},
 		}).
@@ -50,7 +51,7 @@ func (r TodoStepRepository) Find(id int64) (todo.TodoStep, error) {
 	var entity TodoStep
 	err := r.db.
 		Where(&TodoStep{
-			Entity: Entity{
+			Entity: repository.Entity{
 				ID: id,
 			},
 		}).
@@ -74,7 +75,7 @@ func (r TodoStepRepository) FindAllByTodo(todoID int64) ([]todo.TodoStep, error)
 
 func (r TodoStepRepository) convertToPO(entity *todo.TodoStep) TodoStep {
 	return TodoStep{
-		Entity: Entity{
+		Entity: repository.Entity{
 			ID:        entity.ID,
 			CreatedAt: entity.CreatedAt,
 			UpdatedAt: entity.UpdatedAt,

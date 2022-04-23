@@ -2,12 +2,13 @@ package repository
 
 import (
 	"github.com/yzx9/otodo/domain/identity"
+	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/util"
 	"gorm.io/gorm"
 )
 
 type ThirdPartyOAuthToken struct {
-	Entity
+	repository.Entity
 
 	Active bool
 	Type   int8   `gorm:"index:idx_third_party_oauth_tokens_user,unique"`
@@ -70,7 +71,7 @@ func (r ThirdPartyOAuthTokenRepository) ExistActiveOne(userID int64, tokenType i
 
 func (r ThirdPartyOAuthTokenRepository) convertToPO(entity identity.ThirdPartyOAuthToken) ThirdPartyOAuthToken {
 	return ThirdPartyOAuthToken{
-		Entity: Entity{
+		Entity: repository.Entity{
 			ID:        entity.ID(),
 			CreatedAt: entity.CreatedAt(),
 			UpdatedAt: entity.UpdatedAt(),

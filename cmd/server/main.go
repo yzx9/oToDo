@@ -10,8 +10,11 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/yzx9/otodo/adapter/driven"
+	"github.com/yzx9/otodo/adapter/driver/rest"
+	"github.com/yzx9/otodo/application"
 	"github.com/yzx9/otodo/config"
-	"github.com/yzx9/otodo/driver/rest"
+	"github.com/yzx9/otodo/domain"
 )
 
 func main() {
@@ -72,4 +75,21 @@ func main() {
 
 	wg.Wait()
 	log.Println("server shutdown.")
+}
+
+func startUp() error {
+	db, ep, err := driven.StartUp()
+	if err != nil {
+		return fmt.Errorf("fails to start-up driven adapter: %w", err)
+	}
+
+	if err := domain.StartUp(db, ep); err != nil {
+		return fmt.Errorf("fails to start-up domain: %w", err)
+	}
+
+	if err := application.StatrUp(db); err != nil {
+		return fmt.Errorf("fails to start-up application: %w", err)
+	}
+
+	return nil
 }

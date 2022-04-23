@@ -2,12 +2,13 @@ package repository
 
 import (
 	"github.com/yzx9/otodo/domain/identity"
+	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/util"
 	"gorm.io/gorm"
 )
 
 type User struct {
-	Entity
+	repository.Entity
 
 	Name      string `json:"name" gorm:"size:128;index:,unique,priority:11;"`
 	Nickname  string `json:"nickname" gorm:"size:128"`
@@ -37,7 +38,7 @@ func (r UserRepository) Find(id int64) (identity.User, error) {
 	var po User
 	err := r.db.
 		Where(&User{
-			Entity: Entity{
+			Entity: repository.Entity{
 				ID: id,
 			},
 		}).
@@ -75,7 +76,7 @@ func (r UserRepository) FindByTodo(todoID int64) (identity.User, error) {
 	var todo Todo
 	err := r.db.
 		Where(&Todo{
-			Entity: Entity{
+			Entity: repository.Entity{
 				ID: todoID,
 			},
 		}).
@@ -118,7 +119,7 @@ func (r UserRepository) ExistByGithubID(githubID int64) (bool, error) {
 
 func (r UserRepository) convertToPO(entity *identity.User) User {
 	return User{
-		Entity: Entity{
+		Entity: repository.Entity{
 			ID:        entity.Id(),
 			CreatedAt: entity.CreatedAt(),
 			UpdatedAt: entity.UpdatedAt(),

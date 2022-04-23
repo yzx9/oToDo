@@ -2,12 +2,13 @@ package repository
 
 import (
 	"github.com/yzx9/otodo/domain/identity"
+	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/util"
 	"gorm.io/gorm"
 )
 
 type UserInvalidRefreshToken struct {
-	Entity
+	repository.Entity
 
 	UserID int64 `json:"userID"`
 	User   User  `json:"-"`
@@ -50,7 +51,7 @@ func (r UserInvalidRefreshTokenRepository) Exist(userID int64, tokenID string) (
 
 func (r UserInvalidRefreshTokenRepository) convertToPO(entity identity.UserInvalidRefreshToken) UserInvalidRefreshToken {
 	return UserInvalidRefreshToken{
-		Entity: Entity{
+		Entity: repository.Entity{
 			ID:        entity.ID,
 			CreatedAt: entity.CreatedAt,
 			UpdatedAt: entity.UpdatedAt,

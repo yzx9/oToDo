@@ -2,12 +2,13 @@ package repository
 
 import (
 	"github.com/yzx9/otodo/domain/file"
+	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/util"
 	"gorm.io/gorm"
 )
 
 type File struct {
-	Entity
+	repository.Entity
 
 	FileName     string
 	FileServerID string `gorm:"size:15"`
@@ -35,7 +36,7 @@ func (r FileRepository) Find(id int64) (*file.File, error) {
 	var po File
 	err := r.db.
 		Where(&File{
-			Entity: Entity{
+			Entity: repository.Entity{
 				ID: id,
 			},
 		}).
@@ -49,7 +50,7 @@ func (r FileRepository) Find(id int64) (*file.File, error) {
 // TODO mapper
 func (r FileRepository) convertToPO(f *file.File) File {
 	return File{
-		Entity: Entity{
+		Entity: repository.Entity{
 			ID:        f.ID,
 			CreatedAt: f.CreatedAt,
 			UpdatedAt: f.UpdatedAt,

@@ -3,12 +3,13 @@ package repository
 import (
 	"github.com/yzx9/otodo/domain/identity"
 	"github.com/yzx9/otodo/domain/todo"
+	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/util"
 	"gorm.io/gorm"
 )
 
 type TodoList struct {
-	Entity
+	repository.Entity
 
 	Name      string `gorm:"size:128"`
 	IsBasic   bool
@@ -41,7 +42,7 @@ func (r TodoListRepository) Save(entity *todo.TodoList) error {
 func (r TodoListRepository) Delete(id int64) error {
 	err := r.db.
 		Delete(&Todo{
-			Entity: Entity{
+			Entity: repository.Entity{
 				ID: id,
 			},
 		}).
@@ -64,7 +65,7 @@ func (r TodoListRepository) Find(id int64) (todo.TodoList, error) {
 	var PO TodoList
 	err := r.db.
 		Where(&TodoList{
-			Entity: Entity{
+			Entity: repository.Entity{
 				ID: id,
 			},
 		}).
@@ -94,7 +95,7 @@ func (r TodoListRepository) FindAllSharedByUser(userID int64) ([]todo.TodoList, 
 	var POs []TodoList
 	err := r.db.
 		Model(&User{
-			Entity: Entity{
+			Entity: repository.Entity{
 				ID: userID,
 			},
 		}).
@@ -126,7 +127,7 @@ func (r TodoListRepository) Exist(id int64) (bool, error) {
 	err := r.db.
 		Model(&TodoList{}).
 		Where(&TodoList{
-			Entity: Entity{
+			Entity: repository.Entity{
 				ID: id,
 			},
 		}).
@@ -138,7 +139,7 @@ func (r TodoListRepository) Exist(id int64) (bool, error) {
 
 func (r TodoListRepository) convertToPO(entity *todo.TodoList) TodoList {
 	return TodoList{
-		Entity: Entity{
+		Entity: repository.Entity{
 			ID:        entity.ID,
 			CreatedAt: entity.CreatedAt,
 			UpdatedAt: entity.UpdatedAt,
@@ -186,13 +187,13 @@ func NewTodoListSharingRepository(db *gorm.DB) TodoListSharingRepository {
 func (r TodoListSharingRepository) SaveSharedUser(userID, todoListID int64) error {
 	err := r.db.
 		Model(&User{
-			Entity: Entity{
+			Entity: repository.Entity{
 				ID: userID,
 			},
 		}).
 		Association("SharedTodoLists").
 		Append(&TodoList{
-			Entity: Entity{
+			Entity: repository.Entity{
 				ID: todoListID,
 			},
 		})
@@ -204,7 +205,7 @@ func (r TodoListSharingRepository) FindAllSharedUsers(todoListID int64) ([]ident
 	var POs []User
 	err := r.db.
 		Model(&TodoList{
-			Entity: Entity{
+			Entity: repository.Entity{
 				ID: todoListID,
 			},
 		}).
@@ -219,13 +220,13 @@ func (r TodoListSharingRepository) FindAllSharedUsers(todoListID int64) ([]ident
 func (r TodoListSharingRepository) DeleteSharedUser(userID, todoListID int64) error {
 	err := r.db.
 		Model(&TodoList{
-			Entity: Entity{
+			Entity: repository.Entity{
 				ID: todoListID,
 			},
 		}).
 		Association("SharedUsers").
 		Delete(&User{
-			Entity: Entity{
+			Entity: repository.Entity{
 				ID: userID,
 			},
 		})
@@ -238,13 +239,13 @@ func (r TodoListSharingRepository) ExistSharing(userID, todoListID int64) (bool,
 	var lists []TodoList
 	err := r.db.
 		Model(&User{
-			Entity: Entity{
+			Entity: repository.Entity{
 				ID: userID,
 			},
 		}).
 		Association("SharedTodoLists").
 		Find(&lists, &TodoList{
-			Entity: Entity{
+			Entity: repository.Entity{
 				ID: todoListID,
 			},
 		})
@@ -258,7 +259,7 @@ func (r TodoListSharingRepository) ExistSharing(userID, todoListID int64) (bool,
 
 func (r TodoListSharingRepository) convertToPO(entity *todo.TodoList) TodoList {
 	return TodoList{
-		Entity: Entity{
+		Entity: repository.Entity{
 			ID:        entity.ID,
 			CreatedAt: entity.CreatedAt,
 			UpdatedAt: entity.UpdatedAt,

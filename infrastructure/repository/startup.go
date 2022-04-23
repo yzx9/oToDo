@@ -5,8 +5,6 @@ import (
 
 	"github.com/bwmarrin/snowflake"
 	"github.com/yzx9/otodo/config"
-	"github.com/yzx9/otodo/infrastructure/errors"
-	"github.com/yzx9/otodo/util"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -19,10 +17,6 @@ func StartUp() (*gorm.DB, error) {
 	db, err := startUpDatabase()
 	if err != nil {
 		return nil, err
-	}
-
-	if err := autoMigrate(db); err != nil {
-		return nil, util.NewError(errors.ErrDatabaseConnectFailed, "fails to migrate database: %w", err)
 	}
 
 	return db, nil
@@ -49,30 +43,8 @@ func startUpDatabase() (*gorm.DB, error) {
 		DisableForeignKeyConstraintWhenMigrating: true,
 	})
 	if err != nil {
-		return nil, util.NewError(errors.ErrDatabaseConnectFailed, "fails to connect database: %w", err)
+		return nil, fmt.Errorf("fails to connect database: %w", err)
 	}
 
 	return db, nil
-}
-
-func autoMigrate(db *gorm.DB) error {
-	return db.AutoMigrate(
-		&File{},
-
-		&User{},
-		&UserInvalidRefreshToken{},
-
-		&Todo{},
-		&TodoStep{},
-		&TodoRepeatPlan{},
-
-		&TodoList{},
-		&TodoListFolder{},
-
-		&Tag{},
-
-		&Sharing{},
-
-		&ThirdPartyOAuthToken{},
-	)
 }

@@ -2,12 +2,13 @@ package repository
 
 import (
 	"github.com/yzx9/otodo/domain/todo"
+	"github.com/yzx9/otodo/infrastructure/repository"
 	"github.com/yzx9/otodo/util"
 	"gorm.io/gorm"
 )
 
 type Tag struct {
-	Entity
+	repository.Entity
 
 	Name string `gorm:"size:32;index:idx_tags_user,unique"`
 
@@ -56,7 +57,7 @@ func (r TagRepository) FindAllByUser(userID int64) ([]todo.Tag, error) {
 
 func (r TagRepository) convertToPO(entity *todo.Tag) Tag {
 	return Tag{
-		Entity: Entity{
+		Entity: repository.Entity{
 			ID:        entity.ID,
 			CreatedAt: entity.CreatedAt,
 			UpdatedAt: entity.UpdatedAt,
@@ -99,7 +100,7 @@ func (r TagTodoRepository) Save(userID, todoID int64, tagName string) error {
 		Scopes(filterTag(userID, tagName)).
 		Association("Todos").
 		Append(&Todo{
-			Entity: Entity{
+			Entity: repository.Entity{
 				ID: todoID,
 			},
 		})
@@ -112,7 +113,7 @@ func (r TagTodoRepository) Delete(userID, todoID int64, tagName string) error {
 		Scopes(filterTag(userID, tagName)).
 		Association("Todos").
 		Delete(&Todo{
-			Entity: Entity{
+			Entity: repository.Entity{
 				ID: todoID,
 			},
 		})
