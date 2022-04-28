@@ -1,35 +1,33 @@
 package event_publisher
 
 type EventPublisher struct {
-	subscribers map[string][]int
-	callbacks   []func([]byte)
+	subscriberId eventSubscriberId
+	subscribers  map[string][]eventSubscriberId
+	callbacks    map[eventSubscriberId]func([]byte)
 }
+
+type eventSubscriberId int
 
 func New() *EventPublisher {
 	return &EventPublisher{
-		subscribers: make(map[string][]int),
-		callbacks:   make([]func([]byte), 0),
+		subscriberId: 0,
+		subscribers:  make(map[string][]eventSubscriberId),
+		callbacks:    make(map[eventSubscriberId]func([]byte)),
 	}
 }
 
 func (ep *EventPublisher) Subscribe(event string, cb func([]byte)) func() {
-	if _, ok := ep.subscribers[event]; !ok {
-		ep.subscribers[event] = make([]int, 0, 1)
-	}
+	id := ep.subscriberId
+	ep.subscriberId++
 
-	id := len(ep.callbacks)
-	ep.callbacks = append(ep.callbacks, cb)
+	if _, ok := ep.subscribers[event]; !ok {
+		ep.subscribers[event] = make([]eventSubscriberId, 0, 1)
+	}
+	ep.callbacks[id] = cb
 	ep.subscribers[event] = append(ep.subscribers[event], id)
 
-	return func() {
-		// unsubscribe
-		ep.callbacks[id] = nil
-		for i := range ep.subscribers[event] {
-			if ep.subscribers[event][i] == id {
-				ep.subscribers[event][i] = -1
-			}
-		}
-	}
+	unsubscribe := func() { delete(ep.callbacks, id) }
+	return unsubscribe
 }
 
 func (ep *EventPublisher) Publish(event string, payload []byte) {
@@ -39,8 +37,8 @@ func (ep *EventPublisher) Publish(event string, payload []byte) {
 
 	for i := range ep.subscribers[event] {
 		id := ep.subscribers[event][i]
-		if id != -1 {
-			ep.callbacks[id](payload)
+		if ep.callbacks[id] != nil {
+			go ep.callbacks[id](payload)
 		}
 	}
 }
