@@ -1,6 +1,6 @@
 module github.com/yzx9/otodo
 
-go 1.17
+go 1.18
 
 require (
 	github.com/bwmarrin/snowflake v0.3.0
@@ -14,6 +14,7 @@ require (
 )
 
 require (
+	github.com/devfeel/mapper v0.7.10 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect

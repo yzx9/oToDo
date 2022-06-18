@@ -3,7 +3,7 @@ package util
 import (
 	"errors"
 
-	"github.com/yzx9/otodo/otodo"
+	customError "github.com/yzx9/otodo/infrastructure/errors"
 	"gorm.io/gorm"
 )
 
@@ -17,7 +17,7 @@ func WrapGormErr(err error, resource string) error {
 	}
 
 	if errors.Is(err, gorm.ErrNotImplemented) {
-		return NewError(otodo.ErrNotImplemented, "handle %v not implemented", resource)
+		return NewError(customError.ErrNotImplemented, "handle %v not implemented", resource)
 	}
 
 	return NewErrorWithUnknown("unknown error in %v: %w", resource, err)

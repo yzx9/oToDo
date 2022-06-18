@@ -5,12 +5,15 @@ server:
   access_control_allow_origin: "*"
   file_path_template: tmp/files/:date/:id:ext
 
-session:
+identity:
   access_token_exp: 900 # 15 min
-  refresh_token_exp: 12969000 # 15 day
+  refresh_token_exp_default: 18000 # 6 hours
+  refresh_token_exp_max: 25938000 # 30 day
+  refresh_token_exp_oauth: 12969000 # 15 day
   access_token_refresh_threshold: 300 #  5 min
+  oauth_state_exp: 600 # 10min
+  token_issuer: oToDo
 
 github:
   client_id: 67d44b6101f98c012bd7
   oauth_redirect_uri: http://localhost:3000/login
-  oauth_state_exp: 600 # 10min
